@@ -56,6 +56,21 @@
 
         <div class="chat-messages px-4 py-3" id="chatMessages">
             <div class="text-center text-gray-400 text-xs mt-8">👈 Sélectionnez une conversation</div>
+            {{-- Indicateur de saisie (typing) - style WhatsApp --}}
+            <div id="typingIndicatorContainer" class="msg-row items-start gap-2.5 max-w-[70%]" style="display: none;">
+                <div class="h-8 w-8 rounded-lg text-xs font-bold shrink-0 flex items-center justify-center bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <span>?</span>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div class="px-4 py-3 rounded-2xl bg-white text-slate-800 border border-slate-200/60 rounded-tl-none shadow-sm">
+                        <div class="flex items-center gap-1">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="px-5 py-3 bg-white border-t border-gray-100" id="chatInputArea" style="display: none;">
@@ -81,30 +96,117 @@
 let currentUserId = null;
 let sseSource = null;
 let typingTimer = null;
+let pollTimer = null;
+let lastMessageCount = {};
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-// ===== SSE =====
-function connectSSE() {
-    if (sseSource) sseSource.close();
-    sseSource = new EventSource('/messages/sse/stream');
+// ===== Polling temps réel (remplace SSE pour fiabilité) =====
+function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(pollNewData, 3000);
+}
 
-    sseSource.addEventListener('message', function(e) {
-        const data = JSON.parse(e.data);
-        if (data.messages && data.messages.length) {
-            data.messages.forEach(msg => {
-                handleNewMessage(msg);
+function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function pollNewData() {
+    if (!currentUserId) {
+        pollConversations();
+        return;
+    }
+    // Refresh messages for active conversation
+    fetch(`/messages/${currentUserId}/list`, {
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+    })
+    .then(r => r.json())
+    .then(messages => {
+        const chatMessages = document.getElementById('chatMessages');
+        const localMsgs = chatMessages.querySelectorAll('.msg-row[data-msg-id]');
+        const localIds = new Set();
+        localMsgs.forEach(el => localIds.add(parseInt(el.dataset.msgId)));
+
+        const newMsgs = messages.filter(m => m.id && !localIds.has(m.id));
+        if (newMsgs.length > 0) {
+            newMsgs.forEach(msg => {
+                appendMessage(msg, msg.is_mine);
+                if (!msg.is_mine) {
+                    showToast({
+                        message: msg.message,
+                        sender_name: msg.sender_name || 'Utilisateur',
+                        sender_id: msg.sender_id
+                    });
+                }
             });
+            scrollToBottom();
+            markAsRead(currentUserId);
         }
-    });
+    })
+    .catch(() => {});
+    pollConversations();
+}
 
-    sseSource.addEventListener('typing', function(e) {
-        const data = JSON.parse(e.data);
-        showTypingIndicators(data);
-    });
+function pollConversations() {
+    fetch('/messages/conversations', {
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+    })
+    .then(r => r.json())
+    .then(conversations => {
+        const list = document.getElementById('conversationList');
+        const existingItems = list.querySelectorAll('.conv-item');
+        const existingIds = new Set();
+        existingItems.forEach(item => existingIds.add(parseInt(item.dataset.userId)));
 
-    sseSource.onerror = function() {
-        setTimeout(connectSSE, 3000);
-    };
+        // Update existing items
+        conversations.forEach(conv => {
+            const item = list.querySelector(`.conv-item[data-user-id="${conv.user.id}"]`);
+            if (item) {
+                const preview = item.querySelector('p');
+                const time = item.querySelector('.text-\\[9px\\]');
+                if (preview) preview.textContent = escHtml(conv.last_message || 'Aucun message');
+                if (time) time.textContent = conv.last_time || '';
+
+                // Mise à jour badge non-lu depuis le serveur (évite cumul côté client)
+                const existingBadge = item.querySelector('.conv-unread');
+                if (conv.unread_count > 0 && currentUserId !== conv.user.id) {
+                    if (existingBadge) {
+                        existingBadge.textContent = conv.unread_count;
+                    } else {
+                        item.querySelector('.flex-1').insertAdjacentHTML('afterend',
+                            `<span class="conv-unread flex-shrink-0 inline-flex items-center justify-center h-4 min-w-[16px] rounded-full bg-emerald-600 px-1 text-[9px] font-bold text-white">${conv.unread_count}</span>`
+                        );
+                    }
+                } else if (existingBadge) {
+                    existingBadge.remove();
+                }
+            } else {
+                // New conversation - reload list
+                loadConversations();
+            }
+        });
+    })
+    .catch(() => {});
+}
+
+function notifyNewMessage(userName) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-3 flex items-start gap-3 cursor-pointer hover:shadow-xl transition-shadow';
+    toast.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs flex-shrink-0">${escHtml(userName.charAt(0))}</div>
+        <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-gray-900">${escHtml(userName)}</p>
+            <p class="text-[11px] text-gray-600">Nouveau message reçu</p>
+        </div>
+        <button onclick="this.closest('.toast-msg').classList.add('hide');setTimeout(()=>this.closest('.toast-msg').remove(),300)" class="text-gray-400 hover:text-gray-600 flex-shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        if (toast.parentNode) { toast.classList.add('hide'); setTimeout(() => toast.remove(), 300); }
+    }, 5000);
 }
 
 function handleNewMessage(msg) {
@@ -185,10 +287,28 @@ function updateConversationFromSSE(msg) {
     }
 }
 
+// ===== Indicateur de saisie (typing) style WhatsApp =====
+function showTypingBubble() {
+    const container = document.getElementById('typingIndicatorContainer');
+    if (container && currentUserId) {
+        container.style.display = 'flex';
+        const avatar = container.querySelector('span');
+        if (avatar) avatar.textContent = document.getElementById('chatUserName')?.textContent?.charAt(0) || '?';
+        clearTimeout(container._timeout);
+        container._timeout = setTimeout(() => { container.style.display = 'none'; }, 4000);
+    }
+}
+
+function hideTypingBubble() {
+    const container = document.getElementById('typingIndicatorContainer');
+    if (container) { container.style.display = 'none'; clearTimeout(container._timeout); }
+}
+
 function showTypingIndicators(typingUsers) {
     const indicator = document.getElementById('chatTypingIndicator');
     if (!currentUserId || !typingUsers.length) {
         indicator.classList.add('hidden');
+        hideTypingBubble();
         return;
     }
 
@@ -196,10 +316,15 @@ function showTypingIndicators(typingUsers) {
     if (typing) {
         indicator.classList.remove('hidden');
         indicator.textContent = typing.name + ' écrit...';
+        showTypingBubble();
         clearTimeout(indicator._timeout);
-        indicator._timeout = setTimeout(() => indicator.classList.add('hidden'), 3000);
+        indicator._timeout = setTimeout(() => {
+            indicator.classList.add('hidden');
+            hideTypingBubble();
+        }, 3000);
     } else {
         indicator.classList.add('hidden');
+        hideTypingBubble();
     }
 }
 
@@ -243,7 +368,7 @@ function sendTyping(typing) {
 document.addEventListener('DOMContentLoaded', function() {
     const chatForm = document.getElementById('chatForm');
     loadConversations();
-    connectSSE();
+    startPolling(); // Polling temps réel au lieu de SSE
 
     if (chatForm) {
         chatForm.addEventListener('submit', function(e) {
@@ -372,6 +497,7 @@ function loadConversation(userId, userName, userEmail) {
 function appendMessage(msg, isMine) {
     const div = document.createElement('div');
     div.className = 'msg-row ' + (isMine ? 'justify-end' : 'justify-start');
+    if (msg.id) div.dataset.msgId = msg.id;
     div.innerHTML = `
         <div class="max-w-[70%] px-3.5 py-2 rounded-[16px] text-xs leading-relaxed whitespace-pre-line ${isMine ? 'bg-emerald-600 text-white rounded-br-[4px] shadow-sm' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-[4px] shadow-sm'}">
             <p>${escHtml(msg.message)}</p>

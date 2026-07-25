@@ -48,6 +48,21 @@
                 @empty
                     <p class="text-sm text-gray-400 text-center py-10" id="emptyMessage">Aucun message pour le moment.</p>
                 @endforelse
+                {{-- Indicateur de saisie (typing) - style WhatsApp --}}
+                <div id="typingIndicatorContainer" class="msg-row items-start gap-2.5 max-w-[85%]" style="display: none;">
+                    <div class="h-8 w-8 rounded-lg text-xs font-bold shrink-0 flex items-center justify-center bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        <span>S</span>
+                    </div>
+                    <div class="flex flex-col items-start">
+                        <div class="px-4 py-3 rounded-2xl bg-white text-slate-800 border border-slate-200/60 rounded-tl-none shadow-sm">
+                            <div class="flex items-center gap-1">
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="p-3 bg-white border-t border-slate-150 flex items-center gap-2 shrink-0">
@@ -69,33 +84,57 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 let sseSource = null;
 let typingTimer = null;
+let pollTimer = null;
 
-function connectSSE() {
-    if (sseSource) sseSource.close();
-    sseSource = new EventSource('/portail/messages/sse');
+function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(pollMessages, 3000);
+}
 
-    sseSource.addEventListener('message', function(e) {
-        const data = JSON.parse(e.data);
-        if (data.messages && data.messages.length) {
-            data.messages.forEach(handleNewMessage);
+function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function pollMessages() {
+    fetch('/chat/messages', {
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        credentials: 'same-origin',
+    })
+    .then(r => r.json())
+    .then(messages => {
+        if (!Array.isArray(messages)) return;
+        const container = document.getElementById('chatMessages');
+        const localCount = container.querySelectorAll('.msg-row:not(#typingIndicatorContainer)').length;
+        if (messages.length > localCount) {
+            // New messages arrived
+            const newMsgs = messages.slice(localCount);
+            newMsgs.forEach(msg => {
+                if (!msg.is_mine) handleNewMessage(msg);
+            });
         }
-    });
+    })
+    .catch(() => {});
+}
 
-    sseSource.addEventListener('typing', function(e) {
-        const data = JSON.parse(e.data);
-        const indicator = document.getElementById('typingIndicator');
-        if (data && data.length) {
-            indicator.classList.remove('hidden');
-            clearTimeout(indicator._timeout);
-            indicator._timeout = setTimeout(() => indicator.classList.add('hidden'), 3000);
-        } else {
-            indicator.classList.add('hidden');
-        }
-    });
+// ===== Indicateur de saisie (typing) style WhatsApp =====
+function showTyping() {
+    const container = document.getElementById('typingIndicatorContainer');
+    if (container) {
+        container.style.display = 'flex';
+        // Auto-cacher après 4s si pas de nouveau message
+        clearTimeout(container._timeout);
+        container._timeout = setTimeout(() => {
+            container.style.display = 'none';
+        }, 4000);
+    }
+}
 
-    sseSource.onerror = function() {
-        setTimeout(connectSSE, 3000);
-    };
+function hideTyping() {
+    const container = document.getElementById('typingIndicatorContainer');
+    if (container) {
+        container.style.display = 'none';
+        clearTimeout(container._timeout);
+    }
 }
 
 function handleNewMessage(msg) {
@@ -173,7 +212,7 @@ function sendMessage() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    connectSSE();
+    startPolling(); // Polling temps réel au lieu de SSE
 
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keydown', function(e) {

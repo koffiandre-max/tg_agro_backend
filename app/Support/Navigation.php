@@ -69,13 +69,20 @@ class Navigation
                 'segments' => ['admin', 'photos'],
                 'can' => $user->role === 'admin',
             ],
-            // [
-            //     'name' => 'Validation des Données',
-            //     'route' => 'admin.data.validation',
-            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
-            //     'segments' => ['admin', 'data'],
-            //     'can' => $user->role === 'admin',
-            // ],
+            [
+                'name' => 'Calendrier',
+                'route' => 'admin.technitian.calendar',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>',
+                'segments' => ['admin', 'technitian', 'calendar'],
+                'can' => $user->role === 'technician',
+            ],
+            [
+                'name' => 'Validation des Données',
+                'route' => 'admin.data.validation',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
+                'segments' => ['admin', 'data'],
+                'can' => $user->role === 'admin',
+            ],
             // [
             //     'name' => 'Prix du Marché',
             //     'route' => 'admin.market-prices.index',
@@ -104,13 +111,13 @@ class Navigation
                 'segments' => ['admin', 'roles'],
                 'can' => $user->role === 'admin',
             ],
-            [
-                'name' => 'Permissions',
-                'route' => 'admin.permissions.index',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h7.5M3 12h18M3 6h18M3 18h18M3 12a9 9 0 0118 0"/>',
-                'segments' => ['admin', 'permissions'],
-                'can' => $user->role === 'admin',
-            ],
+            // [
+            //     'name' => 'Permissions',
+            //     'route' => 'admin.permissions.index',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h7.5M3 12h18M3 6h18M3 18h18M3 12a9 9 0 0118 0"/>',
+            //     'segments' => ['admin', 'permissions'],
+            //     'can' => $user->role === 'admin',
+            // ],
 
             // ============================================
             // ESPACE CLIENT (PORTAIL)
