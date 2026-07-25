@@ -11,7 +11,20 @@
             <input
                 type="text"
                 wire:model.live.debounce.300ms="search"
-                placeholder="Rechercher par nom, email, pays..."
+                placeholder="Rechercher par nom, email, pays, code..."
+                class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+        </div>
+
+        {{-- Recherche par code --}}
+        <div class="relative min-w-[160px]">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-4m0 0l4-4m-4 4l-4 4m4-4l4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+            </svg>
+            <input
+                type="text"
+                wire:model.live.debounce.300ms="code"
+                placeholder="Code client..."
                 class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
         </div>
@@ -67,6 +80,9 @@
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('user_id')">
                             <div class="flex items-center gap-1">Client @include('livewire.partials.sort-icon', ['field' => 'user_id'])</div>
                         </th>
+                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('code')">
+                            <div class="flex items-center gap-1">Code @include('livewire.partials.sort-icon', ['field' => 'code'])</div>
+                        </th>
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('country_of_residence')">
                             <div class="flex items-center gap-1">Pays résidence @include('livewire.partials.sort-icon', ['field' => 'country_of_residence'])</div>
                         </th>
@@ -98,6 +114,11 @@
                                         <p class="text-xs text-gray-400">{{ $client->user->email ?? '' }}</p>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                    {{ $client->code ?? '-' }}
+                                </span>
                             </td>
                             <td class="px-4 py-3 text-gray-600">
                                 <span class="inline-flex items-center gap-1">
@@ -177,7 +198,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-10 text-center text-gray-400">
+                            <td colspan="8" class="px-4 py-10 text-center text-gray-400">
                                 Aucun client ne correspond à vos critères.
                             </td>
                         </tr>

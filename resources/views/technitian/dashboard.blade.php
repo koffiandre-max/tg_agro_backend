@@ -4,7 +4,7 @@
 @section('page-title', 'Mon Espace Technicien')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 p-6">
     {{-- Welcome Card --}}
     <div class="bg-gradient-to-r from-green-500 to-teal-600 rounded-xl p-6 text-white">
         <h2 class="text-2xl font-bold mb-2">Bonjour, {{ auth()->user()->name }} !</h2>

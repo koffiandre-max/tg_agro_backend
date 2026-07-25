@@ -26,4 +26,10 @@ Route::middleware('auth')->group(function () {
     require __DIR__ . '/users.php';
     require __DIR__ . '/roles.php';
     require __DIR__ . '/permissions.php';
+
+    Route::get('/chat/messages', [App\Http\Controllers\Portail\MessageController::class, 'list'])->name('chat.messages.index');
+    Route::post('/chat/messages', [App\Http\Controllers\Portail\MessageController::class, 'store'])->name('chat.messages.store');
+    Route::post('/chat/messages/{message}/read', [App\Http\Controllers\Portail\MessageController::class, 'markRead'])->name('chat.messages.read');
+
+    
 });

@@ -30,7 +30,8 @@ class GalleryController extends Controller
 
     public function index(Request $request)
     {
-        $query = Photo::with(['farm', 'client.user', 'technician']);
+        $query = Photo::with(['farm', 'client.user', 'technician'])
+            ->where('is_validated', true);
 
         // Filtre par client
         if ($request->filled('client_id')) {
@@ -54,7 +55,11 @@ class GalleryController extends Controller
             $query->where('technician_id', $user->id);
         }
 
-        $photos = $query->latest()->paginate(24);
+        $photos = $query->latest()->get()->groupBy(function ($photo) {
+            return $photo->farm?->name ?? 'Sans exploitation';
+        });
+
+        $pendingCount = Photo::where('is_validated', false)->count();
 
         // Données pour les filtres
         $clients = Client::with('user')
@@ -70,6 +75,6 @@ class GalleryController extends Controller
             $technicians = User::where('role', 'technician')->orderBy('name')->get();
         }
 
-        return view('admin.gallery.index', compact('photos', 'clients', 'farms', 'technicians'));
+        return view('admin.gallery.index', compact('photos', 'clients', 'farms', 'technicians', 'pendingCount'));
     }
 }

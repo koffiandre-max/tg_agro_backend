@@ -4,29 +4,33 @@ $navItems = collect($navigation);
 $userRole = auth()->user()->role ?? 'client';
 
 // Couleurs profondes et modernes adaptées au design flottant
-$sidebarBgColor = match($userRole) {
-    'admin' => 'bg-slate-950 border-slate-800',
-    'client' => 'bg-emerald-950 border-emerald-900/50', 
-    'technician' => 'bg-blue-900 border-blue-900/50',
-    default => 'bg-emerald-950 border-emerald-900/50',
+$sidebarBg = match($userRole) {
+    'admin' => 'slate-950',
+    'client' => 'emerald-600', 
+    'technician' => 'blue-900', 
+    default => 'emerald-600',
 };
 
+$sidebarBorder = match($userRole) {
+    'admin' => 'border-slate-800',
+    'client' => 'border-emerald-600', 
+    'technician' => 'border-blue-900/50', 
+    default => 'border-emerald-600',
+};
+
+// Classes de survol et actif fixes basées sur du blanc/transparent (visible sur tous les fonds)
 $sidebarHoverBg = 'hover:bg-white/10 hover:text-white';
-$sidebarActiveBg = 'bg-white/15 text-white font-semibold shadow-sm';
-$textColor = 'text-white/80';
+$sidebarActiveBg = 'bg-white/20 text-white font-semibold shadow-sm border-r-2 border-white';
+$textColor = 'text-white';
 @endphp
 
 <aside id="sidebar-lateral"
-       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col border-r shadow-lg transition-all duration-300 ease-in-out overflow-hidden {{ $sidebarBgColor }}"
+       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col  shadow-lg transition-all duration-300 ease-in-out overflow-hidden  bg-{{ $sidebarBg }}"
        :class="sidebarCollapsed ? 'w-20' : 'w-64'"
-       :style="{
-           width: sidebarCollapsed ? '80px' : '256px',
-           minWidth: sidebarCollapsed ? '80px' : '256px'
-       }"
        @click.outside="closeSidebarOnMobile">
 
     {{-- Header / Logo --}}
-    <div class="h-16 flex items-center px-4 border-b border-white/5 shrink-0">
+    <div class="h-16 flex items-center px-4 bg-{{ $sidebarBg }} border-b border-white/5 shrink-0">
         <div class="flex items-center gap-3 overflow-hidden w-full">
             {{-- Icône de Logo moderne & minimaliste --}}
             <div class="h-9 w-9 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/10">
@@ -36,7 +40,7 @@ $textColor = 'text-white/80';
             </div>
             <span class="font-bold text-sm tracking-wider text-white transition-opacity duration-300 whitespace-nowrap"
                   :class="{ 'opacity-0 absolute pointer-events-none': sidebarCollapsed }">
-                TG'AGRO <span class="font-normal text-white/60">CONSULTING</span>
+                TG’INVEST <span class="font-normal text-white/60">CONSULTING</span>
             </span>
         </div>
     </div>
@@ -49,8 +53,8 @@ $textColor = 'text-white/80';
                     @if(!isset($item['children']))
                         {{-- Menu simple --}}
                         <li>
-                            <a href="{{ route($item['route']) }}"
-                               class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 {{ $textColor }} {{ $sidebarHoverBg }} {{ request()->routeIs($item['route'] ?? '') ? $sidebarActiveBg : '' }}">
+                            <a href="{{ $item['route'] ? route($item['route']) : '#' }}"
+                               class="group flex items-center gap-3 px-3 py-2.5 rounded text-sm transition-all duration-150 {{ $textColor }} {{ $sidebarHoverBg }} {{ isset($item['route']) && request()->routeIs($item['route']) ? $sidebarActiveBg : '' }}">
                                 <svg class="h-4 w-4 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                     {!! $item['icon'] !!}
                                 </svg>
@@ -62,12 +66,13 @@ $textColor = 'text-white/80';
                     @else
                         {{-- Menu déroulant avec Alpine --}}
                         @php
-                            $isChildActive = in_array(request()->route()->getName(), array_column($item['children'], 'route') ?? []);
+                            $currentRouteName = request()->route() ? request()->route()->getName() : '';
+                            $isChildActive = in_array($currentRouteName, array_column($item['children'], 'route') ?? []);
                         @endphp
                         <li x-data="{ open: {{ $isChildActive ? 'true' : 'false' }} }" class="flex flex-col">
                             <button @click="open = !open; if (window.innerWidth < 1024 && sidebarCollapsed) sidebarCollapsed = false"
                                     class="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full {{ $textColor }} {{ $sidebarHoverBg }}"
-                                    :class="open ? 'bg-white/5 text-white' : ''">
+                                    :class="open ? 'bg-white/15 text-white font-semibold' : ''">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="h-4 w-4 flex items-center justify-center shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
                                         {!! $item['icon'] !!}
@@ -90,10 +95,10 @@ $textColor = 'text-white/80';
                                  :class="{ 'hidden': sidebarCollapsed }">
                                 @foreach ($item['children'] as $child)
                                     @if (isset($child['can']) && $child['can'])
-                                        <a href="{{ route($child['route']) }}"
-                                           class="group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-150 {{ request()->routeIs($child['route'] ?? '') ? 'text-white font-semibold' : 'text-white/60 hover:text-white' }}"
+                                        <a href="{{ $child['route'] ? route($child['route']) : '#' }}"
+                                           class="group flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-150 {{ isset($child['route']) && request()->routeIs($child['route']) ? 'bg-white/15 text-white font-semibold' : 'text-white/60 hover:bg-white/10 hover:text-white' }}"
                                            @click="if (window.innerWidth < 1024) closeSidebarOnMobile()">
-                                            <span class="h-1.5 w-1.5 rounded-full shrink-0 transition-all duration-150 {{ request()->routeIs($child['route'] ?? '') ? 'bg-white scale-125' : 'bg-white/20 group-hover:bg-white/50' }}"></span>
+                                            <span class="h-1.5 w-1.5 rounded-full shrink-0 transition-all duration-150 {{ isset($child['route']) && request()->routeIs($child['route']) ? 'bg-white scale-125' : 'bg-white/20 group-hover:bg-white/50' }}"></span>
                                             <span class="truncate">{{ $child['name'] }}</span>
                                         </a>
                                     @endif
@@ -107,7 +112,7 @@ $textColor = 'text-white/80';
     </nav>
 
     {{-- Profil de l'utilisateur (Bas de page) --}}
-    <div class="p-3 border-t border-white/5 shrink-0 bg-white/[0.02]">
+    {{-- <div class="p-3 border-t border-white/5 shrink-0 bg-{{ $sidebarBg }}">
         <div class="flex items-center gap-3 overflow-hidden rounded-xl p-1">
             <div class="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 border border-white/10">
                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
@@ -121,7 +126,7 @@ $textColor = 'text-white/80';
                 </p>
             </div>
         </div>
-    </div>
+    </div> --}}
 </aside>
 
 <style>
@@ -130,7 +135,7 @@ $textColor = 'text-white/80';
             transform: translateX(-260px);
             transition: transform 0.3s ease-in-out;
         }
-        #sidebar-lateral:not(.hidden) { 
+        #sidebar-lateral:not(.hidden) {
             transform: translateX(0);
         }
     }

@@ -18,6 +18,17 @@
                     </svg>
                     Ajouter des photos
                 </a>
+                <a href="{{ route('admin.photos.validation') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 relative">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Images en attente
+                    @if($pendingCount > 0)
+                        <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-amber-500 rounded-full">
+                            {{ $pendingCount }}
+                        </span>
+                    @endif
+                </a>
             </div>
         </div>
 
@@ -78,62 +89,79 @@
             </form>
         </div>
 
-        {{-- Grille de photos --}}
+        {{-- Grille de photos par exploitation --}}
         @if($photos->count() > 0)
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                @foreach($photos as $photo)
-                    <div class="relative group rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer"
-                         onclick="openPhotoModal({{ $photo->id }}, '{{ asset('storage/' . $photo->photo_path) }}', '{{ addslashes($photo->client?->user?->name ?? 'Client') }}', '{{ addslashes($photo->farm?->name ?? 'Plantation') }}', '{{ addslashes($photo->technician?->name ?? '—') }}', '{{ $photo->created_at?->format('d/m/Y H:i') ?? '' }}', '{{ $photo->caption ?? '' }}', {{ $photo->latitude ?? 'null' }}, {{ $photo->longitude ?? 'null' }})">
-                        <div class="aspect-square">
-                            <img src="{{ asset('storage/' . $photo->photo_path) }}"
-                                 alt="{{ $photo->caption ?? 'Photo' }}"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                 loading="lazy" />
-                        </div>
+            @foreach($photos as $farmName => $farmPhotos)
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">{{ $farmName }}</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                        @foreach($farmPhotos as $index => $photo)
+                            <div class="relative group rounded-2xl overflow-hidden border bg-white shadow-sm hover:shadow-md transition-all cursor-pointer {{ !$photo->is_validated ? 'border-amber-200' : 'border-gray-100' }} {{ $index >= 6 ? 'hidden photo-extra' : '' }}"
+                                 onclick="openPhotoModal({{ $photo->id }}, '{{ asset('storage/' . $photo->photo_path) }}', '{{ addslashes($photo->client?->user?->name ?? 'Client') }}', '{{ addslashes($photo->farm?->name ?? 'Plantation') }}', '{{ addslashes($photo->technician?->name ?? '—') }}', '{{ $photo->created_at?->format('d/m/Y H:i') ?? '' }}', '{{ $photo->caption ?? '' }}', {{ $photo->latitude ?? 'null' }}, {{ $photo->longitude ?? 'null' }})">
+                                <div class="aspect-square">
+                                    <img src="{{ asset('storage/' . $photo->photo_path) }}"
+                                         alt="{{ $photo->caption ?? 'Photo' }}"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                         loading="lazy" />
+                                </div>
 
-                        {{-- Overlay au survol --}}
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
-                            <p class="text-white text-xs font-medium truncate">{{ $photo->client?->user?->name ?? 'Client' }}</p>
-                            <p class="text-white/70 text-xs truncate">{{ $photo->farm?->name ?? 'Plantation' }}</p>
-                            @if($photo->caption)
-                                <p class="text-white/60 text-xs mt-1 truncate">{{ $photo->caption }}</p>
-                            @endif
-                        </div>
+                                @if(!$photo->is_validated)
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold shadow-sm border border-amber-200">
+                                        En attente
+                                    </span>
+                                </div>
+                                @endif
 
-                        {{-- Badge technicien en haut --}}
-                        <div class="absolute top-2 left-2">
-                            <span class="inline-flex items-center rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs font-medium text-gray-700 shadow-sm">
-                                {{ $photo->technician?->name ?? '—' }}
-                            </span>
-                        </div>
+                                {{-- Overlay au survol --}}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
+                                    <p class="text-white text-xs font-medium truncate">{{ $photo->client?->user?->name ?? 'Client' }}</p>
+                                    <p class="text-white/70 text-xs truncate">{{ $photo->farm?->name ?? 'Plantation' }}</p>
+                                    @if($photo->caption)
+                                        <p class="text-white/60 text-xs mt-1 truncate">{{ $photo->caption }}</p>
+                                    @endif
+                                </div>
 
-                        {{-- Badge date --}}
-                        <div class="absolute top-2 right-2">
-                            <span class="inline-flex items-center rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs text-gray-500 shadow-sm">
-                                {{ $photo->created_at?->format('d/m') ?? '' }}
-                            </span>
-                        </div>
+                                {{-- Badge technicien en haut --}}
+                                <div class="absolute top-2 left-2">
+                                    <span class="inline-flex items-center rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs font-medium text-gray-700 shadow-sm">
+                                        {{ $photo->technician?->name ?? '—' }}
+                                    </span>
+                                </div>
 
-                        {{-- Coordonnées GPS si disponibles --}}
-                        @if($photo->latitude && $photo->longitude)
-                        <div class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span class="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs text-blue-600 shadow-sm">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                </svg>
-                                GPS
-                            </span>
-                        </div>
-                        @endif
+                                {{-- Badge date --}}
+                                <div class="absolute top-2 right-2">
+                                    <span class="inline-flex items-center rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs text-gray-500 shadow-sm">
+                                        {{ $photo->created_at?->format('d/m') ?? '' }}
+                                    </span>
+                                </div>
+
+                                {{-- Coordonnées GPS si disponibles --}}
+                                @if($photo->latitude && $photo->longitude)
+                                <div class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-xs text-blue-600 shadow-sm">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        GPS
+                                    </span>
+                                </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
 
-            {{-- Pagination --}}
-            <div class="mt-6">
-                {{ $photos->appends(request()->query())->onEachSide(1)->links() }}
-            </div>
+                    @if($farmPhotos->count() > 6)
+                        <button type="button" onclick="togglePhotos(this)" class="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                            <span class="btn-text">Voir plus</span>
+                            <svg class="w-4 h-4 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                    @endif
+                </div>
+            @endforeach
         @else
             <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-12 text-center">
                 <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,5 +301,23 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closePhotoModal();
     });
+
+    function togglePhotos(button) {
+        const container = button.closest('.mb-8');
+        const hiddenPhotos = container.querySelectorAll('.photo-extra');
+        const textSpan = button.querySelector('.btn-text');
+        const icon = button.querySelector('svg');
+
+        hiddenPhotos.forEach(photo => {
+            photo.classList.toggle('hidden');
+        });
+
+        if (textSpan) {
+            textSpan.textContent = hiddenPhotos[0]?.classList.contains('hidden') ? 'Voir plus' : 'Voir moins';
+        }
+        if (icon) {
+            icon.style.transform = hiddenPhotos[0]?.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    }
 </script>
 @endpush

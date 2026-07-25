@@ -7,6 +7,7 @@ use App\Http\Controllers\Technitian\ReportController;
 use App\Http\Controllers\Technitian\PhotoController;
 use App\Http\Controllers\Technitian\DataEntryController;
 use App\Http\Controllers\Technitian\CalendarController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/technitian', [TechnitianDashboardController::class, 'index'])->name('admin.technitian.index');
 Route::get('/technitian/missions', [MissionController::class, 'index'])->name('admin.technitian.missions');
@@ -19,4 +20,3 @@ Route::post('/technitian/photos', [PhotoController::class, 'store'])->name('admi
 Route::get('/technitian/data/create', [DataEntryController::class, 'create'])->name('admin.technitian.data.create');
 Route::post('/technitian/data', [DataEntryController::class, 'store'])->name('admin.technitian.data.store');
 Route::get('/technitian/calendar', [CalendarController::class, 'index'])->name('admin.technitian.calendar');
-Route::get('/technicians/{technician}/detail', [TechnicianController::class, 'show'])->name('admin.technicians.detail');

@@ -32,10 +32,10 @@ class AuthController extends Controller
             $user = Auth::user();
 
             $redirect = match ($user->role ?? null) {
-                'admin' => Route::has('dashboard') ? route('dashboard') : '/admin',
-                'client' => Route::has('admin.portail.index') ? route('admin.portail.index') : '/portail',
-                'technician' => '/technitian',
-                default => '/portail',
+                'admin' => Route::has('dashboard') ? route('dashboard') : route('admin.technicians.index'),
+                'client' => Route::has('admin.portail.index') ? route('admin.portail.index') : route('login'),
+                'technician' => route('admin.technitian.index'),
+                default => route('admin.portail.index'),
             };
 
             return response()->json([
@@ -53,10 +53,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect('/login');
+        return redirect()->route('login');
     }
 }

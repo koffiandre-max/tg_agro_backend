@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Mission;
+use App\Models\Technician;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -10,12 +12,19 @@ class TechnicianMissionsTable extends Component
 {
     use WithPagination;
 
-    public int $technicianId;
+    public ?int $technicianId = null;
     public string $search = '';
     public string $status = '';
     public string $sortField = 'created_at';
     public string $sortDirection = 'desc';
     public int $perPage = 10;
+
+    public function mount()
+    {
+        if ($this->technicianId === null) {
+            $this->technicianId = Technician::where('user_id', Auth::id())->value('id');
+        }
+    }
 
     public function updatingSearch()
     {
@@ -48,14 +57,9 @@ class TechnicianMissionsTable extends Component
         $this->resetPage();
     }
 
-    public function viewMission($id): void
-    {
-        $this->dispatch('view-mission', id: $id);
-    }
-
     public function render()
     {
-        $query = Mission::query()
+        $missions = Mission::query()
             ->where('technician_id', $this->technicianId)
             ->with('farm')
             ->when($this->search, function ($q) {
@@ -68,9 +72,8 @@ class TechnicianMissionsTable extends Component
                 });
             })
             ->when($this->status, fn($q) => $q->where('status', $this->status))
-            ->orderBy($this->sortField, $this->sortDirection);
-
-        $missions = $query->paginate($this->perPage);
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
 
         return view('livewire.technician-missions-table', [
             'missions' => $missions,

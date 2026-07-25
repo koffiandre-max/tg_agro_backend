@@ -42,7 +42,7 @@
     'searchable'  => true,
     'clearable'   => false,
     'disabled'    => false,
-    'size'        => 'lg', // sm | md | lg
+    'size'        => 'md', // sm | md | lg
     'class'       => '',
     'addUrl'      => null,
     'addLabel'    => 'Ajouter',

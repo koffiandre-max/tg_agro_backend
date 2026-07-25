@@ -11,6 +11,7 @@ class ClientsTable extends Component
     use WithPagination;
 
     public string $search = '';
+    public string $code = '';
     public string $subscriptionType = '';
     public string $countryOfResidence = '';
     public string $sortField = 'created_at';
@@ -46,7 +47,7 @@ class ClientsTable extends Component
 
     public function resetFilters(): void
     {
-        $this->reset(['search', 'subscriptionType', 'countryOfResidence']);
+        $this->reset(['search', 'code', 'subscriptionType', 'countryOfResidence']);
         $this->resetPage();
     }
 
@@ -76,8 +77,10 @@ class ClientsTable extends Component
                         ->orWhere('email', 'like', "%{$this->search}%");
                 })
                     ->orWhere('country_of_residence', 'like', "%{$this->search}%")
-                    ->orWhere('country_of_origin', 'like', "%{$this->search}%");
+                    ->orWhere('country_of_origin', 'like', "%{$this->search}%")
+                    ->orWhere('code', 'like', "%{$this->search}%");
             })
+            ->when($this->code, fn($q) => $q->where('code', 'like', "%{$this->code}%"))
             ->when($this->subscriptionType, fn($q) => $q->where('subscription_type', $this->subscriptionType))
             ->when($this->countryOfResidence, fn($q) => $q->where('country_of_residence', $this->countryOfResidence))
             ->orderBy($this->sortField, $this->sortDirection);

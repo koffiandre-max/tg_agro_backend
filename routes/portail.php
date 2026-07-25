@@ -12,4 +12,7 @@ Route::get('/portail/reports', [ReportController::class, 'index'])->name('admin.
 Route::get('/portail/reports/{report}/download', [ReportController::class, 'download'])->name('admin.portail.reports.download');
 Route::get('/portail/messages', [MessageController::class, 'index'])->name('admin.portail.messages');
 Route::post('/portail/messages', [MessageController::class, 'store'])->name('admin.portail.messages.store');
+Route::get('/portail/messages/list', [MessageController::class, 'list'])->name('admin.portail.messages.list');
+Route::post('/portail/messages/typing', [MessageController::class, 'typing'])->name('admin.portail.messages.typing');
+Route::get('/portail/messages/sse', [MessageController::class, 'sse'])->name('admin.portail.messages.sse');
 Route::get('/portail/subscription', [SubscriptionController::class, 'index'])->name('admin.portail.subscription');

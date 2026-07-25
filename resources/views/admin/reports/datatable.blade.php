@@ -22,7 +22,7 @@
         </div>
 
         {{-- Composant Livewire Datatable --}}
-        @livewire('reports-table')
+        @livewire('reports-explorer')
     </div>
 </div>
 @endsection

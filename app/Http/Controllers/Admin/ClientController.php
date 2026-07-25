@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\User;
+use App\Support\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -35,7 +37,7 @@ class ClientController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
@@ -44,8 +46,11 @@ class ClientController extends Controller
             'is_active' => true,
         ]);
 
+        $code = Helpers::generateUniqueClientCode();
+
         Client::create([
             'user_id' => $user->id,
+            'code' => $code,
             'country_of_residence' => $validated['country_of_residence'] ?? null,
             'country_of_origin' => $validated['country_of_origin'] ?? null,
             'city_of_residence' => $validated['city_of_residence'] ?? null,
@@ -107,7 +112,7 @@ class ClientController extends Controller
 
         $client->user->update($userData);
 
-        $client->update([
+        $clientData = [
             'country_of_residence' => $validated['country_of_residence'],
             'country_of_origin' => $validated['country_of_origin'],
             'city_of_residence' => $validated['city_of_residence'],
@@ -115,7 +120,13 @@ class ClientController extends Controller
             'subscription_expires_at' => $validated['subscription_expires_at'] ?: null,
             'total_investment' => $validated['total_investment'] ?: 0,
             'notes' => $validated['notes'],
-        ]);
+        ];
+
+        if (empty($client->code)) {
+            $clientData['code'] = Helpers::generateUniqueClientCode();
+        }
+
+        $client->update($clientData);
 
         return redirect()->route('admin.clients.show', $client)->with('success', 'Client mis à jour avec succès.');
     }

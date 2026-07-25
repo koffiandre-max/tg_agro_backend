@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Client;
-use App\Models\Farm;
 use App\Models\Report;
 use App\Services\SendmailService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -59,26 +58,8 @@ class ReportController extends Controller
 
     public function create()
     {
-        $farms = Farm::with(['user', 'clients.user'])->orderBy('name')->get();
-
-        $clientIds = $farms->flatMap(function ($farm) {
-            return $farm->clients->pluck('id');
-        })->unique();
-
-        $clients = Client::whereIn('id', $clientIds)
-            ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
-            ->select('clients.*')
-            ->with('user')
-            ->get();
-
-        if ($clients->isEmpty()) {
-            $clients = Client::join('users', 'users.id', '=', 'clients.user_id')
-                ->orderBy('users.name')
-                ->select('clients.*')
-                ->with('user')
-                ->get();
-        }
+        $farmData = app(FarmService::class)->getFarmsAndClients();
+        extract($farmData->toArray());
 
         $formAction = route('admin.reports.store');
 
@@ -121,7 +102,8 @@ class ReportController extends Controller
 
             return redirect()->route('admin.reports.show', $report)->with('success', 'Rapport créé avec succès.');
         } catch (Exception $e) {
-            dd($e->getMessage());
+            Log::error('Failed to create report: '.$e->getMessage(), ['exception' => $e]);
+            return redirect()->back()->withInput()->with('error', 'Erreur lors de la création du rapport.');
         }
     }
 }

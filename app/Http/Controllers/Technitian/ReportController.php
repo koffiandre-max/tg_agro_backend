@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Technitian;
 
 use App\Http\Controllers\Controller;
-use App\Models\Client;
-use App\Models\Farm;
+use App\Http\Middleware\TechnicianMiddleware;
 use App\Models\Report;
 use App\Models\User;
 use App\Services\SendmailService;
@@ -13,59 +12,26 @@ use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
+    public function __construct(private SendmailService $mailer)
+    {
+        $this->middleware(TechnicianMiddleware::class);
+    }
+
     public function create()
     {
         $user = Auth::user();
-
-        if (!$user || $user->role !== 'technician') {
-            abort(403, 'Accès non autorisé.');
-        }
-
-        $farms = Farm::query();
-
-        // Filtrer selon le technicien
-        if ($user->technician) {
-            $farms = $farms->where('assigned_technician_id', $user->technician->id);
-        }
-
-        $farms = $farms->with(['user', 'clients.user'])
-            ->orderBy('name')
-            ->get();
-
-        // Récupérer les clients associés aux farms
-        $clientIds = $farms->flatMap(function ($farm) {
-            return $farm->clients->pluck('id');
-        })->unique();
-
-        $clients = Client::whereIn('id', $clientIds)
-            ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
-            ->select('clients.*')
-            ->with('user')
-            ->get();
-
-        if ($clients->isEmpty()) {
-            $clients = Client::join('users', 'users.id', '=', 'clients.user_id')
-                ->orderBy('users.name')
-                ->select('clients.*')
-                ->with('user')
-                ->get();
-        }
+        $technicianId = $user->technician?->id;
+        $farmData = app(FarmService::class)->getFarmsAndClients($technicianId);
+        extract($farmData->toArray());
 
         $formAction = route('admin.technitian.reports.store');
 
         return view('technitian.reports.create', compact('farms', 'clients', 'formAction'));
     }
 
-    public function __construct(private SendmailService $mailer) {}
-
     public function store(Request $request)
     {
         $user = Auth::user();
-
-        if (!$user || $user->role !== 'technician') {
-            abort(403, 'Accès non autorisé.');
-        }
 
         $validated = $request->validate([
             'farm_id' => 'required|integer|exists:farms,id',

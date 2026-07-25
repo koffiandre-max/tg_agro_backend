@@ -2,8 +2,17 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{
     sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
     sidebarOpen: false,
+    windowWidth: window.innerWidth,
+    get isDesktop() {
+        return this.windowWidth >= 1024;
+    },
+    init() {
+        window.addEventListener('resize', () => {
+            this.windowWidth = window.innerWidth;
+        });
+    },
     toggleSidebar() {
-        if (window.innerWidth >= 1024) {
+        if (this.isDesktop) {
             this.sidebarCollapsed = !this.sidebarCollapsed;
             localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
         } else {
@@ -11,7 +20,7 @@
         }
     },
     closeSidebarOnMobile() {
-        if (window.innerWidth < 1024) {
+        if (!this.isDesktop) {
             this.sidebarOpen = false;
         }
     }
@@ -24,9 +33,117 @@
     @vite(['resources/css/app.css'])
     <script src="/jQuery/jquery-3.4.1.min.js"></script>
     <link href="{{ asset('css/tokens.css') }}" rel="stylesheet">
+    <script>
+        // Enregistrer le composant chat AVANT le chargement d'Alpine.js
+        // pour éviter les conflits de quotes dans l'attribut HTML x-data
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('chatComponent', () => ({
+                chatOpen: false,
+                currentMessage: '',
+                messages: [],
+                loading: false,
+                sending: false,
+                pollingInterval: null,
+                init() {
+                    this.initPolling();
+                },
+                async loadMessages() {
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/chat/messages', { credentials: 'same-origin' });
+                        const data = await response.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            this.messages = data.map(item => ({
+                                id: item.id,
+                                text: item.message,
+                                sentBy: item.is_mine ? 'user' : 'support',
+                                time: item.time,
+                            }));
+                        } else {
+                            this.messages = [{ text: 'Bonjour ! Comment pouvons-nous vous accompagner aujourd\'hui ?', sentBy: 'support', time: 'À l\'instant' }];
+                        }
+                        this.$nextTick(() => this.scrollToBottom());
+                    } catch (e) {
+                        this.messages = [{ text: 'Bonjour ! Comment pouvons-nous vous accompagner aujourd\'hui ?', sentBy: 'support', time: 'À l\'instant' }];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                scrollToBottom() {
+                    const container = document.getElementById('chat-messages-container');
+                    if (container) container.scrollTop = container.scrollHeight;
+                },
+                async sendMessage() {
+                    const text = this.currentMessage.trim();
+                    if (!text || this.sending) return;
+                    this.sending = true;
+                    this.messages.push({ text, sentBy: 'user', time: 'À l\'instant' });
+                    this.currentMessage = '';
+                    this.$nextTick(() => this.scrollToBottom());
+                    try {
+                        const response = await fetch('/chat/messages', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            },
+                            body: JSON.stringify({ message: text }),
+                        });
+                        if (!response.ok) throw new Error('Erreur serveur');
+                    } catch (e) {
+                        this.messages = this.messages.filter(m => m.text !== text);
+                        this.messages.push({ text: 'Erreur lors de l\'envoi. Veuillez réessayer.', sentBy: 'support', time: 'À l\'instant' });
+                        this.$nextTick(() => this.scrollToBottom());
+                    } finally {
+                        this.sending = false;
+                    }
+                },
+                initPolling() {
+                    this.pollingInterval = setInterval(() => {
+                        if (this.chatOpen) this.refreshMessages();
+                    }, 8000);
+                },
+                async refreshMessages() {
+                    try {
+                        const response = await fetch('/chat/messages', { credentials: 'same-origin' });
+                        const data = await response.json();
+                        if (Array.isArray(data)) {
+                            const localIds = this.messages.map(m => m.id).filter(id => id);
+                            const hasNew = data.some(m => m.id && !localIds.includes(m.id));
+                            if (hasNew) {
+                                this.messages = data.map(item => ({
+                                    id: item.id,
+                                    text: item.message,
+                                    sentBy: item.is_mine ? 'user' : 'support',
+                                    time: item.time,
+                                }));
+                                this.$nextTick(() => this.scrollToBottom());
+                            }
+                            // Marquer les messages comme lus
+                            const unread = data.filter(m => m.id && !m.is_mine);
+                            unread.forEach(msg => {
+                                if (msg.id) {
+                                    fetch('/chat/messages/' + msg.id + '/read', {
+                                        method: 'POST',
+                                        credentials: 'same-origin',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                        },
+                                    }).catch(() => {});
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                }
+            }));
+        });
+    </script>
     <script src="/alpine/alpine.js" defer></script>
     <script src="/alpine/collapse.js" defer></script>
     <script src="{{ asset('tailwind/tailwind.js') }}"></script>
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @livewireStyles
     @stack('styles')
 </head>
@@ -40,11 +157,19 @@
         'client' => 'bg-emerald-600',
         'technician' => 'bg-blue-900',
     ];
+
+    $baseBgColors = [
+        'admin' => 'gray-900',
+        'client' => 'emerald-600',
+        'technician' => 'blue-900',
+    ];
+
     $headerBorderColors = [
         'admin' => 'border-gray-800',
         'client' => 'border-emerald-700',
         'technician' => 'border-blue-800',
     ];
+    
     $headerTextColors = [
         'admin' => 'text-white',
         'client' => 'text-emerald-100',
@@ -60,6 +185,7 @@
     $headerBorder = $headerBorderColors[$userRole] ?? $headerBorderColors['client'];
     $headerText = $headerTextColors[$userRole] ?? $headerTextColors['client'];
     $headerHover = $headerHoverColors[$userRole] ?? $headerHoverColors['client'];
+    $sidebarBgColor = $baseBgColors[$userRole] ?? $baseBgColors['client'];
     
     // Couleurs pour le header mobile
     $mobileHeaderBgColors = [
@@ -89,12 +215,12 @@
     {{-- Sidebar Navigation --}}
     @include('layouts.sidebar-emerald')
 
-    {{-- Header Desktop (CORRIGÉ : Classes 'left-64' et 'left-20' rendues dynamiques) --}}
-   <header class="hidden lg:flex fixed top-0 right-0 h-16 {{ $headerBg }} border-b {{ $headerBorder }} z-20 items-center justify-between px-6 transition-all duration-300 ease-in-out"
+    {{-- Header Desktop --}}
+    <header class="hidden lg:flex fixed top-0 right-0 h-16 {{ $headerBg }} border-b {{ $headerBorder }} z-20 items-center justify-between px-6 transition-all duration-300 ease-in-out"
         :class="{
-            'left-64': !sidebarCollapsed && window.innerWidth >= 1024,
-            'left-20': sidebarCollapsed && window.innerWidth >= 1024,
-            'left-0': window.innerWidth < 1024
+            'left-64': !sidebarCollapsed && isDesktop,
+            'left-20': sidebarCollapsed && isDesktop,
+            'left-0': !isDesktop
         }">
         <div class="flex items-center gap-2">
             <h1 class="text-lg font-semibold {{ $headerText }}">@yield('page-title', 'Dashboard')</h1>
@@ -116,16 +242,25 @@
                         <p class="text-sm font-semibold text-gray-800">Messages</p>
                     </div>
                     <div class="max-h-96 overflow-y-auto">
-                        <a href="{{ route('admin.portail.messages') }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
-                            <p class="text-sm font-medium text-gray-800">Nouveau message</p>
-                            <p class="text-xs text-gray-500 mt-1">Vous avez reçu un nouveau message</p>
-                            <p class="text-xs text-gray-400 mt-1">Il y a 5 minutes</p>
-                        </a>
-                    </div>
-                    <div class="p-2">
-                        <a href="{{ route('admin.portail.messages') }}" class="block text-center text-sm {{ $headerText }} hover:text-white py-1.5">
-                            Voir tous les messages
-                        </a>
+                        @if(auth()->user() && auth()->user()->role === 'admin')
+                         <a href="{{ route('admin.messages.index') }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
+                             <p class="text-sm font-medium text-gray-800">Nouveau message</p>
+                             <p class="text-xs text-gray-500 mt-1">Vous avez reçu un nouveau message</p>
+                             <p class="text-xs text-gray-400 mt-1">Il y a 5 minutes</p>
+                         </a>
+                         <a href="{{ route('admin.messages.index') }}" class="block text-center text-sm {{ $headerText }} hover:text-white py-1.5">
+                             Voir tous les messages
+                         </a>
+                     @else
+                         <a href="{{ route('admin.portail.messages') }}" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
+                             <p class="text-sm font-medium text-gray-800">Nouveau message</p>
+                             <p class="text-xs text-gray-500 mt-1">Vous avez reçu un nouveau message</p>
+                             <p class="text-xs text-gray-400 mt-1">Il y a 5 minutes</p>
+                         </a>
+                         <a href="{{ route('admin.portail.messages') }}" class="block text-center text-sm {{ $headerText }} hover:text-white py-1.5">
+                             Voir tous les messages
+                         </a>
+                     @endif
                     </div>
                 </div>
             </div>
@@ -181,7 +316,7 @@
                         <p class="text-xs {{ $headerText }}/70">{{ ucfirst(auth()->user()->role ?? 'user') }}</p>
                     </div>
                     <svg class="h-4 w-4 {{ $headerText }}/80" :class="{'rotate-180': open}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-transition
@@ -190,7 +325,7 @@
                     <div class="p-2">
                         <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                             Mon Profil
                         </a>
@@ -199,7 +334,7 @@
                         <button type="button" onclick="document.getElementById('header-logout-form').submit()"
                                 class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l-4-4m0 0l4-4m-4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l-4-4m0 0l4-4m-4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
                             Déconnexion
                         </button>
@@ -225,22 +360,149 @@
     <main id="main-content" 
           class="min-h-screen transition-all duration-300 ease-in-out pt-20"
           :class="{
-              'ml-64': !sidebarCollapsed && window.innerWidth >= 1024,
-              'ml-20': sidebarCollapsed && window.innerWidth >= 1024,
-              'ml-0': window.innerWidth < 1024
+              'ml-64': !sidebarCollapsed && isDesktop,
+              'ml-20': sidebarCollapsed && isDesktop,
+              'ml-0': !isDesktop
           }">
         @yield('content')
     </main>
 
-    {{-- Footer (CORRIGÉ : Marges de décalage rendues dynamiques) --}}
+    {{-- Footer --}}
     <footer class="transition-all duration-300 ease-in-out p-4 text-center text-xs text-gray-500"
             :class="{
-                'lg:ml-64': !sidebarCollapsed && window.innerWidth >= 1024,
-                'lg:ml-20': sidebarCollapsed && window.innerWidth >= 1024,
-                'ml-0': window.innerWidth < 1024
+                'lg:ml-64': !sidebarCollapsed && isDesktop,
+                'lg:ml-20': sidebarCollapsed && isDesktop,
+                'ml-0': !isDesktop
             }">
         <p>&copy; {{ date('Y') }} {{ config('app.name', 'TG Invest') }}. Tous droits réservés.</p>
     </footer>
+
+    @php
+    // Classes CSS fixes par rôle pour que Tailwind JIT les détecte en production
+    $chatBgColor = match($userRole) {
+        'admin' => 'bg-gray-900',
+        'client' => 'bg-emerald-600',
+        'technician' => 'bg-blue-900',
+        default => 'bg-emerald-600',
+    };
+    $chatBorderColor = match($userRole) {
+        'admin' => 'border-gray-900',
+        'client' => 'border-emerald-600',
+        'technician' => 'border-blue-900',
+        default => 'border-emerald-600',
+    };
+    @endphp
+
+    {{-- Bulle & Modal de Discussion (Support Chat) - Masquée pour les admins --}}
+    @if(auth()->user() && auth()->user()->role !== 'admin')
+    <div x-data="chatComponent">
+        {{-- Bouton flottant (Bulle de chat) --}}
+        <button @click="chatOpen = !chatOpen; if(chatOpen && !messages.length) loadMessages()" 
+                class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full {{ $chatBgColor }} text-white shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none">
+            {{-- Icône fermée --}}
+            <svg x-show="!chatOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {{-- Icône ouverte --}}
+            <svg x-show="chatOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display: none;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        {{-- Modal de Discussion --}}
+        <div x-show="chatOpen" 
+             @click.outside="chatOpen = false"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+             class="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[550px] flex flex-col bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden"
+             style="display: none;">
+            
+            {{-- En-tête de la discussion --}}
+            <div class="px-5 py-4 {{ $chatBgColor }} text-white flex items-center justify-between shadow-sm shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center font-bold border border-white/10 text-sm">
+                            TG
+                        </div>
+                        <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-emerald-600"></span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm tracking-wide">Assistance TG'AGRO</h4>
+                        <p class="text-[11px] text-white/80 flex items-center gap-1 mt-0.5">
+                            <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Support connecté
+                        </p>
+                    </div>
+                </div>
+                <button @click="chatOpen = false" class="text-white/80 hover:text-white transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Zone des messages --}}
+            <div class="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3.5" id="chat-messages-container">
+                {{-- Loader --}}
+                <template x-if="loading">
+                    <div class="flex items-center justify-center py-10">
+                        <div class="flex gap-1.5">
+                            <div class="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0s"></div>
+                            <div class="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.15s"></div>
+                            <div class="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.3s"></div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-for="msg in messages" :key="msg.id ?? $index">
+                    <div class="flex items-start gap-2.5 max-w-[88%]" :class="msg.sentBy === 'user' ? 'ml-auto flex-row-reverse' : ''">
+                        {{-- Avatar ou initiales --}}
+                        <div class="h-8 w-8 rounded-lg text-xs font-bold shrink-0 flex items-center justify-center"
+                             :class="msg.sentBy === 'user' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'">
+                            <span x-text="msg.sentBy === 'user' ? 'M' : 'S'"></span>
+                        </div>
+                        
+                        {{-- Bulle textuelle --}}
+                        <div class="flex flex-col" :class="msg.sentBy === 'user' ? 'items-end' : 'items-start'">
+                            <div class="p-3 text-sm rounded-2xl shadow-sm border max-w-full break-words"
+                                 :class="msg.sentBy === 'user' 
+                                     ? '{{ str_replace('bg-', '', $chatBgColor) }} text-white {{ $chatBorderColor }} rounded-tr-none' 
+                                     : 'bg-white text-slate-800 border-slate-200/60 rounded-tl-none'">
+                                <p class="leading-relaxed whitespace-pre-wrap" x-text="msg.text"></p>
+                            </div>
+                            <span class="text-[9px] text-slate-400 mt-1 px-0.5" x-text="msg.time"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Formulaire de saisie du message --}}
+            <div class="p-3 bg-white border-t border-slate-150 flex items-center gap-2 shrink-0">
+                <input type="text" 
+                       x-model="currentMessage"
+                       @keydown.enter="sendMessage()"
+                       :disabled="sending"
+                       placeholder="Saisissez votre message..." 
+                       class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all disabled:opacity-50">
+                
+                <button @click="sendMessage()"
+                        :disabled="sending || !currentMessage.trim()"
+                        class="h-10 w-10 {{ $chatBgColor }} text-white rounded-xl flex items-center justify-center hover:opacity-90 active:scale-95 transition-all shrink-0 shadow-sm shadow-emerald-600/10 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg x-show="!sending" class="h-4 w-4 transform rotate-45 -translate-x-0.5 translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <svg x-show="sending" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Notification Manager --}}
     <script>
@@ -347,6 +609,8 @@
     </script>
 
     <style>
+        [x-cloak] { display: none !important; }
+
         .notification-enter {
             animation: slideInRight 0.3s ease-out forwards;
         }

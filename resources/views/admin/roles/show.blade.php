@@ -53,24 +53,6 @@
     <div class="space-y-6">
         <x-ui.card>
             <x-slot:header>
-                <h3 class="text-base font-semibold text-gray-900">Permissions associées</h3>
-            </x-slot:header>
-            <div class="space-y-2">
-                @forelse($role->permissions as $permission)
-                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">{{ $permission->name }}</p>
-                            <p class="text-xs text-gray-500">{{ $permission->slug }}</p>
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-400 text-center py-3">Aucune permission associée</p>
-                @endforelse
-            </div>
-        </x-ui.card>
-
-        <x-ui.card>
-            <x-slot:header>
                 <h3 class="text-base font-semibold text-gray-900">Actions</h3>
             </x-slot:header>
             <div class="space-y-2">

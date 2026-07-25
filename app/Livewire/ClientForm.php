@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class ClientForm extends Component
@@ -68,8 +69,11 @@ class ClientForm extends Component
             'is_active' => true,
         ]);
 
+        $code = 'CLI-' . strtoupper(Str::random(6));
+
         Client::create([
             'user_id' => $user->id,
+            'code' => $code,
             'country_of_residence' => $this->country_of_residence,
             'country_of_origin' => $this->country_of_origin,
             'city_of_residence' => $this->city_of_residence,

@@ -11,4 +11,8 @@ Route::put('/technicians/{technician}', [TechnicianController::class, 'update'])
 Route::delete('/technicians/{technician}', [TechnicianController::class, 'destroy'])->name('admin.technicians.destroy');
 Route::get('/technicians/{technician}/detail', [TechnicianController::class, 'show'])->name('admin.technicians.detail');
 Route::get('/technicians/{technician}/missions', [TechnicianController::class, 'missions'])->name('admin.technicians.missions');
+Route::get('/technicians/{technician}/missions/json', [TechnicianController::class, 'missionsJson'])->name('admin.technicians.missions.json');
+Route::post('/technicians/{technician}/missions', [TechnicianController::class, 'storeMission'])->name('admin.technicians.missions.store');
+Route::put('/technicians/{technician}/missions/{mission}', [TechnicianController::class, 'updateMission'])->name('admin.technicians.missions.update');
+Route::delete('/technicians/{technician}/missions/{mission}', [TechnicianController::class, 'destroyMission'])->name('admin.technicians.missions.destroy');
 Route::get('/technicians/{technician}/reports', [TechnicianController::class, 'reports'])->name('admin.technicians.reports');

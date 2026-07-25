@@ -12,6 +12,42 @@ use Illuminate\Support\Facades\Storage;
 
 class PhotoController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $technicianId = $user->id;
+
+        $query = Photo::with(['farm', 'client.user', 'technician'])
+            ->where('technician_id', $technicianId)
+            ->where('is_validated', true);
+
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->client_id);
+        }
+
+        if ($request->filled('farm_id')) {
+            $query->where('farm_id', $request->farm_id);
+        }
+
+        $photos = $query->latest()->get()->groupBy(function ($photo) {
+            return $photo->farm?->name ?? 'Sans exploitation';
+        });
+
+        $pendingCount = Photo::where('is_validated', false)
+            ->where('technician_id', $technicianId)
+            ->count();
+
+        $clients = Client::with('user')
+            ->join('users', 'users.id', '=', 'clients.user_id')
+            ->orderBy('users.name')
+            ->select('clients.*')
+            ->get();
+
+        $farms = Farm::orderBy('name')->get();
+
+        return view('technician.gallery.index', compact('photos', 'clients', 'farms', 'pendingCount'));
+    }
+
     public function create()
     {
         $clients = Client::with('user')
@@ -58,13 +94,14 @@ class PhotoController extends Controller
                 'longitude' => $validated['longitude'] ?? null,
                 'taken_at' => $now,
                 'is_visible_to_client' => false,
+                'is_validated' => false,
                 'file_size' => $size,
             ]);
 
             $uploaded++;
         }
 
-        return redirect()->route('admin.technitian.photos.create')
+        return redirect()->route('admin.technitian.gallery.index')
             ->with('success', "$uploaded photo(s) ajoutée(s) avec succès.");
     }
 }

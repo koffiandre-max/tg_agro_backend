@@ -20,6 +20,8 @@ class Photo extends Model
         'longitude',
         'taken_at',
         'is_visible_to_client',
+        'is_validated',
+        'validated_at',
         'file_size',
     ];
 
@@ -30,6 +32,8 @@ class Photo extends Model
             'longitude' => 'decimal:7',
             'taken_at' => 'datetime',
             'is_visible_to_client' => 'boolean',
+            'is_validated' => 'boolean',
+            'validated_at' => 'datetime',
             'file_size' => 'integer',
         ];
     }
