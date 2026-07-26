@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MarketPriceController;
 use App\Http\Controllers\Admin\PhotoValidationController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SupportChatController;
+use App\Http\Controllers\Technitian\DataEntryController;
 use Illuminate\Support\Facades\Route;
 
 // Gallery

@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Technitian;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\TechnicianMiddleware;
+use App\Models\Client;
 use App\Models\DataEntry;
+use App\Models\Farm;
+use App\Services\FarmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DataEntryController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(TechnicianMiddleware::class);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware(TechnicianMiddleware::class);
+    // }
 
     public function index()
     {
@@ -25,8 +28,36 @@ class DataEntryController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $farmData = app(FarmService::class)->getFarmsAndClients();
-        extract($farmData->toArray());
+        // dd($user->role);
+        // $farmData = app(FarmService::class)->getFarmsAndClients();
+        // extract($farmData->toArray());
+
+        // if (!$user || $user->role !== 'technician' || !$user->role !== 'admin') {
+        //     abort(403, 'Accès non autorisé.');
+        // }
+
+        $farms = Farm::with('clients.user')
+            ->orderBy('name')
+            ->get();
+
+        $clientIds = $farms->flatMap(function ($farm) {
+            return $farm->clients->pluck('id');
+        })->unique();
+
+        $clients = Client::whereIn('id', $clientIds)
+            ->join('users', 'users.id', '=', 'clients.user_id')
+            ->orderBy('users.name')
+            ->select('clients.*')
+            ->with('user')
+            ->get();
+
+        if ($clients->isEmpty()) {
+            $clients = Client::join('users', 'users.id', '=', 'clients.user_id')
+                ->orderBy('users.name')
+                ->select('clients.*')
+                ->with('user')
+                ->get();
+        }
 
         return view('technitian.data.create', compact('farms', 'clients'));
     }

@@ -31,8 +31,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'TG Invest') }} - @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css'])
+    @fonts
     <script src="/jQuery/jquery-3.4.1.min.js"></script>
     <link href="{{ asset('css/tokens.css') }}" rel="stylesheet">
+    
     <script>
         // Enregistrer le composant chat AVANT le chargement d'Alpine.js
         // pour éviter les conflits de quotes dans l'attribut HTML x-data

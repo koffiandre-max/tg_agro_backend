@@ -20,6 +20,8 @@ class DataEntry extends Model
         'status',
         'validated_by',
         'validated_at',
+        'rejection_reason',
+        'seen_by_client',
     ];
 
     protected function casts(): array
@@ -28,6 +30,7 @@ class DataEntry extends Model
             'crop_stage_progress' => 'integer',
             'estimated_harvest_date' => 'date',
             'validated_at' => 'datetime',
+            'seen_by_client' => 'boolean',
         ];
     }
 

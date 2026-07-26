@@ -71,10 +71,10 @@ class Navigation
             ],
             [
                 'name' => 'Calendrier',
-                'route' => 'admin.technitian.calendar',
+                'route' => 'admin.calendar',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>',
-                'segments' => ['admin', 'technitian', 'calendar'],
-                'can' => $user->role === 'technician',
+                'segments' => ['admin', 'calendar'],
+                'can' => $user->role === 'admin',
             ],
             [
                 'name' => 'Validation des Données',
@@ -141,6 +141,13 @@ class Navigation
                 'route' => 'admin.portail.reports',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>',
                 'segments' => ['admin', 'portail', 'reports'],
+                'can' => $user->role === 'client',
+            ],
+            [
+                'name' => 'Mes Saisies de Données',
+                'route' => 'admin.portail.data',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
+                'segments' => ['admin', 'portail', 'data'],
                 'can' => $user->role === 'client',
             ],
             [
