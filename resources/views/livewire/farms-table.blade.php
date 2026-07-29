@@ -99,15 +99,8 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 bg-gray-50/60 text-left text-gray-500">
-                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('name')">
-                            <div class="flex items-center gap-1">Nom @include('livewire.partials.sort-icon', ['field' => 'name'])</div>
-                        </th>
-                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('location')">
-                            <div class="flex items-center gap-1">Localisation @include('livewire.partials.sort-icon', ['field' => 'location'])</div>
-                        </th>
-                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('culture_type')">
-                            <div class="flex items-center gap-1">Culture @include('livewire.partials.sort-icon', ['field' => 'culture_type'])</div>
-                        </th>
+                        <th class="px-4 py-3 font-medium">Réf. dossier</th>
+                        <th class="px-4 py-3 font-medium">Numéro cadastral</th>
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('total_area_hectares')">
                             <div class="flex items-center gap-1">Surface (ha) @include('livewire.partials.sort-icon', ['field' => 'total_area_hectares'])</div>
                         </th>
@@ -127,33 +120,8 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($farms as $farm)
                         <tr class="hover:bg-gray-50/60" wire:key="farm-{{ $farm->id }}">
-                            <td class="px-4 py-3 font-medium text-gray-700">{{ $farm->name }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $farm->location }}</td>
-                            <td class="px-4 py-3">
-                                @if($farm->culture_type)
-                                    @php
-                                        $colors = [
-                                            'Cacao' => 'bg-amber-100 text-amber-800',
-                                            'Café' => 'bg-brown-100 text-brown-800',
-                                            'Coton' => 'bg-blue-100 text-blue-800',
-                                            'Hévéa' => 'bg-gray-100 text-gray-800',
-                                            'Légumes' => 'bg-green-100 text-green-800',
-                                            'Maïs' => 'bg-yellow-100 text-yellow-800',
-                                            'Riz' => 'bg-orange-100 text-orange-800',
-                                            'Manioc' => 'bg-teal-100 text-teal-800',
-                                            'Banane' => 'bg-purple-100 text-purple-800',
-                                            'Palmier' => 'bg-emerald-100 text-emerald-800',
-                                            'default' => 'bg-indigo-100 text-indigo-800',
-                                        ];
-                                        $badgeColor = $colors[$farm->culture_type] ?? $colors['default'];
-                                    @endphp
-                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeColor }}">
-                                        {{ $farm->culture_type }}
-                                    </span>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
+                            <td class="px-4 py-3 text-gray-600">{{ $farm->reference_dossier ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $farm->numero_cadastral ?? '-' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ number_format($farm->total_area_hectares, 2) }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium {{ $farm->statusBadgeClasses() }}">
@@ -235,7 +203,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-10 text-center text-gray-400">
+                            <td colspan="8" class="px-4 py-10 text-center text-gray-400">
                                 Aucune exploitation ne correspond à vos critères.
                             </td>
                         </tr>

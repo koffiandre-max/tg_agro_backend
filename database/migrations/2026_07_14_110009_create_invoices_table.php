@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('client_address')->nullable();
             $table->date('issue_date');
             $table->date('due_date');
-            $table->enum('status', ['draft', 'sent', 'paid', 'overdue', 'cancelled'])->default('draft');
+            $table->text('status')->default('draft');
             $table->decimal('subtotal', 15, 2);
             $table->decimal('tax_amount', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2);

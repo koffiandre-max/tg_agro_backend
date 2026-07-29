@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('city_of_residence', 100)->nullable();
             $table->string('id_document_type', 50)->nullable();
             $table->string('id_document_number', 100)->nullable();
-            $table->enum('subscription_type', ['basic', 'standard', 'premium'])->default('basic');
+            $table->text('subscription_type')->default('basic');
             $table->date('subscription_expires_at')->nullable();
             $table->decimal('total_investment', 15, 2)->default(0);
             $table->text('notes')->nullable();

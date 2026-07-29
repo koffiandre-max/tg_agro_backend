@@ -1,0 +1,257 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('parcelles', function (Blueprint $table) {
+            $table->id();
+            $table->string('reference_dossier', 50)->nullable();
+            $table->date('date_declaration')->nullable();
+            $table->string('nom_client', 100)->nullable();
+            $table->string('contact', 100)->nullable();
+            $table->string('localisation', 200)->nullable();
+            $table->string('latitude', 20)->nullable();
+            $table->string('longitude', 20)->nullable();
+            $table->string('numero_cadastral', 50)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('caracteristiques_generales', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->decimal('surface_totale', 10, 2)->nullable();
+            $table->decimal('surface_cultivable', 10, 2)->nullable();
+            $table->text('forme_parcelle')->nullable();
+            $table->text('exposition_principale')->nullable();
+            $table->text('pente_moyenne')->nullable();
+            $table->integer('altitude')->nullable();
+            $table->text('topographie')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('sols', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->text('type_sol')->nullable();
+            $table->text('couleur_sol')->nullable();
+            $table->string('profondeur_sol', 20)->nullable();
+            $table->boolean('presence_cailloux')->nullable();
+            $table->text('commentaire_cailloux')->nullable();
+            $table->boolean('problemes_erosion')->nullable();
+            $table->text('commentaire_erosion')->nullable();
+            $table->boolean('analyse_sol_realisee')->nullable();
+            $table->text('commentaire_analyse')->nullable();
+            $table->decimal('ph', 4, 2)->nullable();
+            $table->string('source_ph', 100)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('ressources_eau', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->boolean('point_eau_proximite')->nullable();
+            $table->text('commentaire_point_eau')->nullable();
+            $table->text('type_point_eau')->nullable();
+            $table->integer('distance_point_eau')->nullable();
+            $table->boolean('systeme_irrigation')->nullable();
+            $table->text('commentaire_irrigation')->nullable();
+            $table->text('type_irrigation')->nullable();
+            $table->boolean('inondations_saisonnieres')->nullable();
+            $table->text('commentaire_inondations')->nullable();
+            $table->string('periode_secheresse', 100)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('vegetation_usages', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->text('occupation_actuelle')->nullable();
+            $table->string('cultures_place', 200)->nullable();
+            $table->boolean('presence_arbres')->nullable();
+            $table->text('commentaire_arbres')->nullable();
+            $table->text('especes_ligneuses')->nullable();
+            $table->string('rendement_actuel', 50)->nullable();
+            $table->boolean('antecedents_traitement')->nullable();
+            $table->text('commentaire_traitement')->nullable();
+            $table->boolean('produits_herbicides')->nullable();
+            $table->boolean('produits_pesticides')->nullable();
+            $table->boolean('produits_engrais')->nullable();
+            $table->boolean('produits_autre')->nullable();
+            $table->string('produits_autre_detail', 100)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('acces_infrastructures', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->boolean('acces_carrossable')->nullable();
+            $table->text('commentaire_acces')->nullable();
+            $table->decimal('distance_route_principale', 5, 2)->nullable();
+            $table->boolean('cloture_existante')->nullable();
+            $table->text('commentaire_cloture')->nullable();
+            $table->boolean('batiment_hangar')->nullable();
+            $table->text('commentaire_batiment')->nullable();
+            $table->boolean('electricite_disponible')->nullable();
+            $table->text('commentaire_electricite')->nullable();
+            $table->boolean('reseau_telephonique')->nullable();
+            $table->text('commentaire_reseau')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('remarques_client', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->text('observations_libres')->nullable();
+            $table->date('signature_date')->nullable();
+            $table->text('signature')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('verifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parcelle_id')->constrained('parcelles')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        Schema::create('verification_generales', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->string('surface_totale_declare', 50)->nullable();
+            $table->string('surface_totale_constate', 50)->nullable();
+            $table->boolean('surface_totale_concorde')->nullable();
+            $table->string('surface_cultivable_declare', 50)->nullable();
+            $table->string('surface_cultivable_constate', 50)->nullable();
+            $table->boolean('surface_cultivable_concorde')->nullable();
+            $table->string('exposition_declare', 50)->nullable();
+            $table->string('exposition_constate', 50)->nullable();
+            $table->boolean('exposition_concorde')->nullable();
+            $table->string('pente_declare', 50)->nullable();
+            $table->string('pente_constate', 50)->nullable();
+            $table->boolean('pente_concorde')->nullable();
+            $table->string('topographie_declare', 50)->nullable();
+            $table->string('topographie_constate', 50)->nullable();
+            $table->boolean('topographie_concorde')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('verification_sols', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->string('type_sol_declare', 50)->nullable();
+            $table->string('type_sol_constate', 50)->nullable();
+            $table->boolean('type_sol_concorde')->nullable();
+            $table->string('profondeur_sol_declare', 50)->nullable();
+            $table->string('profondeur_sol_constate', 50)->nullable();
+            $table->boolean('profondeur_sol_concorde')->nullable();
+            $table->string('presence_pierres_declare', 50)->nullable();
+            $table->string('presence_pierres_constate', 50)->nullable();
+            $table->boolean('presence_pierres_concorde')->nullable();
+            $table->string('erosion_declare', 50)->nullable();
+            $table->string('erosion_constate', 50)->nullable();
+            $table->boolean('erosion_concorde')->nullable();
+            $table->string('ph_sol_declare', 50)->nullable();
+            $table->string('ph_sol_constate', 50)->nullable();
+            $table->boolean('ph_sol_concorde')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('verification_eau', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->string('point_eau_declare', 50)->nullable();
+            $table->string('point_eau_constate', 50)->nullable();
+            $table->boolean('point_eau_concorde')->nullable();
+            $table->string('type_point_eau_declare', 50)->nullable();
+            $table->string('type_point_eau_constate', 50)->nullable();
+            $table->boolean('type_point_eau_concorde')->nullable();
+            $table->string('distance_point_eau_declare', 50)->nullable();
+            $table->string('distance_point_eau_constate', 50)->nullable();
+            $table->boolean('distance_point_eau_concorde')->nullable();
+            $table->string('irrigation_declare', 50)->nullable();
+            $table->string('irrigation_constate', 50)->nullable();
+            $table->boolean('irrigation_concorde')->nullable();
+            $table->string('inondations_declare', 50)->nullable();
+            $table->string('inondations_constate', 50)->nullable();
+            $table->boolean('inondations_concorde')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('verification_vegetation', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->string('occupation_declare', 50)->nullable();
+            $table->string('occupation_constate', 50)->nullable();
+            $table->boolean('occupation_concorde')->nullable();
+            $table->string('cultures_declare', 50)->nullable();
+            $table->string('cultures_constate', 50)->nullable();
+            $table->boolean('cultures_concorde')->nullable();
+            $table->string('arbres_declare', 50)->nullable();
+            $table->string('arbres_constate', 50)->nullable();
+            $table->boolean('arbres_concorde')->nullable();
+            $table->string('traitements_declare', 50)->nullable();
+            $table->string('traitements_constate', 50)->nullable();
+            $table->boolean('traitements_concorde')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('verification_acces', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->string('acces_declare', 50)->nullable();
+            $table->string('acces_constate', 50)->nullable();
+            $table->boolean('acces_concorde')->nullable();
+            $table->string('distance_route_declare', 50)->nullable();
+            $table->string('distance_route_constate', 50)->nullable();
+            $table->boolean('distance_route_concorde')->nullable();
+            $table->string('cloture_declare', 50)->nullable();
+            $table->string('cloture_constate', 50)->nullable();
+            $table->boolean('cloture_concorde')->nullable();
+            $table->string('batiment_declare', 50)->nullable();
+            $table->string('batiment_constate', 50)->nullable();
+            $table->boolean('batiment_concorde')->nullable();
+            $table->string('electricite_declare', 50)->nullable();
+            $table->string('electricite_constate', 50)->nullable();
+            $table->boolean('electricite_concorde')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('syntheses_verification', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('verification_id')->constrained('verifications')->onDelete('cascade');
+            $table->integer('nombre_criteres')->nullable();
+            $table->integer('conformes')->nullable();
+            $table->integer('ecarts')->nullable();
+            $table->integer('total')->nullable();
+            $table->text('ecarts_significatifs')->nullable();
+            $table->text('recommandation')->nullable();
+            $table->string('verificateur_nom', 100)->nullable();
+            $table->string('verificateur_poste', 100)->nullable();
+            $table->date('verificateur_date')->nullable();
+            $table->text('verificateur_signature')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('syntheses_verification');
+        Schema::dropIfExists('verification_acces');
+        Schema::dropIfExists('verification_vegetation');
+        Schema::dropIfExists('verification_eau');
+        Schema::dropIfExists('verification_sols');
+        Schema::dropIfExists('verification_generales');
+        Schema::dropIfExists('verifications');
+        Schema::dropIfExists('remarques_client');
+        Schema::dropIfExists('acces_infrastructures');
+        Schema::dropIfExists('vegetation_usages');
+        Schema::dropIfExists('ressources_eau');
+        Schema::dropIfExists('sols');
+        Schema::dropIfExists('caracteristiques_generales');
+        Schema::dropIfExists('parcelles');
+    }
+};

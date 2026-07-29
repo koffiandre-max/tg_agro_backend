@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Photo extends Model
 {
@@ -23,6 +24,8 @@ class Photo extends Model
         'is_validated',
         'validated_at',
         'file_size',
+        'photoable_type',
+        'photoable_id',
     ];
 
     protected function casts(): array
@@ -36,6 +39,14 @@ class Photo extends Model
             'validated_at' => 'datetime',
             'file_size' => 'integer',
         ];
+    }
+
+    /**
+     * Relation polymorphique : la photo peut appartenir à Farm, RapportVisite, etc.
+     */
+    public function photoable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     public function user(): BelongsTo

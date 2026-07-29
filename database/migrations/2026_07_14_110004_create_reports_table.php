@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('file_original_name', 255)->nullable();
             $table->integer('file_size')->nullable();
             $table->text('notes')->nullable();
-            $table->enum('status', ['pending', 'validated', 'rejected'])->default('pending');
+            $table->text('status')->default('pending');
             $table->text('rejection_reason')->nullable();
             $table->boolean('is_validated')->default(false);
             $table->foreignId('validated_by')->nullable()->constrained('users')->onDelete('set null');

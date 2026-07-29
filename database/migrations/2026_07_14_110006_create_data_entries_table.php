@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('inputs_used')->nullable();
             $table->text('observations')->nullable();
             $table->string('weather_conditions', 100)->nullable();
-            $table->enum('status', ['pending', 'validated', 'rejected'])->default('pending');
+            $table->text('status')->default('pending');
             $table->foreignId('validated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->dateTime('validated_at')->nullable();
             $table->timestamps();

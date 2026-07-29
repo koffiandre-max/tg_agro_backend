@@ -160,6 +160,551 @@
                 <p class="text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line">{{ $farm->notes }}</p>
             </div>
         @endif
+
+        {{-- Parcelles --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Parcelles</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Référence dossier</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->reference_dossier ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Date de déclaration</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->date_declaration?->format('d/m/Y') ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Nom client</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->nom_client ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Contact</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->contact ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Numéro cadastral</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->numero_cadastral ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Caractéristiques générales --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Caractéristiques générales</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Surface totale</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->surface_totale !== null ? number_format($farm->surface_totale, 2) . ' ha' : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Surface cultivable</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->surface_cultivable !== null ? number_format($farm->surface_cultivable, 2) . ' ha' : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Forme de la parcelle</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->forme_parcelle ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Exposition principale</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->exposition_principale ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Pente moyenne</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->pente_moyenne ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Altitude</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->altitude !== null ? $farm->altitude . ' m' : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Topographie</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->topographie ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Sols --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Sols</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Type de sol</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->type_sol ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Couleur du sol</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->couleur_sol ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Profondeur du sol</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->profondeur_sol ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Présence de cailloux</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->presence_cailloux === true ? 'Oui' : ($farm->presence_cailloux === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire cailloux</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_cailloux ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Problèmes d'érosion</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->problemes_erosion === true ? 'Oui' : ($farm->problemes_erosion === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire érosion</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_erosion ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Analyse de sol réalisée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->analyse_sol_realisee === true ? 'Oui' : ($farm->analyse_sol_realisee === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire analyse</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_analyse ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">pH</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->ph !== null ? number_format($farm->ph, 2) : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Source pH</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->source_ph ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Ressources en eau --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Ressources en eau</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Point d'eau à proximité</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->point_eau_proximite === true ? 'Oui' : ($farm->point_eau_proximite === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire point d'eau</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_point_eau ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Type de point d'eau</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->type_point_eau ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Distance point d'eau</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->distance_point_eau !== null ? $farm->distance_point_eau . ' m' : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Système d'irrigation</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->systeme_irrigation === true ? 'Oui' : ($farm->systeme_irrigation === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire irrigation</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_irrigation ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Type d'irrigation</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->type_irrigation ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Inondations saisonnières</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->inondations_saisonnieres === true ? 'Oui' : ($farm->inondations_saisonnieres === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire inondations</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_inondations ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Période de sécheresse</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->periode_secheresse ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Végétation et usages --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Végétation et usages</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Occupation actuelle</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->occupation_actuelle ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Cultures en place</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->cultures_place ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Présence d'arbres</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->presence_arbres === true ? 'Oui' : ($farm->presence_arbres === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire arbres</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_arbres ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Espèces ligneuses</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->especes_ligneuses ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Rendement actuel</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->rendement_actuel ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Antécédents de traitement</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->antecedents_traitement === true ? 'Oui' : ($farm->antecedents_traitement === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire traitement</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_traitement ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Produits herbicides</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->produits_herbicides === true ? 'Oui' : ($farm->produits_herbicides === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Produits pesticides</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->produits_pesticides === true ? 'Oui' : ($farm->produits_pesticides === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Produits engrais</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->produits_engrais === true ? 'Oui' : ($farm->produits_engrais === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Autres produits</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->produits_autre === true ? 'Oui' : ($farm->produits_autre === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Détail autres produits</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->produits_autre_detail ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Accès et infrastructures --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Accès et infrastructures</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Accès carrossable</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->acces_carrossable === true ? 'Oui' : ($farm->acces_carrossable === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire accès</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_acces ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Distance route principale</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->distance_route_principale !== null ? number_format($farm->distance_route_principale, 2) . ' km' : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Clôture existante</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->cloture_existante === true ? 'Oui' : ($farm->cloture_existante === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire clôture</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_cloture ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Bâtiment / Hangar</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->batiment_hangar === true ? 'Oui' : ($farm->batiment_hangar === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire bâtiment</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_batiment ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Électricité disponible</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->electricite_disponible === true ? 'Oui' : ($farm->electricite_disponible === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire électricité</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_electricite ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Réseau téléphonique</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->reseau_telephonique === true ? 'Oui' : ($farm->reseau_telephonique === false ? 'Non' : '—') }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Commentaire réseau</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->commentaire_reseau ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Remarques client --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Remarques client</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Observations libres</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium whitespace-pre-line">{{ $farm->observations_libres ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Date de signature</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->signature_date?->format('d/m/Y') ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Signature</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->signature ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Vérifications --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Vérifications</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Surface totale déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->surface_totale_declare ?? '—' }} / {{ $farm->surface_totale_constate ?? '—' }} / {{ $farm->surface_totale_concorde === true ? 'Oui' : ($farm->surface_totale_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Surface cultivable déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->surface_cultivable_declare ?? '—' }} / {{ $farm->surface_cultivable_constate ?? '—' }} / {{ $farm->surface_cultivable_concorde === true ? 'Oui' : ($farm->surface_cultivable_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Exposition déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->exposition_declare ?? '—' }} / {{ $farm->exposition_constate ?? '—' }} / {{ $farm->exposition_concorde === true ? 'Oui' : ($farm->exposition_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Pente déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->pente_declare ?? '—' }} / {{ $farm->pente_constate ?? '—' }} / {{ $farm->pente_concorde === true ? 'Oui' : ($farm->pente_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Topographie déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->topographie_declare ?? '—' }} / {{ $farm->topographie_constate ?? '—' }} / {{ $farm->topographie_concorde === true ? 'Oui' : ($farm->topographie_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Type sol déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->type_sol_declare ?? '—' }} / {{ $farm->type_sol_constate ?? '—' }} / {{ $farm->type_sol_concorde === true ? 'Oui' : ($farm->type_sol_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Profondeur sol déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->profondeur_sol_declare ?? '—' }} / {{ $farm->profondeur_sol_constate ?? '—' }} / {{ $farm->profondeur_sol_concorde === true ? 'Oui' : ($farm->profondeur_sol_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Présence pierres déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->presence_pierres_declare ?? '—' }} / {{ $farm->presence_pierres_constate ?? '—' }} / {{ $farm->presence_pierres_concorde === true ? 'Oui' : ($farm->presence_pierres_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Érosion déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->erosion_declare ?? '—' }} / {{ $farm->erosion_constate ?? '—' }} / {{ $farm->erosion_concorde === true ? 'Oui' : ($farm->erosion_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">pH sol déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->ph_sol_declare ?? '—' }} / {{ $farm->ph_sol_constate ?? '—' }} / {{ $farm->ph_sol_concorde === true ? 'Oui' : ($farm->ph_sol_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Point d'eau déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->point_eau_declare ?? '—' }} / {{ $farm->point_eau_constate ?? '—' }} / {{ $farm->point_eau_concorde === true ? 'Oui' : ($farm->point_eau_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Type point d'eau déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->type_point_eau_declare ?? '—' }} / {{ $farm->type_point_eau_constate ?? '—' }} / {{ $farm->type_point_eau_concorde === true ? 'Oui' : ($farm->type_point_eau_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Distance point d'eau déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->distance_point_eau_declare ?? '—' }} / {{ $farm->distance_point_eau_constate ?? '—' }} / {{ $farm->distance_point_eau_concorde === true ? 'Oui' : ($farm->distance_point_eau_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Irrigation déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->irrigation_declare ?? '—' }} / {{ $farm->irrigation_constate ?? '—' }} / {{ $farm->irrigation_concorde === true ? 'Oui' : ($farm->irrigation_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Inondations déclarées / constatées / concordées</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->inondations_declare ?? '—' }} / {{ $farm->inondations_constate ?? '—' }} / {{ $farm->inondations_concorde === true ? 'Oui' : ($farm->inondations_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Occupation déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->occupation_declare ?? '—' }} / {{ $farm->occupation_constate ?? '—' }} / {{ $farm->occupation_concorde === true ? 'Oui' : ($farm->occupation_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Cultures déclarées / constatées / concordées</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->cultures_declare ?? '—' }} / {{ $farm->cultures_constate ?? '—' }} / {{ $farm->cultures_concorde === true ? 'Oui' : ($farm->cultures_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Arbres déclarés / constatés / concordés</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->arbres_declare ?? '—' }} / {{ $farm->arbres_constate ?? '—' }} / {{ $farm->arbres_concorde === true ? 'Oui' : ($farm->arbres_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Traitements déclarés / constatés / concordés</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->traitements_declare ?? '—' }} / {{ $farm->traitements_constate ?? '—' }} / {{ $farm->traitements_concorde === true ? 'Oui' : ($farm->traitements_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Accès déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->acces_declare ?? '—' }} / {{ $farm->acces_constate ?? '—' }} / {{ $farm->acces_concorde === true ? 'Oui' : ($farm->acces_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Distance route déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->distance_route_declare ?? '—' }} / {{ $farm->distance_route_constate ?? '—' }} / {{ $farm->distance_route_concorde === true ? 'Oui' : ($farm->distance_route_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Clôture déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->cloture_declare ?? '—' }} / {{ $farm->cloture_constate ?? '—' }} / {{ $farm->cloture_concorde === true ? 'Oui' : ($farm->cloture_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Bâtiment déclaré / constaté / concordé</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->batiment_declare ?? '—' }} / {{ $farm->batiment_constate ?? '—' }} / {{ $farm->batiment_concorde === true ? 'Oui' : ($farm->batiment_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Électricité déclarée / constatée / concordée</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->electricite_declare ?? '—' }} / {{ $farm->electricite_constate ?? '—' }} / {{ $farm->electricite_concorde === true ? 'Oui' : ($farm->electricite_concorde === false ? 'Non' : '—') }}
+                    </dd>
+                </div>
+            </dl>
+        </x-ui.card>
+
+        {{-- Synthèse vérification --}}
+        <x-ui.card class="border border-slate-200/80 shadow-sm">
+            <x-slot:header>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-slate-900">Synthèse vérification</h3>
+                </div>
+            </x-slot:header>
+            <dl class="divide-y divide-slate-100 text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Nombre de critères</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->nombre_criteres !== null ? $farm->nombre_criteres : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Conformes</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->conformes !== null ? $farm->conformes : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Écarts</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->ecarts !== null ? $farm->ecarts : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Total</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->total !== null ? $farm->total : '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Écarts significatifs</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium whitespace-pre-line">{{ $farm->ecarts_significatifs ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Recommandation</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->recommandation ?? '—' }}</dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Vérificateur</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">
+                        {{ $farm->verificateur_nom ?? '—' }} ({{ $farm->verificateur_poste ?? '—' }})<br>
+                        <span class="text-xs text-slate-500">Le {{ $farm->verificateur_date?->format('d/m/Y') ?? '—' }}</span>
+                    </dd>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 py-4 gap-1">
+                    <dt class="font-semibold text-slate-500">Signature vérificateur</dt>
+                    <dd class="sm:col-span-2 text-slate-900 font-medium">{{ $farm->verificateur_signature ?? '—' }}</dd>
+                </div>
+            </dl>
+        </x-ui.card>
     </div>
 
     {{-- Colonne latérale (Sidebar) --}}

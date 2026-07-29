@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('longitude', 10, 7)->nullable();
             $table->decimal('total_area_hectares', 10, 2);
             $table->string('culture_type', 100)->nullable();
-            $table->enum('status', ['active', 'inactive', 'fallow'])->default('active');
+            $table->text('status')->default('active');
             $table->date('expected_harvest_date')->nullable();
             $table->string('crop_stage', 100)->nullable();
             $table->integer('crop_stage_progress')->default(0);

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Data\ClientData;
 
 class ClientController extends Controller
 {
@@ -47,6 +48,8 @@ class ClientController extends Controller
         ]);
 
         $code = Helpers::generateUniqueClientCode();
+
+        Client::create(clientData::form($validated));
 
         Client::create([
             'user_id' => $user->id,

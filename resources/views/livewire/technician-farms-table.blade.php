@@ -28,9 +28,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 bg-gray-50/60 text-left text-gray-500">
-                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('name')">
-                            <div class="flex items-center gap-1">Nom @include('livewire.partials.sort-icon', ['field' => 'name'])</div>
-                        </th>
+                        <th class="px-4 py-3 font-medium">Réf. dossier</th>
                         <th class="px-4 py-3 font-medium">Localisation</th>
                         <th class="px-4 py-3 font-medium">Culture</th>
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('status')">
@@ -42,7 +40,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($farms as $farm)
                         <tr class="hover:bg-gray-50/60" wire:key="farm-{{ $farm->id }}">
-                            <td class="px-4 py-3 font-medium text-gray-700">{{ $farm->name }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $farm->reference_dossier ?? '-' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $farm->location ?? '-' }}</td>
                             <td class="px-4 py-3 text-gray-600 capitalize">{{ $farm->culture_type ?? '-' }}</td>
                             <td class="px-4 py-3">
