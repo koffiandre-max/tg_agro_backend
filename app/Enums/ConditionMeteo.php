@@ -4,10 +4,10 @@ namespace App\Enums;
 
 enum ConditionMeteo: string
 {
-    case ENSOLEILLE = 'Ensoleillé';
-    case NUAGEUX = 'Nuageux';
-    case PLUIE = 'Pluie';
-    case SEC = 'Sec';
+    case ENSOLEILLE = 'ensoleille';
+    case NUAGEUX = 'nuageux';
+    case PLUIE = 'pluie';
+    case SEC = 'sec';
 
     public function label(): string
     {

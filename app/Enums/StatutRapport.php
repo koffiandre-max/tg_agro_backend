@@ -4,10 +4,10 @@ namespace App\Enums;
 
 enum StatutRapport: string
 {
-    case BROUILLON = 'Brouillon';
-    case EN_ATTENTE_VALIDATION = 'En attente de validation';
-    case VALIDE = 'Validé';
-    case REJETE = 'Rejeté';
+    case BROUILLON = 'brouillon';
+    case EN_ATTENTE_VALIDATION = 'en_attente_validation';
+    case VALIDE = 'valide';
+    case REJETE = 'rejete';
 
     public function label(): string
     {

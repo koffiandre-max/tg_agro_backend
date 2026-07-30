@@ -4,14 +4,14 @@ namespace App\Enums;
 
 enum StadePhenologique: string
 {
-    case GERMINATION = 'Germination';
-    case CROISSANCE_VEGETATIVE = 'Croissance végétative';
-    case FLORAISON = 'Floraison';
-    case NOUAISON = 'Nouaison';
-    case FRUCTIFICATION = 'Fructification';
-    case MATURATION = 'Maturation';
-    case RECOLTE = 'Récolte';
-    case POST_RECOLTE = 'Post-récolte';
+    case GERMINATION = 'germination';
+    case CROISSANCE_VEGETATIVE = 'croissance_vegetative';
+    case FLORAISON = 'floraison';
+    case NOUAISON = 'nouaison';
+    case FRUCTIFICATION = 'fructification';
+    case MATURATION = 'maturation';
+    case RECOLTE = 'recolte';
+    case POST_RECOLTE = 'post_recolte';
 
     public function label(): string
     {

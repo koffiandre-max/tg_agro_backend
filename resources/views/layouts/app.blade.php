@@ -23,8 +23,13 @@
         if (!this.isDesktop) {
             this.sidebarOpen = false;
         }
+    },
+    closeSidebarOnDesktop() {
+        if (this.isDesktop) {
+            this.sidebarOpen = false;
+        }
     }
-}" @click.outside="closeSidebarOnMobile">
+}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

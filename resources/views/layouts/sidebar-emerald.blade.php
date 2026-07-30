@@ -24,10 +24,22 @@ $sidebarActiveBg = 'bg-white/20 text-white font-semibold shadow-sm border-r-2 bo
 $textColor = 'text-white';
 @endphp
 
+{{-- Overlay mobile --}}
+<div x-show="sidebarOpen" 
+     x-cloak
+     @click="sidebarOpen = false"
+     class="fixed inset-0 z-10 bg-black/40 backdrop-blur-sm lg:hidden"
+     x-transition.opacity
+     aria-hidden="true"></div>
+
 <aside id="sidebar-lateral"
-       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col  shadow-lg transition-all duration-300 ease-in-out overflow-hidden  bg-{{ $sidebarBg }}"
-       :class="sidebarCollapsed ? 'w-20' : 'w-64'"
-       @click.outside="closeSidebarOnMobile">
+       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out overflow-hidden bg-{{ $sidebarBg }}"
+       :class="{
+           'w-20': sidebarCollapsed && isDesktop,
+           'w-64': !sidebarCollapsed && isDesktop,
+           'translate-x-0': sidebarOpen && !isDesktop,
+           '-translate-x-full': !sidebarOpen && !isDesktop
+       }">
 
     {{-- Header / Logo --}}
     <div class="h-16 flex items-center px-4 bg-{{ $sidebarBg }} border-b border-white/5 shrink-0">
@@ -130,13 +142,5 @@ $textColor = 'text-white';
 </aside>
 
 <style>
-    @media (max-width: 1023px) {
-        #sidebar-lateral { 
-            transform: translateX(-260px);
-            transition: transform 0.3s ease-in-out;
-        }
-        #sidebar-lateral:not(.hidden) {
-            transform: translateX(0);
-        }
-    }
+    [x-cloak] { display: none !important; }
 </style>
