@@ -1,396 +1,536 @@
 @extends('layouts.app')
 
-@section('page-title', 'Détails du Rapport de Visite')
+@section('title', 'Détails du Rapport de Visite - ' . ($rapport->localisation_parcelle ?? 'Rapport'))
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+@php
+    $statutColors = [
+        'brouillon' => ['label' => 'Brouillon', 'bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'ring' => 'ring-gray-600/20'],
+        'en_attente_validation' => ['label' => 'En attente', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'ring' => 'ring-amber-600/20'],
+        'valide' => ['label' => 'Validé', 'bg' => 'bg-green-50', 'text' => 'text-green-700', 'ring' => 'ring-green-600/20'],
+        'rejete' => ['label' => 'Rejeté', 'bg' => 'bg-red-50', 'text' => 'text-red-700', 'ring' => 'ring-red-600/20'],
+    ];
+    $statut = $statutColors[$rapport->statut?->value] ?? ['label' => $rapport->statut?->label() ?? '—', 'bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'ring' => 'ring-gray-600/20'];
+@endphp
 
-        {{-- Retour --}}
-        <a href="{{ route('admin.rapports-visite.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors">
-            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Retour à la liste
-        </a>
+<div class="max-w-7xl mx-auto px-4 sm:px-6" x-data="{ activeTab: 'resume' }">
 
-        {{-- En-tête --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Rapport de visite</h1>
-                    <p class="mt-1 text-sm text-gray-500">{{ $rapport->localisation_parcelle }}</p>
+    {{-- Header --}}
+    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <a href="{{ route('admin.rapports-visite.index') }}" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-2 transition-colors duration-150">
+                <svg class="w-4 h-4 mr-1.5 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Retour à la liste
+            </a>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                Rapport — <span class="text-indigo-600">{{ $rapport->localisation_parcelle }}</span>
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">{{ $rapport->technicien?->name ?? '—' }} &middot; {{ $rapport->date_visite?->format('d/m/Y') ?? '—' }}</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statut['bg'] }} {{ $statut['text'] }} ring-1 {{ $statut['ring'] }}">
+                {{ $statut['label'] }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {{-- Sidebar --}}
+        <div class="lg:col-span-1 space-y-6">
+            <x-ui.card>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto">
+                        <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <h2 class="mt-3 text-lg font-bold text-gray-900">{{ $rapport->technicien?->name ?? '—' }}</h2>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ $rapport->technicien?->email ?? '' }}</p>
                 </div>
-                <div class="flex gap-2">
-                    <a href="{{ route('admin.rapports-visite.edit', $rapport->id) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">
+                <div class="mt-4 space-y-2.5 text-sm">
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <i class="fas fa-calendar w-4 text-gray-400"></i>
+                        {{ $rapport->date_visite?->format('d/m/Y') ?? '—' }}
+                    </div>
+                    @if($rapport->client)
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-user w-4 text-gray-400"></i>
+                            {{ $rapport->client->user?->name ?? $rapport->client->nom ?? '—' }}
+                        </div>
+                    @endif
+                    @if($rapport->farm)
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-map-marker-alt w-4 text-gray-400"></i>
+                            {{ $rapport->farm->name ?? '—' }}
+                        </div>
+                    @endif
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <i class="fas fa-clock w-4 text-gray-400"></i>
+                        {{ $rapport->duree_visite?->label() ?? $rapport->duree_visite ?? '—' }}
+                    </div>
+                    @if($rapport->superficie_visitee_ha)
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <i class="fas fa-ruler w-4 text-gray-400"></i>
+                            {{ number_format($rapport->superficie_visitee_ha, 2) }} ha
+                        </div>
+                    @endif
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <i class="fas fa-tag w-4 text-gray-400"></i>
+                        {{ $rapport->type_activite?->label() ?? '—' }}
+                    </div>
+                </div>
+            </x-ui.card>
+
+            <x-ui.card>
+                <x-slot:header>
+                    <h3 class="text-sm font-bold text-slate-900">Actions</h3>
+                </x-slot:header>
+                <div class="space-y-2">
+                    <x-ui.btn href="{{ route('admin.rapports-visite.edit', $rapport->id) }}" variant="secondary" icon="edit" class="w-full">
                         Modifier
-                    </a>
-                    <form action="{{ route('admin.rapports-visite.destroy', $rapport->id) }}" method="POST" onsubmit="return confirm('Supprimer ce rapport ?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
-                            Supprimer
+                    </x-ui.btn>
+                    @if($rapport->statut?->value === 'en_attente_validation')
+                        <x-ui.btn href="{{ route('admin.rapports-visite.validate', $rapport->id) }}" variant="success" icon="check" class="w-full">
+                            Valider
+                        </x-ui.btn>
+                        <x-ui.btn href="{{ route('admin.rapports-visite.reject', $rapport->id) }}" variant="danger" icon="x" class="w-full">
+                            Rejeter
+                        </x-ui.btn>
+                    @endif
+                    <x-ui.btn href="{{ route('admin.rapports-visite.print', $rapport->id) }}" variant="outline" icon="print" class="w-full">
+                        Imprimer
+                    </x-ui.btn>
+                    <x-ui.btn href="{{ route('admin.rapports-visite.index') }}" variant="ghost" icon="arrow-left" class="w-full">
+                        Retour
+                    </x-ui.btn>
+                </div>
+            </x-ui.card>
+        </div>
+
+        {{-- Main Content with Tabs --}}
+        <div class="lg:col-span-2">
+            {{-- Tab Navigation --}}
+            <div class="gap-6 mb-6 ">
+                <nav class="flex gap-1 overflow-x-auto px-4" role="tablist">
+                    @php
+                        $tabs = [];
+                        if ($rapport->type_activite?->value === 'culture') {
+                            $tabs['culture'] = ['label' => 'Cultures', 'icon' => 'M7 20l4-16m2 16l4-16M6 9h14M4 15h14'];
+                        } elseif ($rapport->type_activite?->value === 'elevage') {
+                            $tabs['elevage'] = ['label' => 'Élevage', 'icon' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342'];
+                        } elseif ($rapport->type_activite?->value === 'autre') {
+                            $tabs['autre'] = ['label' => 'Activité', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'];
+                        }
+                        $tabs['photos'] = ['label' => 'Photos', 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'];
+                        $tabs['historique'] = ['label' => 'Historique', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'];
+                        $tabs['resume'] = ['label' => 'Résumé', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'];
+                    @endphp
+                    @foreach($tabs as $tabKey => $tab)
+                        <button type="button" role="tab"
+                            x-on:click="activeTab = '{{ $tabKey }}'"
+                            :class="activeTab === '{{ $tabKey }}' ? 'text-white bg-indigo-600 shadow-sm rounded-md ' : 'border-transparent rounded-md text-slate-500 hover:text-slate-700 bg-white'"
+                            class="flex items-center gap-1.5 px-4 py-2.5  font-medium text-sm transition-colors duration-150 whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $tab['icon'] }}"/>
+                            </svg>
+                            {{ $tab['label'] }}
                         </button>
-                    </form>
-                </div>
+                    @endforeach
+                </nav>
             </div>
 
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                    <span class="text-gray-500">Date de visite</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->date_visite?->format('d/m/Y') }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Technicien</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->technicien?->name }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Client</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->client?->user?->name ?? $rapport->client?->nom }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Statut</span>
-                    <p class="font-medium">
-                        @if($rapport->statut)
-                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
-                                @if($rapport->statut->value === 'Validé') bg-green-100 text-green-700
-                                @elseif($rapport->statut->value === 'Rejeté') bg-red-100 text-red-700
-                                @elseif($rapport->statut->value === 'En attente de validation') bg-amber-100 text-amber-700
-                                @else bg-gray-100 text-gray-700 @endif">
-                                {{ $rapport->statut->label() }}
-                            </span>
-                        @endif
-                    </p>
-                </div>
-            </div>
-        </div>
+            {{-- Tab Panels --}}
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
 
-        {{-- Informations générales --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Informations générales</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                    <span class="text-gray-500">Type de visite</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->type_visite instanceof App\Enums\RapportVisiteType ? $rapport->type_visite->label() : $rapport->type_visite }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Conditions météo</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->conditions_meteo instanceof App\Enums\ConditionMeteo ? $rapport->conditions_meteo->label() : ($rapport->conditions_meteo ?? '-') }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Durée de visite</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->duree_visite instanceof App\Enums\DureeVisite ? $rapport->duree_visite->label() : ($rapport->duree_visite ?? '-') }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Superficie visitée</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->superficie_visitee ? number_format($rapport->superficie_visitee, 2) . ' ha' : '-' }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Latitude</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->latitude ?? '-' }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Longitude</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->longitude ?? '-' }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Exploitation</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->farm?->name ?? '-' }}</p>
-                </div>
-            </div>
-        </div>
+                {{-- Cultures --}}
+                @if($rapport->type_activite?->value === 'culture' && $rapport->visiteCultures->isNotEmpty())
+                    <div x-show="activeTab === 'culture'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                        @foreach($rapport->visiteCultures as $visiteCulture)
+                            <div class="space-y-6">
+                                @if($visiteCulture->cultures_presentes)
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Types de cultures</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($visiteCulture->cultures_presentes as $culture)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $culture }}</span>
+                                            @endforeach
+                                            @if($visiteCulture->culture_autre_precision)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ $visiteCulture->culture_autre_precision }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
 
-        {{-- Étape 2 : Cultures --}}
-        @if($rapport->visiteCultures)
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Informations sur les cultures</h2>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Stade phénologique</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->stade_phenologique ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Avancement</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->avancement_cycle_pourcent ?? '—' }}%</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">État couvert</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->etat_couvert_vegetal ?? '—' }}/5</p>
+                                    </div>
+                                </div>
 
-            @if($rapport->visiteCultures->typesCultures->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Types de cultures</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-                @foreach($rapport->visiteCultures->typesCultures as $type)
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="{{ $type->present ? 'text-green-600' : 'text-gray-400' }}">
-                        @if($type->present) ✓ @else ✗ @endif
-                    </span>
-                    <span class="{{ $type->present ? 'text-gray-900' : 'text-gray-400' }}">
-                        {{ $type->culture_type instanceof App\Enums\CultureType ? $type->culture_type->label() : $type->culture_type }}
-                        @if($type->culture_autre_detail) ({{ $type->culture_autre_detail }}) @endif
-                    </span>
-                </div>
-                @endforeach
-            </div>
-            @endif
+                                @if($visiteCulture->ravageurs_maladies)
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ravageurs et maladies</h4>
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            @foreach($visiteCulture->ravageurs_maladies as $ravageur)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">{{ $ravageur }}</span>
+                                            @endforeach
+                                            @if($visiteCulture->ravageur_autre_precision)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ $visiteCulture->ravageur_autre_precision }}</span>
+                                            @endif
+                                            @if($visiteCulture->niveau_infestation)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Niveau: {{ $visiteCulture->niveau_infestation }}/5</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
 
-            @if($rapport->visiteCultures->etatsVegetatifs->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">États végétatifs</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
-                @foreach($rapport->visiteCultures->etatsVegetatifs as $etat)
-                <div>
-                    <span class="text-gray-500">Stade: </span>
-                    <span class="font-medium text-gray-900">{{ $etat->stade_phenologique instanceof App\Enums\StadePhenologique ? $etat->stade_phenologique->label() : ($etat->stade_phenologique ?? '-') }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">Avancement: </span>
-                    <span class="font-medium text-gray-900">{{ $etat->avancement_cycle ?? '-' }}%</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">État couvert: </span>
-                    <span class="font-medium text-gray-900">{{ $etat->etat_couvert ?? '-' }}/5</span>
-                </div>
-                @endforeach
-            </div>
-            @endif
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">État hydrique</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->etat_hydrique_sol ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Irrigation</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->irrigation_en_place === null ? '—' : ($visiteCulture->irrigation_en_place ? 'Oui' : 'Non') }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Structure du sol</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->etat_structure_sol ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">pH du sol</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->ph_sol ?? '—' }}</p>
+                                    </div>
+                                </div>
 
-            @if($rapport->visiteCultures->ravageursMaladies->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Ravageurs et maladies</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-                @foreach($rapport->visiteCultures->ravageursMaladies as $ravageur)
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="{{ $ravageur->present ? 'text-red-600' : 'text-gray-400' }}">
-                        @if($ravageur->present) ✓ @else ✗ @endif
-                    </span>
-                    <span class="{{ $ravageur->present ? 'text-gray-900' : 'text-gray-400' }}">
-                        {{ $ravageur->type_probleme instanceof App\Enums\TypeProbleme ? $ravageur->type_probleme->label() : $ravageur->type_probleme }}
-                        @if($ravageur->niveau_infestation) (niveau: {{ $ravageur->niveau_infestation }}/5) @endif
-                    </span>
-                </div>
-                @endforeach
-            </div>
-            @endif
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Intrants utilisés</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->intrants_utilises ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Estimation récolte</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->estimation_recolte_kg ? number_format($visiteCulture->estimation_recolte_kg, 2) . ' kg' : '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Date récolte estimée</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteCulture->date_estimee_recolte?->format('d/m/Y') ?? '—' }}</p>
+                                    </div>
+                                </div>
 
-            @if($rapport->visiteCultures->solsIrrigations->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Sol et irrigation</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
-                @foreach($rapport->visiteCultures->solsIrrigations as $sol)
-                <div>
-                    <span class="text-gray-500">État hydrique: </span>
-                    <span class="font-medium text-gray-900">{{ $sol->etat_hydrique_sol instanceof App\Enums\EtatHydriqueSol ? $sol->etat_hydrique_sol->label() : ($sol->etat_hydrique_sol ?? '-') }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">Irrigation en place: </span>
-                    <span class="font-medium text-gray-900">{{ $sol->irrigation_place === null ? '-' : ($sol->irrigation_place ? 'Oui' : 'Non') }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">Structure du sol: </span>
-                    <span class="font-medium text-gray-900">{{ $sol->etat_structure_sol instanceof App\Enums\EtatStructureSol ? $sol->etat_structure_sol->label() : ($sol->etat_structure_sol ?? '-') }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-500">pH du sol: </span>
-                    <span class="font-medium text-gray-900">{{ $sol->ph_sol_mesure ?? '-' }}</span>
-                </div>
-                @endforeach
-            </div>
-            @endif
-
-            @if($rapport->visiteCultures->entretienIntrants->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Entretien et intrants</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                @foreach($rapport->visiteCultures->entretienIntrants as $entretien)
-                <div>Désherbage: <span class="font-medium">{{ $entretien->desherbage_effectue ? 'Oui' : 'Non' }}</span></div>
-                <div>Taille/élagage: <span class="font-medium">{{ $entretien->taille_elagage ? 'Oui' : 'Non' }}</span></div>
-                <div>Engrais: <span class="font-medium">{{ $entretien->engrais_applique ? 'Oui' : 'Non' }}</span></div>
-                <div>Traitement phytosanitaire: <span class="font-medium">{{ $entretien->traitement_phytosanitaire ? 'Oui' : 'Non' }}</span></div>
-                <div>Mulching: <span class="font-medium">{{ $entretien->mulching_realise ? 'Oui' : 'Non' }}</span></div>
-                <div>Compost: <span class="font-medium">{{ $entretien->compost_apporte ? 'Oui' : 'Non' }}</span></div>
-                <div>Intrants utilisés: <span class="font-medium">{{ $entretien->intrants_utilises ?? '-' }}</span></div>
-                <div>Estimation récolte: <span class="font-medium">{{ $entretien->estimation_recolte ? number_format($entretien->estimation_recolte, 2) : '-' }}</span></div>
-                <div>Date récolte estimée: <span class="font-medium">{{ $entretien->date_estimee_recolte?->format('d/m/Y') ?? '-' }}</span></div>
-                @endforeach
-            </div>
-            @endif
-        </div>
-        @endif
-
-        {{-- Étape 3 : Élevage --}}
-        @if($rapport->visiteElevage)
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Informations sur l'élevage</h2>
-
-            @if($rapport->visiteElevage->typesAnimaux->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Types d'animaux</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
-                @foreach($rapport->visiteElevage->typesAnimaux as $animal)
-                <div>
-                    <span class="{{ $animal->present ? 'text-gray-900' : 'text-gray-400' }}">
-                        {{ $animal->animal_type instanceof App\Enums\AnimalType ? $animal->animal_type->label() : $animal->animal_type }}
-                    </span>
-                    @if($animal->present)
-                    <div class="text-xs text-gray-500 mt-1">
-                        Effectif: {{ $animal->effectif_total ?? '-' }} |
-                        Mortalité: {{ $animal->mortalite_constatee ?? 0 }} |
-                        Naissances: {{ $animal->naissances_visite ?? '-' }} |
-                        Ventes/abattages: {{ $animal->ventes_abatages ?? '-' }}
+                                @if($visiteCulture->observations_ravageurs)
+                                    <div class="text-sm">
+                                        <span class="font-semibold text-slate-500">Observations ravageurs</span>
+                                        <p class="text-slate-900 mt-1">{{ $visiteCulture->observations_ravageurs }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
+                @endif
+
+                {{-- Élevage --}}
+                @if($rapport->type_activite?->value === 'elevage' && $rapport->visiteElevage->isNotEmpty())
+                    <div x-show="activeTab === 'elevage'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                        @foreach($rapport->visiteElevage as $visiteElevage)
+                            <div class="space-y-6">
+                                @if($visiteElevage->animaux_presents)
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Types d'animaux</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($visiteElevage->animaux_presents as $animal)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $animal }}</span>
+                                            @endforeach
+                                            @if($visiteElevage->animal_autre_precision)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ $visiteElevage->animal_autre_precision }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Effectif total</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->effectif_total ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Mortalité</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->mortalite_constatee ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Naissances</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->naissances_depuis_derniere_visite ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Ventes/Abattages</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->ventes_abattages_depuis_derniere_visite ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">État corporel</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->etat_corporel_general ?? '—' }}/5</p>
+                                    </div>
+                                </div>
+
+                                @if($visiteElevage->signes_cliniques)
+                                    <div>
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Signes cliniques</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($visiteElevage->signes_cliniques as $signe)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">{{ $signe }}</span>
+                                            @endforeach
+                                            @if($visiteElevage->signe_autre_precision)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ $visiteElevage->signe_autre_precision }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Alimentation</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->etat_alimentation ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Eau abreuvement</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->eau_abreuvement ?? '—' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">État bâtiments</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->etat_batiments_enclos ?? '—' }}/5</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-500">Production laitière</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->production_laitiere_l_j ?? '—' }} L/j</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Production œufs</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->production_oeufs_nb_j ?? '—' }}/j</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-500">Gain de poids</span>
+                                        <p class="font-medium text-slate-900">{{ $visiteElevage->gain_poids_kg_mois ?? '—' }} kg/mois</p>
+                                    </div>
+                                </div>
+
+                                @if($visiteElevage->observations_sanitaires)
+                                    <div class="text-sm">
+                                        <span class="font-semibold text-slate-500">Observations sanitaires</span>
+                                        <p class="text-slate-900 mt-1">{{ $visiteElevage->observations_sanitaires }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- Autre activité --}}
+                @if($rapport->type_activite?->value === 'autre' && $rapport->visiteAutres->isNotEmpty())
+                    <div x-show="activeTab === 'autre'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                        @foreach($rapport->visiteAutres as $visiteAutre)
+                            <div class="space-y-3 text-sm">
+                                <div>
+                                    <span class="text-slate-500">Type d'activité</span>
+                                    <p class="font-medium text-slate-900 mt-1">{{ $visiteAutre->type_autre ?? '—' }}</p>
+                                </div>
+                                @if($visiteAutre->description_activite)
+                                    <div>
+                                        <span class="text-slate-500">Description</span>
+                                        <p class="text-slate-900 mt-1">{{ $visiteAutre->description_activite }}</p>
+                                    </div>
+                                @endif
+                                @if($visiteAutre->observations_specifiques)
+                                    <div>
+                                        <span class="text-slate-500">Observations spécifiques</span>
+                                        <p class="text-slate-900 mt-1">{{ $visiteAutre->observations_specifiques }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- Photos --}}
+                <div x-show="activeTab === 'photos'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                    @if($rapport->photos->isNotEmpty())
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            @foreach($rapport->photos as $photo)
+                                <div class="relative group">
+                                    <img src="{{ asset('storage/' . $photo->chemin) }}" alt="{{ $photo->caption ?? 'Photo' }}" class="w-full h-32 object-cover rounded-lg">
+                                    @if($photo->caption)
+                                        <p class="text-xs text-slate-500 mt-1">{{ $photo->caption }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-slate-400 text-center py-8">Aucune photo disponible</p>
                     @endif
                 </div>
-                @endforeach
-            </div>
-            @endif
 
-            @if($rapport->visiteElevage->signesCliniques->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Signes cliniques</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-                @foreach($rapport->visiteElevage->signesCliniques as $signe)
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="{{ $signe->present ? 'text-red-600' : 'text-gray-400' }}">
-                        @if($signe->present) ✓ @else ✗ @endif
-                    </span>
-                    <span>{{ $signe->type_signe instanceof App\Enums\TypeSigneClinique ? $signe->type_signe->label() : $signe->type_signe }}</span>
-                </div>
-                @endforeach
-            </div>
-            @endif
-
-            @if($rapport->visiteElevage->soinsAnimaux->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Soins et traitements</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
-                @foreach($rapport->visiteElevage->soinsAnimaux as $soin)
-                <div>Vaccination: <span class="font-medium">{{ $soin->vaccination_effectuee ? 'Oui' : 'Non' }}</span></div>
-                <div>Déparasitage interne: <span class="font-medium">{{ $soin->deparasitage_interne ? 'Oui' : 'Non' }}</span></div>
-                <div>Déparasitage externe: <span class="font-medium">{{ $soin->deparasitage_externe ? 'Oui' : 'Non' }}</span></div>
-                <div>Antibiotique: <span class="font-medium">{{ $soin->traitement_antibiotique ? 'Oui' : 'Non' }}</span></div>
-                <div>Soins plaies: <span class="font-medium">{{ $soin->soins_plaies ? 'Oui' : 'Non' }}</span></div>
-                <div>Consultation vétérinaire: <span class="font-medium">{{ $soin->consultation_veterinaire ? 'Oui' : 'Non' }}</span></div>
-                <div>Produits administrés: <span class="font-medium">{{ $soin->produits_administres ?? '-' }}</span></div>
-                @endforeach
-            </div>
-            @endif
-
-            @if($rapport->visiteElevage->alimentationEau->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Alimentation, eau et logement</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
-                @foreach($rapport->visiteElevage->alimentationEau as $alim)
-                <div>Alimentation: <span class="font-medium">{{ $alim->etat_alimentation instanceof App\Enums\EtatAlimentation ? $alim->etat_alimentation->label() : ($alim->etat_alimentation ?? '-') }}</span></div>
-                <div>Eau abreuvement: <span class="font-medium">{{ $alim->eau_abreuvement instanceof App\Enums\EauAbreuvement ? $alim->eau_abreuvement->label() : ($alim->eau_abreuvement ?? '-') }}</span></div>
-                <div>État bâtiments: <span class="font-medium">{{ $alim->etat_batiments ?? '-' }}/5</span></div>
-                @endforeach
-            </div>
-            @endif
-
-            @if($rapport->visiteElevage->performancesElevage->isNotEmpty())
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Performances productives</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                @foreach($rapport->visiteElevage->performancesElevage as $perf)
-                <div>Production laitière: <span class="font-medium">{{ $perf->production_laitiere ?? '-' }}</span></div>
-                <div>Production œufs: <span class="font-medium">{{ $perf->production_oeufs ?? '-' }}</span></div>
-                <div>Gain de poids: <span class="font-medium">{{ $perf->gain_poids ?? '-' }}</span></div>
-                @endforeach
-            </div>
-            @endif
-        </div>
-        @endif
-
-        {{-- Étape 4 : Photos --}}
-        @if($rapport->photos->isNotEmpty())
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Photos terrain ({{ $rapport->photos->count() }})</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                @foreach($rapport->photos as $photo)
-                <div class="relative group">
-                    <img src="{{ asset('storage/' . $photo->photo_path) }}" alt="{{ $photo->caption ?? 'Photo' }}" class="w-full h-32 object-cover rounded-lg">
-                    @if($photo->caption)
-                    <p class="text-xs text-gray-500 mt-1">{{ $photo->caption }}</p>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        {{-- Observations finales --}}
-        @if($rapport->observationsFinales)
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Observations générales et alertes</h2>
-            <div class="space-y-3 text-sm">
-                <div>
-                    <span class="text-gray-500">Résumé de la visite:</span>
-                    <p class="text-gray-900 mt-1">{{ $rapport->observationsFinales->resume_visite }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Niveau d'alerte:</span>
-                    <p class="mt-1">
-                        @if($rapport->observationsFinales->niveau_alerte)
-                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
-                                @if($rapport->observationsFinales->niveau_alerte->value === 'Aucune alerte') bg-gray-100 text-gray-700
-                                @elseif($rapport->observationsFinales->niveau_alerte->value === 'Alerte faible (information)') bg-blue-100 text-blue-700
-                                @elseif($rapport->observationsFinales->niveau_alerte->value === 'Alerte modérée (surveillance)') bg-amber-100 text-amber-700
-                                @else bg-red-100 text-red-700 @endif">
-                                {{ $rapport->observationsFinales->niveau_alerte->label() }}
-                            </span>
+                {{-- Historique --}}
+                <div x-show="activeTab === 'historique'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                    <div class="space-y-6">
+                        {{-- Historique des validations --}}
+                        @if($rapport->validations->isNotEmpty())
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Historique des validations</h3>
+                                <div class="space-y-3">
+                                    @foreach($rapport->validations as $validation)
+                                        <div class="flex items-center justify-between text-sm border-b border-slate-100 pb-2">
+                                            <div>
+                                                <span class="font-medium text-slate-900">{{ $validation->action }}</span>
+                                                @if($validation->motif)
+                                                    <span class="text-slate-500"> - {{ $validation->motif }}</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-slate-500">
+                                                {{ $validation->admin?->name ?? 'N/A' }} - {{ $validation->date_action?->format('d/m/Y H:i') }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
-                    </p>
-                </div>
-                @if($rapport->observationsFinales->description_alerte)
-                <div>
-                    <span class="text-gray-500">Description de l'alerte:</span>
-                    <p class="text-gray-900 mt-1">{{ $rapport->observationsFinales->description_alerte }}</p>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
 
-        {{-- Prochaine visite --}}
-        @if($rapport->prochaineVisite)
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Prochaine visite recommandée</h2>
-            <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                    <span class="text-gray-500">Date souhaitée:</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->prochaineVisite->date_souhaitee?->format('d/m/Y') ?? '-' }}</p>
-                </div>
-                <div>
-                    <span class="text-gray-500">Raison:</span>
-                    <p class="font-medium text-gray-900">{{ $rapport->prochaineVisite->raison instanceof App\Enums\RaisonProchaineVisite ? $rapport->prochaineVisite->raison->label() : ($rapport->prochaineVisite->raison ?? '-') }}</p>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        {{-- Notes --}}
-        @if($rapport->notesRapport)
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Notes et messages</h2>
-            <div class="space-y-3 text-sm">
-                @if($rapport->notesRapport->note_interne)
-                <div>
-                    <span class="text-gray-500">Note interne:</span>
-                    <p class="text-gray-900 mt-1">{{ $rapport->notesRapport->note_interne }}</p>
-                </div>
-                @endif
-                @if($rapport->notesRapport->message_client)
-                <div>
-                    <span class="text-gray-500">Message au client:</span>
-                    <p class="text-gray-900 mt-1">{{ $rapport->notesRapport->message_client }}</p>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        {{-- Historique des validations --}}
-        @if($rapport->validations->isNotEmpty())
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Historique des validations</h2>
-            <div class="space-y-3">
-                @foreach($rapport->validations as $validation)
-                <div class="flex items-center justify-between text-sm border-b border-gray-100 pb-2">
-                    <div>
-                        <span class="font-medium text-gray-900">{{ $validation->action }}</span>
-                        @if($validation->motif)
-                        <span class="text-gray-500"> - {{ $validation->motif }}</span>
+                        {{-- Notes et messages --}}
+                        @if($rapport->notesRapport->isNotEmpty())
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Notes et messages</h3>
+                                @foreach($rapport->notesRapport as $note)
+                                    <div class="space-y-3 text-sm">
+                                        @if($note->note_interne)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Note interne</span>
+                                                <p class="text-slate-900 mt-1">{{ $note->note_interne }}</p>
+                                            </div>
+                                        @endif
+                                        @if($note->message_client)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Message au client</span>
+                                                <p class="text-slate-900 mt-1">{{ $note->message_client }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
-                    <div class="text-gray-500">
-                        {{ $validation->admin?->name ?? 'N/A' }} - {{ $validation->date_action?->format('d/m/Y H:i') }}
+                </div>
+
+                {{-- Résumé --}}
+                <div x-show="activeTab === 'resume'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="p-6">
+                    <div class="space-y-6">
+                        {{-- Résumé de la visite --}}
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Résumé de la visite</h3>
+                            <p class="text-sm text-slate-700 leading-relaxed">{{ $rapport->resume_visite }}</p>
+                        </div>
+
+                        {{-- Alertes --}}
+                        @if($rapport->niveau_alerte && $rapport->niveau_alerte !== 'aucune')
+                            <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
+                                <h4 class="text-xs font-bold text-red-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Alerte — {{ $rapport->niveau_alerte }}
+                                </h4>
+                                @if($rapport->description_alerte)
+                                    <p class="text-sm text-red-800 mt-1">{{ $rapport->description_alerte }}</p>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- Observations finales --}}
+                        @if($rapport->observationsFinales->isNotEmpty())
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Observations générales</h3>
+                                @foreach($rapport->observationsFinales as $observation)
+                                    <div class="space-y-3 text-sm">
+                                        <div>
+                                            <span class="font-semibold text-slate-500">Résumé</span>
+                                            <p class="text-slate-900 mt-1">{{ $observation->resume_visite }}</p>
+                                        </div>
+                                        @if($observation->niveau_alerte)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Niveau d'alerte</span>
+                                                <p class="mt-1">
+                                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                                        {{ $observation->niveau_alerte }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        @endif
+                                        @if($observation->description_alerte)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Description</span>
+                                                <p class="text-slate-900 mt-1">{{ $observation->description_alerte }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Prochaine visite --}}
+                        @if($rapport->prochaineVisite->isNotEmpty())
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Prochaine visite</h3>
+                                @foreach($rapport->prochaineVisite as $prochaine)
+                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span class="text-slate-500">Date souhaitée</span>
+                                            <p class="font-medium text-slate-900">{{ $prochaine->date_souhaitee?->format('d/m/Y') ?? '—' }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-500">Raison</span>
+                                            <p class="font-medium text-slate-900">{{ $prochaine->raison ?? '—' }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Notes --}}
+                        @if($rapport->notesRapport->isNotEmpty())
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Notes et messages</h3>
+                                @foreach($rapport->notesRapport as $note)
+                                    <div class="space-y-3 text-sm">
+                                        @if($note->note_interne)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Note interne</span>
+                                                <p class="text-slate-900 mt-1">{{ $note->note_interne }}</p>
+                                            </div>
+                                        @endif
+                                        @if($note->message_client)
+                                            <div>
+                                                <span class="font-semibold text-slate-500">Message au client</span>
+                                                <p class="text-slate-900 mt-1">{{ $note->message_client }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 </div>
-                @endforeach
             </div>
         </div>
-        @endif
-
     </div>
 </div>
 @endsection

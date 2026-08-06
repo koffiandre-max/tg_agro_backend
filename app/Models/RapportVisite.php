@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ConditionMeteo;
 use App\Enums\DureeVisite;
 use App\Enums\StatutRapport;
+use App\Enums\TypeActivite;
 use App\Enums\TypeVisite;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,48 +19,15 @@ class RapportVisite extends Model
         'technicien_id',
         'date_visite',
         'client_id',
+        'farm_id',
         'localisation_parcelle',
         'type_visite',
+        'type_activite',
         'conditions_meteo',
         'superficie_visitee_ha',
         'duree_visite',
         'gps_latitude',
         'gps_longitude',
-        'cultures_presentes',
-        'culture_autre_precision',
-        'stade_phenologique',
-        'avancement_cycle_pourcent',
-        'etat_couvert_vegetal',
-        'ravageurs_maladies',
-        'ravageur_autre_precision',
-        'niveau_infestation',
-        'observations_ravageurs',
-        'etat_hydrique_sol',
-        'irrigation_en_place',
-        'etat_structure_sol',
-        'ph_sol',
-        'entretien_intrants',
-        'intrants_utilises',
-        'estimation_recolte_kg',
-        'date_estimee_recolte',
-        'animaux_presents',
-        'animal_autre_precision',
-        'effectif_total',
-        'mortalite_constatee',
-        'naissances_depuis_derniere_visite',
-        'ventes_abattages_depuis_derniere_visite',
-        'etat_corporel_general',
-        'signes_cliniques',
-        'signe_autre_precision',
-        'observations_sanitaires',
-        'soins_traitements',
-        'produits_administres',
-        'etat_alimentation',
-        'eau_abreuvement',
-        'etat_batiments_enclos',
-        'production_laitiere_l_j',
-        'production_oeufs_nb_j',
-        'gain_poids_kg_mois',
         'resume_visite',
         'niveau_alerte',
         'description_alerte',
@@ -81,32 +49,11 @@ class RapportVisite extends Model
             'superficie_visitee_ha' => 'decimal:2',
             'gps_latitude' => 'decimal:7',
             'gps_longitude' => 'decimal:7',
-            'cultures_presentes' => 'array',
-            'ravageurs_maladies' => 'array',
-            'entretien_intrants' => 'array',
-            'animaux_presents' => 'array',
-            'signes_cliniques' => 'array',
-            'soins_traitements' => 'array',
-            'avancement_cycle_pourcent' => 'integer',
-            'etat_couvert_vegetal' => 'integer',
-            'niveau_infestation' => 'integer',
-            'irrigation_en_place' => 'boolean',
-            'ph_sol' => 'decimal:1',
-            'estimation_recolte_kg' => 'decimal:2',
-            'date_estimee_recolte' => 'date',
-            'effectif_total' => 'integer',
-            'mortalite_constatee' => 'integer',
-            'naissances_depuis_derniere_visite' => 'integer',
-            'ventes_abattages_depuis_derniere_visite' => 'integer',
-            'etat_corporel_general' => 'integer',
-            'etat_batiments_enclos' => 'integer',
-            'production_laitiere_l_j' => 'decimal:2',
-            'production_oeufs_nb_j' => 'integer',
-            'gain_poids_kg_mois' => 'decimal:2',
             'prochaine_visite_date' => 'date',
             'valide_at' => 'datetime',
             'envoye_at' => 'datetime',
             'type_visite' => TypeVisite::class,
+            'type_activite' => TypeActivite::class,
             'conditions_meteo' => ConditionMeteo::class,
             'duree_visite' => DureeVisite::class,
             'statut' => StatutRapport::class,
@@ -123,6 +70,11 @@ class RapportVisite extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function farm(): BelongsTo
+    {
+        return $this->belongsTo(Farm::class);
+    }
+
     public function validePar(): BelongsTo
     {
         return $this->belongsTo(User::class, 'valide_par');
@@ -131,5 +83,40 @@ class RapportVisite extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(RapportVisitePhoto::class, 'rapport_visite_id');
+    }
+
+    public function visiteCultures(): HasMany
+    {
+        return $this->hasMany(VisiteCulture::class, 'rapport_id');
+    }
+
+    public function visiteElevage(): HasMany
+    {
+        return $this->hasMany(VisiteElevage::class, 'rapport_id');
+    }
+
+    public function visiteAutres(): HasMany
+    {
+        return $this->hasMany(VisiteAutre::class, 'rapport_id');
+    }
+
+    public function observationsFinales(): HasMany
+    {
+        return $this->hasMany(ObservationFinale::class, 'rapport_id');
+    }
+
+    public function prochaineVisite(): HasMany
+    {
+        return $this->hasMany(ProchaineVisite::class, 'rapport_id');
+    }
+
+    public function notesRapport(): HasMany
+    {
+        return $this->hasMany(NotesRapport::class, 'rapport_id');
+    }
+
+    public function validations()
+    {
+        return $this->morphMany(Validation::class, 'validable');
     }
 }

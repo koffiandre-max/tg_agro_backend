@@ -47,6 +47,7 @@
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('user_id')">
                             <div class="flex items-center gap-1">Technicien @include('livewire.partials.sort-icon', ['field' => 'user_id'])</div>
                         </th>
+                        <th class="px-4 py-3 font-medium">Type</th>
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('location_base')">
                             <div class="flex items-center gap-1">Base @include('livewire.partials.sort-icon', ['field' => 'location_base'])</div>
                         </th>
@@ -75,6 +76,18 @@
                                         <p class="text-xs text-gray-400">{{ $technician->user->email ?? '' }}</p>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if($technician->user->type_technicien)
+                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($technician->user->type_technicien->value === 'culture') bg-green-100 text-green-700
+                                        @elseif($technician->user->type_technicien->value === 'elevage') bg-blue-100 text-blue-700
+                                        @else bg-purple-100 text-purple-700 @endif">
+                                        {{ $technician->user->type_technicien->label() }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-400">Non défini</span>
+                                @endif
                             </td>
                             <td class="px-4 py-3 text-gray-600">
                                 <span class="inline-flex items-center gap-1">
@@ -169,7 +182,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-gray-400">
+                            <td colspan="7" class="px-4 py-10 text-center text-gray-400">
                                 Aucun technicien ne correspond à vos critères.
                             </td>
                         </tr>

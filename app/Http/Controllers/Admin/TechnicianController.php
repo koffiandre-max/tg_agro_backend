@@ -34,6 +34,7 @@ class TechnicianController extends Controller
             'phone' => $data->phone,
             'password' => bcrypt($data->password),
             'role' => 'technician',
+            'type_technicien' => $data->type_technicien,
             'is_active' => true,
         ]);
 
@@ -53,7 +54,7 @@ class TechnicianController extends Controller
 
     public function show($id)
     {
-        $technician = Technician::with('user')->findOrFail($id);
+        $technician = Technician::with('user', 'farms', 'missions.farm', 'reports')->findOrFail($id);
         return view('admin.technicians.show', compact('technician'));
     }
 
@@ -81,6 +82,7 @@ class TechnicianController extends Controller
             'name' => $data->name,
             'email' => $data->email,
             'phone' => $data->phone,
+            'type_technicien' => $data->type_technicien,
         ]);
 
         // Update password if provided

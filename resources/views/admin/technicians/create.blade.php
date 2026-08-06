@@ -72,6 +72,21 @@
             <div class="px-6 py-6 space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
+                        <label for="type_technicien" class="block text-sm font-medium text-gray-700 mb-1.5">
+                            Type de technicien <span class="text-red-600">*</span>
+                        </label>
+                        <select id="type_technicien" name="type_technicien" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
+                            <option value="">Sélectionner le type</option>
+                            @foreach(\App\Enums\TypeTechnicien::cases() as $type)
+                                <option value="{{ $type->value }}" {{ old('type_technicien') === $type->value ? 'selected' : '' }}>
+                                    {{ $type->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('type_technicien') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
                         <label for="phone_secondary" class="block text-sm font-medium text-gray-700 mb-1.5">
                             Téléphone secondaire
                         </label>

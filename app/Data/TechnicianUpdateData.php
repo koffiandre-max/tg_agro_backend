@@ -29,6 +29,9 @@ class TechnicianUpdateData extends Data
     #[Required, Max(255)]
     public string $location_base;
 
+    #[Required]
+    public string $type_technicien;
+
     #[Nullable]
     public ?int $max_concurrent_missions = 5;
 

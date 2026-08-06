@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\FarmController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/farms', [FarmController::class, 'index'])->name('admin.farms.index');
 Route::get('/farms/create', [FarmController::class, 'create'])->name('admin.farms.create');

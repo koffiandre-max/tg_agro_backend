@@ -11,6 +11,7 @@
             'techniciens' => $techniciens,
             'clients' => $clients,
             'farms' => $farms,
+            'typeActiviteOptions' => $typeActiviteOptions ?? collect(\App\Enums\TypeActivite::cases())->map(fn($case) => ['value' => $case->value, 'label' => $case->label()])->toArray(),
         ])
     </div>
 </div>

@@ -16,6 +16,26 @@
             >
         </div>
 
+        {{-- Filtre Type d'activité --}}
+        <div class="relative">
+            <button @click="openFilter = openFilter === 'typeActivite' ? null : 'typeActivite'"
+                    class="flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50">
+                Activité <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div x-show="openFilter === 'typeActivite'" x-cloak class="absolute z-20 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                <button wire:click="$set('typeActivite', '')" @click="openFilter = null"
+                        class="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 {{ $typeActivite === '' ? 'text-indigo-600 font-medium' : 'text-gray-700' }}">
+                    Tous
+                </button>
+                @foreach(\App\Enums\TypeActivite::cases() as $activite)
+                    <button wire:click="$set('typeActivite', '{{ $activite->value }}')" @click="openFilter = null"
+                            class="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 {{ $typeActivite === $activite->value ? 'text-indigo-600 font-medium' : 'text-gray-700' }}">
+                        {{ $activite->label() }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
         {{-- Filtre Statut --}}
         <div class="relative">
             <button @click="openFilter = openFilter === 'statut' ? null : 'statut'"
@@ -52,7 +72,7 @@
         </div>
 
         {{-- Réinitialiser --}}
-        @if($search || $statut || $typeVisite || $technicien || $client || $dateFrom || $dateTo)
+        @if($search || $statut || $typeVisite || $typeActivite || $technicien || $client || $dateFrom || $dateTo)
             <button wire:click="resetFilters" class="text-sm text-indigo-600 hover:underline">Réinitialiser</button>
         @endif
     </div>
@@ -68,6 +88,7 @@
                         </th>
                         <th class="px-4 py-3 font-medium">Localisation</th>
                         <th class="px-4 py-3 font-medium">Type de visite</th>
+                        <th class="px-4 py-3 font-medium">Activité</th>
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('statut')">
                             <div class="flex items-center gap-1">Statut @include('livewire.partials.sort-icon', ['field' => 'statut'])</div>
                         </th>
@@ -87,6 +108,16 @@
                                 {{ $rapport->type_visite instanceof App\Enums\RapportVisiteType ? $rapport->type_visite->label() : $rapport->type_visite }}
                             </td>
                             <td class="px-4 py-3">
+                                @if($rapport->type_activite)
+                                    <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($rapport->type_activite->value === 'culture') bg-green-100 text-green-700
+                                        @elseif($rapport->type_activite->value === 'elevage') bg-blue-100 text-blue-700
+                                        @else bg-gray-100 text-gray-700 @endif">
+                                        {{ $rapport->type_activite->label() }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
                                 @if($rapport->statut)
                                     <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
                                         @if($rapport->statut->value === 'Validé') bg-green-100 text-green-700
@@ -100,29 +131,75 @@
                             <td class="px-4 py-3 text-gray-600">{{ $rapport->technicien?->name ?? '-' }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $rapport->client?->user?->name ?? $rapport->client?->nom ?? '-' }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center justify-center gap-2">
-                                    <a href="{{ route('admin.rapports-visite.show', $rapport->id) }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Voir détails">
-                                        <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
-                                    <a href="{{ route('admin.rapports-visite.edit', $rapport->id) }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Modifier">
-                                        <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </a>
-                                    <button wire:click="deleteRapport({{ $rapport->id }})" wire:confirm="Êtes-vous sûr de vouloir supprimer ce rapport ?" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
-                                        <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <div class="flex items-center justify-center" x-data="{ open: false }">
+                                    <button @click="open = !open" @click.away="open = false" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                         </svg>
                                     </button>
+                                    <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10" style="display: none;">
+                                        <div class="py-1">
+                                            <a href="{{ route('admin.rapports-visite.show', $rapport->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    Voir détails
+                                                </div>
+                                            </a>
+                                            <a href="{{ route('admin.rapports-visite.edit', $rapport->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                    Modifier
+                                                </div>
+                                            </a>
+                                            <a href="{{ route('admin.rapports-visite.print', $rapport->id) }}"  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                    </svg>
+                                                    Imprimer
+                                                </div>
+                                            </a>
+                                            @if($rapport->statut?->value === 'en_attente_validation')
+                                            <div class="border-t border-gray-100 my-1"></div>
+                                            <a href="{{ route('admin.rapports-visite.validate', $rapport->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Valider
+                                                </div>
+                                            </a>
+                                            <a href="{{ route('admin.rapports-visite.reject', $rapport->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Rejeter
+                                                </div>
+                                            </a>
+                                            @endif
+                                            <div class="border-t border-gray-100 my-1"></div>
+                                            <button wire:click="deleteRapport({{ $rapport->id }})" wire:confirm="Êtes-vous sûr de vouloir supprimer ce rapport ?" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    Supprimer
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-10 text-center text-gray-400">
+                            <td colspan="8" class="px-4 py-10 text-center text-gray-400">
                                 Aucun rapport de visite ne correspond à vos critères.
                             </td>
                         </tr>

@@ -157,7 +157,7 @@
                                                     Modifier
                                                 </div>
                                             </a>
-                                            <button wire:click="viewFarm({{ $farm->id }})" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <a href="{{ route('admin.farms.show', $farm->id) }}" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -165,7 +165,7 @@
                                                     </svg>
                                                     Voir détails
                                                 </div>
-                                            </button>
+                                            </a>
                                             <a href="{{ route('admin.gallery.index', ['farm_id' => $farm->id]) }}" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center justify-between gap-2">
                                                     <div class="flex items-center gap-2">

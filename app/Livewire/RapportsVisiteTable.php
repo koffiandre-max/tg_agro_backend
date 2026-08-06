@@ -14,6 +14,7 @@ class RapportsVisiteTable extends Component
     public string $search = '';
     public string $statut = '';
     public string $typeVisite = '';
+    public string $typeActivite = '';
     public string $technicien = '';
     public string $client = '';
     public string $dateFrom = '';
@@ -32,6 +33,10 @@ class RapportsVisiteTable extends Component
         $this->resetPage();
     }
     public function updatingTypeVisite()
+    {
+        $this->resetPage();
+    }
+    public function updatingTypeActivite()
     {
         $this->resetPage();
     }
@@ -68,7 +73,7 @@ class RapportsVisiteTable extends Component
 
     public function resetFilters(): void
     {
-        $this->reset(['search', 'statut', 'typeVisite', 'technicien', 'client', 'dateFrom', 'dateTo']);
+        $this->reset(['search', 'statut', 'typeVisite', 'typeActivite', 'technicien', 'client', 'dateFrom', 'dateTo']);
         $this->resetPage();
     }
 
@@ -102,6 +107,7 @@ class RapportsVisiteTable extends Component
             })
             ->when($this->statut, fn($q) => $q->where('statut', $this->statut))
             ->when($this->typeVisite, fn($q) => $q->where('type_visite', $this->typeVisite))
+            ->when($this->typeActivite, fn($q) => $q->where('type_activite', $this->typeActivite))
             ->when($this->technicien, function ($q) {
                 $q->whereHas('technicien', function ($q) {
                     $q->where('name', 'like', "%{$this->technicien}%");

@@ -197,7 +197,7 @@ class FarmController extends Controller
 
     public function show(Farm $farm)
     {
-        $farm->load('user', 'photos', 'reports', 'clients.user');
+        $farm->load('user', 'photos', 'reports', 'clients.user', 'assignedTechnician.user');
 
         return view('admin.farms.show', compact('farm'));
     }
