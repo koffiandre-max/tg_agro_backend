@@ -17,7 +17,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500">Mes Exploitations</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">3</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1">{{ $farms->count() }}</p>
                 </div>
                 <div class="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,97 +76,44 @@
             <h2 class="text-lg font-semibold text-gray-800">Mes Exploitations</h2>
             <a href="{{ route('admin.portail.index') }}" class="text-sm text-indigo-600 hover:text-indigo-700">Voir tout</a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h3 class="font-semibold text-gray-800">Ferme de Yamoussoukro</h3>
-                        <p class="text-xs text-gray-500 mt-1">Yamoussoukro, CI</p>
-                    </div>
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Active</span>
-                </div>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Superficie:</span>
-                        <span class="font-medium text-gray-800">15 ha</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Culture:</span>
-                        <span class="font-medium text-gray-800">Maïs</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Stade:</span>
-                        <span class="font-medium text-gray-800">Croissance</span>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-indigo-600 h-2 rounded-full" style="width: 65%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Progression: 65%</p>
-                </div>
-            </div>
 
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h3 class="font-semibold text-gray-800">Ferme de Bouaké</h3>
-                        <p class="text-xs text-gray-500 mt-1">Bouaké, CI</p>
+        @if($farms->isEmpty())
+            <p class="text-sm text-gray-500">Vous n'avez aucune exploitation enregistrée pour le moment.</p>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($farms as $farm)
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold text-gray-800">{{ $farm->name }}</h3>
+                                <p class="text-xs text-gray-500 mt-1">{{ $farm->location ?? '—' }}</p>
+                            </div>
+                            <span class="px-2 py-1 {{ $farm->statusBadgeClasses() }} text-xs rounded-full">{{ $farm->statusLabel() }}</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Superficie:</span>
+                                <span class="font-medium text-gray-800">{{ $farm->total_area_hectares ? $farm->total_area_hectares . ' ha' : '—' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Culture:</span>
+                                <span class="font-medium text-gray-800">{{ $farm->culture_type ?? '—' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Stade:</span>
+                                <span class="font-medium text-gray-800">{{ $farm->crop_stage ?? '—' }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ $farm->crop_stage_progress ?? 0 }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Progression: {{ $farm->crop_stage_progress ?? 0 }}%</p>
+                        </div>
                     </div>
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Active</span>
-                </div>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Superficie:</span>
-                        <span class="font-medium text-gray-800">25 ha</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Culture:</span>
-                        <span class="font-medium text-gray-800">Café</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Stade:</span>
-                        <span class="font-medium text-gray-800">Floraison</span>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-indigo-600 h-2 rounded-full" style="width: 40%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Progression: 40%</p>
-                </div>
+                @endforeach
             </div>
-
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <h3 class="font-semibold text-gray-800">Ferme de Korhogo</h3>
-                        <p class="text-xs text-gray-500 mt-1">Korhogo, CI</p>
-                    </div>
-                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">En attente</span>
-                </div>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Superficie:</span>
-                        <span class="font-medium text-gray-800">10 ha</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Culture:</span>
-                        <span class="font-medium text-gray-800">Coton</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Stade:</span>
-                        <span class="font-medium text-gray-800">Semis</span>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-indigo-600 h-2 rounded-full" style="width: 15%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Progression: 15%</p>
-                </div>
-            </div>
-        </div>
+        @endif
     </div>
 
     {{-- Derniers Rapports --}}

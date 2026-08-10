@@ -151,6 +151,8 @@
     <script src="{{ asset('tailwind/tailwind.js') }}"></script>
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="{{ asset('flatpickr/flatpickr.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('flatpickr/flatpickr.min.js') }}"></script>
     @livewireStyles
     @stack('styles')
 </head>
@@ -160,32 +162,32 @@
     
     // Couleurs du header selon le rôle
     $headerBgColors = [
-        'admin' => 'bg-gray-900',
+        'admin' => 'bg-yellow-600',
         'client' => 'bg-emerald-600',
-        'technician' => 'bg-blue-900',
+        'technician' => 'bg-emerald-600',
     ];
 
     $baseBgColors = [
-        'admin' => 'gray-900',
+        'admin' => 'yellow-500',
         'client' => 'emerald-600',
-        'technician' => 'blue-900',
+        'technician' => 'bg-emerald-600',
     ];
 
     $headerBorderColors = [
         'admin' => 'border-gray-800',
         'client' => 'border-emerald-700',
-        'technician' => 'border-blue-800',
+        'technician' => 'border-emerald-700',
     ];
     
     $headerTextColors = [
         'admin' => 'text-white',
         'client' => 'text-emerald-100',
-        'technician' => 'text-blue-100',
+        'technician' => 'text-emerald-100',
     ];
     $headerHoverColors = [
         'admin' => 'hover:bg-gray-800',
         'client' => 'hover:bg-emerald-700',
-        'technician' => 'hover:bg-blue-800',
+        'technician' => 'hover:bg-emerald-700',
     ];
     
     $headerBg = $headerBgColors[$userRole] ?? $headerBgColors['client'];
@@ -513,6 +515,23 @@
 
     {{-- Notification Manager --}}
     <script>
+
+        // Initialize Flatpickr for all datetime inputs
+            const datetimeInputs = document.querySelectorAll(
+                'input[type="datetime-local"], input.flatpickr-datetime');
+            datetimeInputs.forEach(function(input) {
+                // Only initialize if not already initialized
+                if (!input.hasAttribute('data-flatpickr-initialized')) {
+                    flatpickr(input, {
+                        enableTime: true,
+                        dateFormat: 'Y-m-d H:i',
+                        allowInput: true,
+                        clickOpens: true
+                    });
+                    input.setAttribute('data-flatpickr-initialized', 'true');
+                }
+            });
+        });
         const NotificationManager = {
             show: function(message, type = 'success', duration = 5000) {
                 const container = document.getElementById('notification-container');

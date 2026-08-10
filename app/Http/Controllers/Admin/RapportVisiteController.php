@@ -345,6 +345,10 @@ class RapportVisiteController extends Controller
 
     public function reject(Request $request, $id)
     {
+        $validated = $request->validate([
+            'motif_rejet' => ['required', 'string', 'max:500'],
+        ]);
+
         $rapport = RapportVisite::findOrFail($id);
 
         if ($rapport->statut !== StatutRapport::EN_ATTENTE_VALIDATION) {
@@ -355,7 +359,7 @@ class RapportVisiteController extends Controller
             'statut' => StatutRapport::REJETE,
             'valide_par' => Auth::id(),
             'valide_at' => now(),
-            'motif_rejet' => $request->input('motif_rejet', 'Non précisé'),
+            'motif_rejet' => $validated['motif_rejet'],
         ]);
 
         return redirect()->route('admin.rapports-visite.show', $rapport)->with('success', 'Rapport rejeté.');

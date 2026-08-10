@@ -11,8 +11,15 @@ use App\Http\Controllers\Technitian\DataEntryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/technitian', [TechnitianDashboardController::class, 'index'])->name('admin.technitian.index');
+Route::get('/technitian/missions/kanban', [MissionController::class, 'kanban'])->name('admin.technitian.missions.kanban');
+Route::post('/technitian/missions/{mission}/status', [MissionController::class, 'updateStatus'])->name('admin.technitian.missions.status');
 Route::get('/technitian/missions', [MissionController::class, 'index'])->name('admin.technitian.missions');
+Route::get('/technitian/missions/create', [MissionController::class, 'create'])->name('admin.technitian.missions.create');
+Route::post('/technitian/missions', [MissionController::class, 'store'])->name('admin.technitian.missions.store');
 Route::get('/technitian/missions/{mission}', [MissionController::class, 'show'])->name('admin.technitian.missions.show');
+Route::get('/technitian/missions/{mission}/edit', [MissionController::class, 'edit'])->name('admin.technitian.missions.edit');
+Route::put('/technitian/missions/{mission}', [MissionController::class, 'update'])->name('admin.technitian.missions.update');
+Route::delete('/technitian/missions/{mission}', [MissionController::class, 'destroy'])->name('admin.technitian.missions.destroy');
 Route::post('/technitian/missions/{mission}/complete', [MissionController::class, 'update'])->name('admin.technitian.missions.complete');
 Route::get('/technitian/reports/create', [ReportController::class, 'create'])->name('admin.technitian.reports.create');
 Route::post('/technitian/reports', [ReportController::class, 'store'])->name('admin.technitian.reports.store');

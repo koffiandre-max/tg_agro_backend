@@ -31,4 +31,41 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             return redirect()->back()->with('error', 'La ressource demandée est introuvable.');
         });
+
+        // Page 404 personnalisée
+        $exceptions->render(function (Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Page non trouvée.'], 404);
+            }
+            return response()->view('errors.404', [], 404);
+        });
+
+        // Page 403 personnalisée
+        $exceptions->render(function (Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Accès interdit.'], 403);
+            }
+            return response()->view('errors.403', [], 403);
+        });
+
+        // Page 500 personnalisée
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Erreur serveur interne.'], 500);
+            }
+            // Only render custom view for 500 errors in production
+            if (app()->isProduction() || $e instanceof \ErrorException) {
+                return response()->view('errors.500', [], 500);
+            }
+            // In development, let Laravel show the detailed error page
+            return null;
+        });
+
+        // Page 419 personnalisée (CSRF token mismatch)
+        $exceptions->render(function (Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Session expirée. Veuillez réessayer.'], 419);
+            }
+            return response()->view('errors.419', [], 419);
+        });
     })->create();

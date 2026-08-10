@@ -139,6 +139,7 @@
                                 name="client_id" 
                                 label="Client" 
                                 :options="$clients->map(fn($c) => ['value' => $c->id, 'label' => $c->user?->name ?? $c->nom ?? 'Client #' . $c->id])" 
+                                :value="$rapport->client_id ?? ''"
                                 placeholder="Sélectionner un client" 
                                 error="client_id"
                             />
@@ -162,6 +163,7 @@
                                 name="type_visite" 
                                 label="Type de visite" 
                                 :options="$typeVisiteOptions" 
+                                :value="$rapport->type_visite?->value ?? ''"
                                 placeholder="Sélectionner" 
                                 error="type_visite"
                             />
@@ -227,6 +229,7 @@
                                 name="conditions_meteo" 
                                 label="Conditions météo" 
                                 :options="$conditionMeteoOptions" 
+                                :value="$rapport->conditions_meteo?->value ?? ''"
                                 placeholder="Sélectionner" 
                                 error="conditions_meteo"
                             />
@@ -246,6 +249,7 @@
                                 name="duree_visite" 
                                 label="Durée de visite" 
                                 :options="$dureeVisiteOptions" 
+                                :value="$rapport->duree_visite?->value ?? ''"
                                 placeholder="Sélectionner" 
                                 error="duree_visite"
                             />
@@ -307,6 +311,7 @@
                                 name="stade_phenologique" 
                                 label="Stade phénologique" 
                                 :options="$stadePhenologiqueOptions" 
+                                :value="$visiteCulture->stade_phenologique?->value ?? ''"
                                 placeholder="Sélectionner" 
                                 error="stade_phenologique"
                             />
@@ -611,6 +616,7 @@
                             name="niveau_alerte" 
                             label="Niveau d'alerte" 
                             :options="[['value' => 'aucune', 'label' => 'Aucune'], ['value' => 'faible', 'label' => 'Faible'], ['value' => 'moderee', 'label' => 'Modérée'], ['value' => 'urgente', 'label' => 'Urgente']]" 
+                            :value="$rapport->niveau_alerte ?? ''"
                             placeholder="Sélectionner" 
                             error="niveau_alerte"
                         />
@@ -668,6 +674,7 @@
                             name="statut" 
                             label="Statut" 
                             :options="$statutRapportOptions" 
+                            :value="$rapport->statut?->value ?? ''"
                             placeholder="Sélectionner" 
                             error="statut"
                         />

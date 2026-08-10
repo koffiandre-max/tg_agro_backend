@@ -1,7 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-white p-10 font-serif text-slate-800">
+<div class="min-h-screen bg-white">
+    <div class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <a href="{{ route('admin.rapports-visite.show', $rapport) }}" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Retour au rapport
+            </a>
+            <button type="button" id="btn-print-rapport" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 active:bg-slate-950 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.548 42.548 0 0110.56 0m-10.56 0L6.34 17.5m-3.12-3.12l1.06-1.06M18.66 17.5l-1.06-1.06m-12.02 3.06l.72.096m10.56 0l-.72-.096M6.34 17.5h11.32M17.5 6.34v11.32" />
+                </svg>
+                Imprimer le PDF
+            </button>
+        </div>
+    </div>
+
+    <div id="rapport-print-content" class="p-10 font-serif text-slate-800">
 
     {{-- LETTERHEAD --}}
     <div class="text-center pb-4 mb-1 border-b-2 border-double border-slate-800">
@@ -344,5 +362,27 @@
         <p class="mt-0.5">Rapport #{{ $rapport->id }} · {{ now()->format('d/m/Y à H:i') }}</p>
     </div>
 
-</div>
+    </div>
+
+    <script src="/print/print.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('btn-print-rapport');
+            if (btn && typeof $.EPrint === 'function') {
+                btn.addEventListener('click', function() {
+                    $.EPrint('rapport-print-content', {
+                        titre: 'Rapport de visite #{{ $rapport->id }}',
+                        popupWidth: 900,
+                        popupHeight: 1100,
+                        pageMargin: '1cm',
+                        keepOpen: true,
+                        closeDelay: 800,
+                        styles: [],
+                        scripts: []
+                    }).print();
+                });
+            }
+        });
+    </script>
+    </div>
 @endsection

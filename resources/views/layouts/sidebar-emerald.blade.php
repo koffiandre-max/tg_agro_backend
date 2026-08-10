@@ -5,22 +5,22 @@ $userRole = auth()->user()->role ?? 'client';
 
 // Couleurs profondes et modernes adaptées au design flottant
 $sidebarBg = match($userRole) {
-    'admin' => 'slate-950',
+    'admin' => 'yellow-600',
     'client' => 'emerald-600', 
-    'technician' => 'blue-900', 
+    'technician' => 'emerald-600', 
     default => 'emerald-600',
 };
 
 $sidebarBorder = match($userRole) {
-    'admin' => 'border-slate-800',
+    'admin' => 'border-yellow-800',
     'client' => 'border-emerald-600', 
-    'technician' => 'border-blue-900/50', 
+    'technician' => 'border-emerald-900/50', 
     default => 'border-emerald-600',
 };
 
 // Classes de survol et actif fixes basées sur du blanc/transparent (visible sur tous les fonds)
-$sidebarHoverBg = 'hover:bg-white/10 hover:text-white';
-$sidebarActiveBg = 'bg-white/20 text-white font-semibold shadow-sm border-r-2 border-white';
+$sidebarHoverBg = 'hover:bg-slate-950 hover:text-white';
+$sidebarActiveBg = 'bg-slate-950 text-white font-semibold shadow-sm border-l-2 border-white';
 $textColor = 'text-white';
 @endphp
 

@@ -13,7 +13,7 @@ Route::delete('/rapports-visite/{id}', [RapportVisiteController::class, 'destroy
 
 // Validation et rejet
 Route::get('/rapports-visite/{id}/validate', [RapportVisiteController::class, 'validate'])->name('admin.rapports-visite.validate');
-Route::get('/rapports-visite/{id}/reject', [RapportVisiteController::class, 'reject'])->name('admin.rapports-visite.reject');
+Route::post('/rapports-visite/{id}/reject', [RapportVisiteController::class, 'reject'])->name('admin.rapports-visite.reject');
 
 // Impression
 Route::get('/rapports-visite/{id}/print', [RapportVisiteController::class, 'print'])->name('admin.rapports-visite.print');

@@ -37,8 +37,15 @@ class Navigation
             [
                 'name' => 'Gestion des Techniciens',
                 'route' => 'admin.technicians.index',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 18.725A7.488 7.488 0 0012 15.75a7.482 7.482 0 00-6 3m12 0v.275A7.488 7.488 0 0012 15.75a7.482 7.482 0 00-6 3v.275m12 0h.008v-.275A7.488 7.488 0 0012 15.75a7.482 7.482 0 00-6 3v.275"/>',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 18.725A7.488 7.488 0 0012 15.75a7.482 7.482 0 00-6 3m12 0v.275A7.488 7.488 0 0012 15.75a7.482 7.482 0 00-6 3v.275"/>',
                 'segments' => ['admin', 'technicians'],
+                'can' => $user->role === 'admin',
+            ],
+            [
+                'name' => 'Kanban Missions',
+                'route' => 'admin.technitian.missions.kanban',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
+                'segments' => ['admin', 'technitian', 'missions', 'kanban'],
                 'can' => $user->role === 'admin',
             ],
             [
@@ -48,13 +55,13 @@ class Navigation
                 'segments' => ['admin', 'farms'],
                 'can' => $user->role === 'admin',
             ],
-            [
-                'name' => 'Gestion des Rapports',
-                'route' => 'admin.reports.datatable',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>',
-                'segments' => ['admin', 'reports'],
-                'can' => $user->role === 'admin',
-            ],
+            // [
+            //     'name' => 'Gestion des Rapports',
+            //     'route' => 'admin.reports.datatable',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>',
+            //     'segments' => ['admin', 'reports'],
+            //     'can' => $user->role === 'admin',
+            // ],
             [
                 'name' => 'Rapports de Visite',
                 'route' => 'admin.rapports-visite.index',
@@ -84,7 +91,7 @@ class Navigation
                 'can' => $user->role === 'admin',
             ],
             [
-                'name' => 'Validation des Données',
+                'name' => 'Diagnostique du terrain',
                 'route' => 'admin.data.validation',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
                 'segments' => ['admin', 'data'],
@@ -131,9 +138,9 @@ class Navigation
             // ============================================
             [
                 'name' => 'Mes Exploitations',
-                'route' => 'admin.portail.index',
+                'route' => 'admin.portail.farms',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.188-1.066A2.25 2.25 0 012.25 17.5v-11.5a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v11.5a2.25 2.25 0 01-2.25 2.25L9 18.75v-8.25z"/>',
-                'segments' => ['admin', 'portail'],
+                'segments' => ['admin', 'portail', 'farms'],
                 'can' => $user->role === 'client',
             ],
             [
@@ -181,6 +188,13 @@ class Navigation
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.42 17.816l-3.42-3.42a1 1 0 00-1.42 0L3 16.25V5.25a2.25 2.25 0 012.25-2.25h10.5A2.25 2.25 0 0118 5.25v11a2.25 2.25 0 01-2.25 2.25H5.25"/>',
                 'segments' => ['admin', 'technitian', 'missions'],
                 'can' => $user->role === 'technician',
+            ],
+            [
+                'name' => 'Tableau Kanban',
+                'route' => 'admin.technitian.missions',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
+                'segments' => ['admin', 'technitian', 'missions', 'kanban'],
+                'can' => $user->role === 'technician' || $user->role === 'admin',
             ],
             [
                 'name' => 'Dépôt Rapport',

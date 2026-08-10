@@ -98,6 +98,12 @@
             } else {
                 this.selectedValues = val;
                 this.close();
+                this.$nextTick(() => {
+                    if (this.$refs.hiddenInput) {
+                        this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        this.$refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
             }
         },
 
@@ -106,12 +112,24 @@
             const val = String(value);
             if (this.isMultiple && Array.isArray(this.selectedValues)) {
                 this.selectedValues = this.selectedValues.filter(v => String(v) !== val);
+                this.$nextTick(() => {
+                    if (this.$refs.hiddenInput) {
+                        this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        this.$refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
             }
         },
 
         clear() {
             if (this.isDisabled) return;
             this.selectedValues = this.isMultiple ? [] : '';
+            this.$nextTick(() => {
+                if (this.$refs.hiddenInput) {
+                    this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    this.$refs.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
         },
 
         isSelected(value) {
@@ -188,7 +206,7 @@
                 <input type="hidden" name="{{ $name }}[]" :value="val">
             </template>
         @else
-            <input type="hidden" name="{{ $name }}" :value="selectedValues" id="{{ $id }}">
+            <input type="hidden" name="{{ $name }}" :value="selectedValues" id="{{ $id }}" x-ref="hiddenInput">
         @endif
     @endif
 

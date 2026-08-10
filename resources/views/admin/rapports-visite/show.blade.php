@@ -13,7 +13,7 @@
     $statut = $statutColors[$rapport->statut?->value] ?? ['label' => $rapport->statut?->label() ?? '—', 'bg' => 'bg-gray-100', 'text' => 'text-gray-700', 'ring' => 'ring-gray-600/20'];
 @endphp
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6" x-data="{ activeTab: 'resume' }">
+<div class="max-w-7xl mx-auto px-4 sm:px-6" x-data="{ activeTab: 'resume', rejectOpen: false }">
 
     {{-- Header --}}
     <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -95,7 +95,7 @@
                         <x-ui.btn href="{{ route('admin.rapports-visite.validate', $rapport->id) }}" variant="success" icon="check" class="w-full">
                             Valider
                         </x-ui.btn>
-                        <x-ui.btn href="{{ route('admin.rapports-visite.reject', $rapport->id) }}" variant="danger" icon="x" class="w-full">
+                        <x-ui.btn type="button" @click="rejectOpen = true" variant="danger" icon="x" class="w-full">
                             Rejeter
                         </x-ui.btn>
                     @endif
@@ -532,5 +532,59 @@
             </div>
         </div>
     </div>
+
+{{-- Modal de rejet --}}
+<div x-cloak x-show="rejectOpen" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="rejectModalTitle">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="rejectOpen = false"></div>
+    <div class="relative flex items-center justify-center min-h-screen p-4">
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 bg-red-600 text-white flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 id="rejectModalTitle" class="text-lg font-bold">Rejeter le rapport</h3>
+                        <p class="text-xs text-red-100 mt-0.5">Ce rapport sera marqué comme rejeté.</p>
+                    </div>
+                </div>
+                <button type="button" @click="rejectOpen = false" class="text-white/80 hover:text-white transition-colors" aria-label="Fermer">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.rapports-visite.reject', $rapport->id) }}" class="px-6 py-6 space-y-4">
+                @csrf
+                <div>
+                    <label for="motif_rejet" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                        Motif du rejet <span class="text-red-600">*</span>
+                    </label>
+                    <textarea name="motif_rejet" id="motif_rejet" rows="4" required maxlength="500"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-y"
+                              placeholder="Expliquez la raison du rejet du rapport..."></textarea>
+                    @error('motif_rejet') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" @click="rejectOpen = false"
+                            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Confirmer le rejet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </div>
 @endsection

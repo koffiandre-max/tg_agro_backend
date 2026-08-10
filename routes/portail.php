@@ -9,6 +9,7 @@ use App\Http\Controllers\Portail\DataEntryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/portail', [PortailDashboardController::class, 'index'])->name('admin.portail.index');
+Route::get('/portail/farms', [PortailDashboardController::class, 'farms'])->name('admin.portail.farms');
 Route::get('/portail/gallery', [GalleryController::class, 'index'])->name('admin.portail.gallery');
 Route::get('/portail/reports', [ReportController::class, 'index'])->name('admin.portail.reports');
 Route::get('/portail/reports/{report}/download', [ReportController::class, 'download'])->name('admin.portail.reports.download');
