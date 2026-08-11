@@ -90,9 +90,14 @@ class RapportsVisiteTable extends Component
 
     public function render()
     {
+        $user = auth()->user();
+
         $query = RapportVisite::query()
             ->with(['technicien', 'client.user', 'farm'])
             ->withCount('photos')
+            ->when($user && $user->role !== 'admin', function ($q) use ($user) {
+                $q->where('technicien_id', $user->id);
+            })
             ->when($this->search, function ($q) {
                 $q->where(function ($q) {
                     $q->where('localisation_parcelle', 'like', "%{$this->search}%")

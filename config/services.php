@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'faostat' => [
+        'base_url' => env('FAOSTAT_API_URL', 'https://api.faostat.org/v1/data'),
+        'api_key' => env('FAOSTAT_API_KEY'),
+        'timeout' => env('FAOSTAT_TIMEOUT', 10),
+        'cache_ttl' => env('FAOSTAT_CACHE_TTL', 86400),
+    ],
+
 ];

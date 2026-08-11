@@ -7,6 +7,7 @@ use App\Http\Middleware\TechnicianMiddleware;
 use App\Models\Report;
 use App\Models\User;
 use App\Services\SendmailService;
+use App\Services\FarmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,7 +23,8 @@ class ReportController extends Controller
         $user = Auth::user();
         $technicianId = $user->technician?->id;
         $farmData = app(FarmService::class)->getFarmsAndClients($technicianId);
-        extract($farmData->toArray());
+        $farms = $farmData['farms'];
+        $clients = $farmData['clients'];
 
         $formAction = route('admin.technitian.reports.store');
 

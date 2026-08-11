@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portail;
 
 use App\Http\Controllers\Controller;
 use App\Models\Farm;
+use App\Models\MarketPrice;
 use Illuminate\Http\Request;
 
 class PortailDashboardController extends Controller
@@ -21,7 +22,11 @@ class PortailDashboardController extends Controller
                 ->get();
         }
 
-        return view('portail.dashboard', compact('farms'));
+        $marketPrices = MarketPrice::orderBy('product_name')
+            ->limit(6)
+            ->get();
+
+        return view('portail.dashboard', compact('farms', 'marketPrices'));
     }
 
     public function farms()

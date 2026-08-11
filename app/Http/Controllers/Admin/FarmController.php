@@ -22,6 +22,18 @@ use Illuminate\Http\Request;
 
 class FarmController extends Controller
 {
+    /**
+     * Génère une référence de dossier unique au format DOS-YYYY-NNNN.
+     */
+    private function generateReferenceDossier(): string
+    {
+        do {
+            $reference = 'DOS-' . date('Y') . '-' . str_pad(random_int(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (Farm::where('reference_dossier', $reference)->exists());
+
+        return $reference;
+    }
+
     public function index()
     {
         return view('admin.farms.datatable');
@@ -190,6 +202,8 @@ class FarmController extends Controller
             'verificateur_signature' => ['nullable', 'string'],
         ]);
 
+        $validated['reference_dossier'] = $this->generateReferenceDossier();
+
         Farm::create($validated);
 
         return redirect()->route('admin.farms.index')->with('success', 'Exploitation créée avec succès.');
@@ -296,6 +310,11 @@ class FarmController extends Controller
         ]);
 
         $farm = Farm::findOrFail($id);
+
+        if (empty($validated['reference_dossier'])) {
+            $validated['reference_dossier'] = $this->generateReferenceDossier();
+        }
+
         $farm->update($validated);
 
         return redirect()->route('admin.farms.show', $farm)->with('success', 'Exploitation mise à jour avec succès.');

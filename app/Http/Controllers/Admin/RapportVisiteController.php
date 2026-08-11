@@ -20,6 +20,17 @@ use Illuminate\Support\Facades\Auth;
 
 class RapportVisiteController extends Controller
 {
+    /**
+     * Empêche un technicien d'accéder aux rapports des autres techniciens.
+     */
+    protected function ensureOwned(RapportVisite $rapport): void
+    {
+        $user = Auth::user();
+        if ($user && $user->role === 'technician' && $rapport->technicien_id !== $user->id) {
+            abort(403, 'Accès non autorisé.');
+        }
+    }
+
     public function index()
     {
         return view('admin.rapports-visite.datatable');
@@ -27,7 +38,14 @@ class RapportVisiteController extends Controller
 
     public function create()
     {
-        $techniciens = User::where('role', 'technician')->orWhere('role', 'admin')->get(['id', 'name', 'role', 'type_technicien']);
+        $user = Auth::user();
+
+        if ($user && $user->role === 'technician') {
+            $techniciens = User::where('id', $user->id)->get(['id', 'name', 'role', 'type_technicien']);
+        } else {
+            $techniciens = User::where('role', 'technician')->orWhere('role', 'admin')->get(['id', 'name', 'role', 'type_technicien']);
+        }
+
         $clients = Client::with('user')->get();
         $farms = Farm::all(['id', 'name']);
 
@@ -56,6 +74,7 @@ class RapportVisiteController extends Controller
             'techniciens' => $techniciens,
             'clients' => $clients,
             'farms' => $farms,
+            'defaultTechnicienId' => ($user && $user->role === 'technician') ? $user->id : null,
             'typeVisiteOptions' => $typeVisiteOptions,
             'conditionMeteoOptions' => $conditionMeteoOptions,
             'dureeVisiteOptions' => $dureeVisiteOptions,
@@ -159,6 +178,8 @@ class RapportVisiteController extends Controller
 
     public function show(RapportVisite $rapports_visite)
     {
+        $this->ensureOwned($rapports_visite);
+
         $rapports_visite->load([
             'technicien',
             'client.user',
@@ -179,8 +200,14 @@ class RapportVisiteController extends Controller
     public function edit($id)
     {
         $rapport = RapportVisite::with(['visiteCultures', 'visiteElevage', 'visiteAutres'])->findOrFail($id);
+        $this->ensureOwned($rapport);
 
-        $techniciens = User::where('role', 'technician')->orWhere('role', 'admin')->get(['id', 'name', 'role', 'type_technicien']);
+        $user = Auth::user();
+        if ($user && $user->role === 'technician') {
+            $techniciens = User::where('id', $user->id)->get(['id', 'name', 'role', 'type_technicien']);
+        } else {
+            $techniciens = User::where('role', 'technician')->orWhere('role', 'admin')->get(['id', 'name', 'role', 'type_technicien']);
+        }
         $clients = Client::with('user')->get();
         $farms = Farm::all(['id', 'name']);
 
@@ -200,6 +227,9 @@ class RapportVisiteController extends Controller
 
     public function update(Request $request, $id)
     {
+        $rapport = RapportVisite::findOrFail($id);
+        $this->ensureOwned($rapport);
+
         // Validation des champs communs (rapport_visites)
         $validated = $request->validate([
             'technicien_id' => ['required', 'exists:users,id'],
@@ -224,7 +254,6 @@ class RapportVisiteController extends Controller
             'statut' => ['nullable', 'string', 'in:brouillon,en_attente_validation,valide,rejete'],
         ]);
 
-        $rapport = RapportVisite::findOrFail($id);
         $rapport->update($validated);
 
         // Gérer la table annexe selon le type d'activité
@@ -321,6 +350,7 @@ class RapportVisiteController extends Controller
     public function destroy($id)
     {
         $rapport = RapportVisite::findOrFail($id);
+        $this->ensureOwned($rapport);
         $rapport->delete();
 
         return redirect()->route('admin.rapports-visite.index')->with('success', 'Rapport de visite supprimé avec succès.');

@@ -126,7 +126,36 @@
             <div class="grid grid-cols-1 gap-6">
                 <x-ui.card>
                     <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Intrants Utilisés</h3>
-                    <p class="text-sm text-gray-700 whitespace-pre-line">{{ $entry->inputs_used ?? '—' }}</p>
+                    @php
+                        $raw = $entry->inputs_used;
+                        $decoded = null;
+                        if (is_string($raw) && !empty(trim($raw))) {
+                            $decoded = json_decode(trim($raw), true);
+                            if (!is_array($decoded)) {
+                                $decoded = null;
+                            }
+                        }
+                    @endphp
+
+                    @if($decoded)
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($decoded as $key => $value)
+                                @if(!empty($value))
+                                    <span class="inline-flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-sm font-medium text-purple-700">
+                                        <svg class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591l-2.359 2.359a2.25 2.25 0 00-.659 1.59v3.806a2.25 2.25 0 00.659 1.591l.341.341a2.25 2.25 0 01.659 1.591v2.224M15 4.5l-.001.001M15 4.5a2.25 2.25 0 00-2.25 2.25v3.039M15 4.5a2.25 2.25 0 012.25 2.25v3.039" />
+                                        </svg>
+                                        <span class="capitalize text-purple-500">{{ str_replace('_', ' ', $key) }}</span>
+                                        <span class="text-purple-900">{{ $value }}</span>
+                                    </span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @elseif(!empty($raw))
+                        <p class="text-sm text-gray-700 whitespace-pre-line">{{ $raw }}</p>
+                    @else
+                        <p class="text-sm text-gray-400">Aucun intrant renseigné.</p>
+                    @endif
                 </x-ui.card>
 
                 <x-ui.card>

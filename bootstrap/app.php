@@ -54,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['error' => 'Erreur serveur interne.'], 500);
             }
             // Only render custom view for 500 errors in production
-            if (app()->isProduction() || $e instanceof \ErrorException) {
+            if (app()->isProduction()) {
                 return response()->view('errors.500', [], 500);
             }
             // In development, let Laravel show the detailed error page

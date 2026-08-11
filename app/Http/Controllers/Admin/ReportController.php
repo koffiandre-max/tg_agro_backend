@@ -59,7 +59,8 @@ class ReportController extends Controller
     public function create()
     {
         $farmData = app(FarmService::class)->getFarmsAndClients();
-        extract($farmData->toArray());
+        $farms = $farmData['farms'];
+        $clients = $farmData['clients'];
 
         $formAction = route('admin.reports.store');
 

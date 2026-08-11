@@ -11,6 +11,47 @@
         <p class="text-indigo-100">Voici le résumé de vos exploitations agricoles</p>
     </div>
 
+    {{-- Prix du marché (produits vivriers - Côte d'Ivoire) --}}
+    {{-- <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-5">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2.5">
+                <span class="flex size-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
+                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="text-sm font-semibold text-emerald-900">Prix du marché</h3>
+                    <p class="text-xs text-emerald-700/70">Produits vivriers · Côte d'Ivoire</p>
+                </div>
+            </div>
+            @if($marketPrices->isNotEmpty())
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                    <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Mis à jour le {{ $marketPrices->max('recorded_at')?->format('d/m/Y') ?? '—' }}
+                </span>
+            @endif
+        </div>
+
+        @if($marketPrices->isEmpty())
+            <p class="mt-4 text-sm text-emerald-700/70">Aucun prix de référence disponible pour le moment.</p>
+        @else
+            <div class="mt-4 flex flex-wrap gap-2.5">
+                @foreach($marketPrices as $price)
+                    <div class="flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 shadow-sm">
+                        <span class="text-sm font-medium text-slate-800">{{ $price->product_name }}</span>
+                        <span class="text-sm font-bold text-emerald-700">
+                            {{ number_format($price->price_per_unit, 0, ',', ' ') }} <span class="text-xs font-normal text-emerald-600/80">{{ $price->currency ?? 'FCFA' }}/{{ $price->unit ?? 'kg' }}</span>
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+            <p class="mt-3 text-xs text-emerald-700/60">
+                Source : {{ $marketPrices->first()->source ?? '—' }} · Région : {{ $marketPrices->first()->region ?? '—' }}
+            </p>
+        @endif
+    </div> --}}
+
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl p-6 border border-gray-200">

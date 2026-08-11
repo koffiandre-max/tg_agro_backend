@@ -313,35 +313,36 @@ class DatabaseSeeder extends Seeder
             'auto_renew' => true,
         ]);
 
-        // Créer des market_prices
-        MarketPrice::create([
-            'product_name' => 'Cacao',
-            'unit' => 'kg',
-            'price_per_unit' => 850,
-            'currency' => 'FCFA',
-            'region' => 'Abidjan',
-            'recorded_at' => Carbon::now(),
-            'source' => 'Conseil Café-Cacao',
-        ]);
+        // Créer des market_prices (produits vivriers - Côte d'Ivoire)
+        $marketProducts = [
+            ['product_name' => 'Cacao', 'unit' => 'kg', 'price_per_unit' => 850, 'region' => 'Abidjan', 'source' => 'Conseil Café-Cacao'],
+            ['product_name' => 'Café', 'unit' => 'kg', 'price_per_unit' => 1200, 'region' => 'Man', 'source' => 'Conseil Café-Cacao'],
+            ['product_name' => 'Coton', 'unit' => 'kg', 'price_per_unit' => 450, 'region' => 'Korhogo', 'source' => 'Conseil Coton et Anacarde'],
+            ['product_name' => 'Anacarde', 'unit' => 'kg', 'price_per_unit' => 700, 'region' => 'Bondoukou', 'source' => 'Conseil Coton et Anacarde'],
+            ['product_name' => 'Igname', 'unit' => 'kg', 'price_per_unit' => 350, 'region' => 'Daloa', 'source' => 'MARCO'],
+            ['product_name' => 'Manioc', 'unit' => 'kg', 'price_per_unit' => 200, 'region' => 'Yamoussoukro', 'source' => 'MARCO'],
+            ['product_name' => 'Plantain', 'unit' => 'kg', 'price_per_unit' => 300, 'region' => 'Abobo', 'source' => 'MARCO'],
+            ['product_name' => 'Banane', 'unit' => 'kg', 'price_per_unit' => 250, 'region' => 'Sinfra', 'source' => 'MARCO'],
+            ['product_name' => 'Maïs', 'unit' => 'kg', 'price_per_unit' => 275, 'region' => 'Bouaké', 'source' => 'FENACOVICI'],
+            ['product_name' => 'Riz local', 'unit' => 'kg', 'price_per_unit' => 500, 'region' => 'Gagnoa', 'source' => 'FENACOVICI'],
+            ['product_name' => 'Arachide', 'unit' => 'kg', 'price_per_unit' => 600, 'region' => 'Katiola', 'source' => 'FENASOF'],
+            ['product_name' => 'Tomate', 'unit' => 'kg', 'price_per_unit' => 400, 'region' => 'Azaguié', 'source' => 'MARCO'],
+            ['product_name' => 'Piment', 'unit' => 'kg', 'price_per_unit' => 800, 'region' => 'Abengourou', 'source' => 'MARCO'],
+            ['product_name' => 'Gombo', 'unit' => 'kg', 'price_per_unit' => 350, 'region' => 'Divo', 'source' => 'MARCO'],
+            ['product_name' => 'Aubergine', 'unit' => 'kg', 'price_per_unit' => 300, 'region' => 'Tiassalé', 'source' => 'MARCO'],
+            ['product_name' => 'Patate douce', 'unit' => 'kg', 'price_per_unit' => 220, 'region' => 'Sassandra', 'source' => 'MARCO'],
+            ['product_name' => 'Ananas', 'unit' => 'kg', 'price_per_unit' => 320, 'region' => 'Bingerville', 'source' => 'MARCO'],
+            ['product_name' => 'Mangue', 'unit' => 'kg', 'price_per_unit' => 280, 'region' => 'San-Pédro', 'source' => 'MARCO'],
+            ['product_name' => 'Orange', 'unit' => 'kg', 'price_per_unit' => 400, 'region' => 'Bouna', 'source' => 'MARCO'],
+            ['product_name' => 'Citron', 'unit' => 'kg', 'price_per_unit' => 500, 'region' => 'Grand-Bassam', 'source' => 'MARCO'],
+        ];
 
-        MarketPrice::create([
-            'product_name' => 'Café',
-            'unit' => 'kg',
-            'price_per_unit' => 1200,
-            'currency' => 'FCFA',
-            'region' => 'Man',
-            'recorded_at' => Carbon::now(),
-            'source' => 'Conseil Café-Cacao',
-        ]);
-
-        MarketPrice::create([
-            'product_name' => 'Coton',
-            'unit' => 'kg',
-            'price_per_unit' => 450,
-            'currency' => 'FCFA',
-            'region' => 'Korhogo',
-            'recorded_at' => Carbon::now(),
-            'source' => 'Conseil Coton et Anacarde',
+        foreach ($marketProducts as $mp) {
+            MarketPrice::create(array_merge($mp, [
+                'currency' => 'FCFA',
+                'recorded_at' => Carbon::now(),
+            ]));
+        }
         ]);
 
         // Créer des messages

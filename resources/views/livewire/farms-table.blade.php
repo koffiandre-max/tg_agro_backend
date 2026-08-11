@@ -258,18 +258,52 @@
                 </p>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Technicien</label>
-                    <select wire:model="selectedTechnicianId" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">— Aucun —</option>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
+
+                    <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                        {{-- Aucun --}}
+                        <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
+                                {{ is_null($selectedTechnicianId) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                            <input type="radio" name="technician_choice" value="" wire:model.live="selectedTechnicianId" class="sr-only">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Aucun</p>
+                                <p class="text-xs text-gray-500">Retirer l'assignation</p>
+                            </div>
+                        </label>
+
                         @foreach($technicians as $technician)
-                            <option value="{{ $technician->id }}">
-                                {{ $technician->user->name ?? 'Technicien #' . $technician->id }}
-                                @if($technician->user && $technician->user->phone)
-                                    ({{ $technician->user->phone }})
+                            @php
+                                $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
+                                $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
+                                $tType = $technician->type_technicien?->label();
+                            @endphp
+                            <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
+                                    {{ $selectedTechnicianId == $technician->id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                                <input type="radio" name="technician_choice" value="{{ $technician->id }}" wire:model.live="selectedTechnicianId" class="sr-only">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                                    {{ strtoupper(substr($tName, 0, 1)) }}
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
+                                    <p class="truncate text-xs text-gray-500">
+                                        @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
+                                        @if($tType && $tPhone) · @endif
+                                        {{ $tPhone ?? '' }}
+                                    </p>
+                                </div>
+                                @if($selectedTechnicianId == $technician->id)
+                                    <svg class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                 @endif
-                            </option>
+                            </label>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
             </div>
 

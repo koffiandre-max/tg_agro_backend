@@ -154,6 +154,12 @@ class FarmForm extends Component
 
     public ?string $commentaire_reseau = null;
 
+    public ?bool $surface_totale_concorde = null;
+    public ?bool $surface_cultivable_concorde = null;
+    public ?bool $exposition_concorde = null;
+    public ?bool $pente_concorde = null;
+    public ?bool $topographie_concorde = null;
+
     public ?string $observations_libres = null;
 
     public ?string $signature_date = null;
@@ -265,6 +271,12 @@ class FarmForm extends Component
             $this->reseau_telephonique = $farm->reseau_telephonique;
             $this->commentaire_reseau = $farm->commentaire_reseau;
 
+            $this->surface_totale_concorde = $farm->surface_totale_concorde;
+            $this->surface_cultivable_concorde = $farm->surface_cultivable_concorde;
+            $this->exposition_concorde = $farm->exposition_concorde;
+            $this->pente_concorde = $farm->pente_concorde;
+            $this->topographie_concorde = $farm->topographie_concorde;
+
             $this->observations_libres = $farm->observations_libres;
             $this->signature_date = $farm->signature_date?->format('Y-m-d');
             $this->signature = $farm->signature;
@@ -361,6 +373,12 @@ class FarmForm extends Component
             'commentaire_electricite' => 'nullable|string',
             'reseau_telephonique' => 'nullable|boolean',
             'commentaire_reseau' => 'nullable|string',
+
+            'surface_totale_concorde' => 'nullable|boolean',
+            'surface_cultivable_concorde' => 'nullable|boolean',
+            'exposition_concorde' => 'nullable|boolean',
+            'pente_concorde' => 'nullable|boolean',
+            'topographie_concorde' => 'nullable|boolean',
 
             'observations_libres' => 'nullable|string',
             'signature_date' => 'nullable|date',
@@ -463,6 +481,12 @@ class FarmForm extends Component
             'commentaire_electricite' => $this->commentaire_electricite,
             'reseau_telephonique' => $this->reseau_telephonique,
             'commentaire_reseau' => $this->commentaire_reseau,
+
+            'surface_totale_concorde' => $this->surface_totale_concorde,
+            'surface_cultivable_concorde' => $this->surface_cultivable_concorde,
+            'exposition_concorde' => $this->exposition_concorde,
+            'pente_concorde' => $this->pente_concorde,
+            'topographie_concorde' => $this->topographie_concorde,
 
             'observations_libres' => $this->observations_libres,
             'signature_date' => $this->signature_date ?: null,

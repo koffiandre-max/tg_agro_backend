@@ -21,13 +21,22 @@ class SupportChatController extends Controller
 
     public function index()
     {
-        return view('admin.messages.index');
-    }
-
-    public function listConversations()
-    {
         $admin = Auth::user();
 
+        $conversations = $this->buildConversations($admin);
+
+        $activeUser = $conversations->first()['user'] ?? null;
+
+        return view('admin.messages.index', [
+            'conversations' => $conversations,
+            'apiBase' => '/messages',
+            'activeUserId' => $activeUser['id'] ?? null,
+            'pageTitle' => 'Messages - Support',
+        ]);
+    }
+
+    private function buildConversations($admin)
+    {
         $contactIds = DB::table('messages')
             ->selectRaw('CASE WHEN sender_id = ? THEN user_id ELSE sender_id END as contact_id', [$admin->id])
             ->where(function ($query) use ($admin) {
@@ -39,7 +48,7 @@ class SupportChatController extends Controller
             ->pluck('contact_id');
 
         if ($contactIds->isEmpty()) {
-            return response()->json([]);
+            return collect();
         }
 
         $userIds = $contactIds->values();
@@ -62,7 +71,7 @@ class SupportChatController extends Controller
 
         $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
-        $result = $userIds->map(function ($userId) use ($users, $lastMessages, $unreadCounts) {
+        return $userIds->map(function ($userId) use ($users, $lastMessages, $unreadCounts, $admin) {
             $user = $users[$userId] ?? null;
             if (!$user) return null;
 
@@ -80,14 +89,24 @@ class SupportChatController extends Controller
                 'unread_count' => $unreadCounts->get($userId, 0),
             ];
         })->filter()->sortByDesc('last_created_at')->values();
+    }
 
-        return response()->json($result);
+    public function listConversations()
+    {
+        $admin = Auth::user();
+
+        return response()->json($this->buildConversations($admin));
     }
 
     public function show(User $user)
     {
+        $conversations = $this->buildConversations(Auth::user());
+
         return view('admin.messages.index', [
-            'selectedUser' => $user,
+            'conversations' => $conversations,
+            'apiBase' => '/messages',
+            'activeUserId' => $user->id,
+            'pageTitle' => 'Messages - Support',
         ]);
     }
 

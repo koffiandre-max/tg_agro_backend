@@ -33,7 +33,16 @@ class MessageController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        return view('portail.messages.index', compact('messages', 'support'));
+        return view('portail.messages.index', [
+            'messages' => $messages,
+            'support' => $support,
+            'apiBase' => '/portail/messages',
+            'peer' => $support ? [
+                'name' => $support->name,
+                'initials' => strtoupper(substr($support->name, 0, 2)),
+            ] : null,
+            'pageTitle' => 'Messagerie',
+        ]);
     }
 
     public function list(Request $request): JsonResponse

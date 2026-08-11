@@ -373,6 +373,10 @@
               'ml-20': sidebarCollapsed && isDesktop,
               'ml-0': !isDesktop
           }">
+        {{-- Bandeau prix du marché (clients) --}}
+        @if(($userRole ?? 'client') === 'client')
+            @include('components.market-marquee')
+        @endif
         @yield('content')
     </main>
 

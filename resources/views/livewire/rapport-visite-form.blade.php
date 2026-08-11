@@ -16,7 +16,7 @@
     $typeActiviteValue = old('type_activite', $rapport->type_activite?->value ?? 'culture');
 
     // Déterminer le type de technicien sélectionné (pour l'édition)
-    $selectedTechnicien = $techniciens->firstWhere('id', old('technicien_id', $rapport->technicien_id ?? ''));
+    $selectedTechnicien = $techniciens->firstWhere('id', old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')));
     $selectedTypeTechnicien = $selectedTechnicien?->type_technicien?->value ?? ($selectedTechnicien?->type_technicien ?? '');
     $isAdmin = $selectedTechnicien?->role === 'admin';
 @endphp
@@ -112,7 +112,7 @@
                                     <option value="{{ $t->id }}" 
                                             data-type-technicien="{{ $t->type_technicien?->value ?? $t->type_technicien ?? '' }}"
                                             data-role="{{ $t->role }}"
-                                            {{ old('technicien_id', $rapport->technicien_id ?? '') == $t->id ? 'selected' : '' }}>
+                                            {{ old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')) == $t->id ? 'selected' : '' }}>
                                         {{ $t->name }}
                                         @if($t->type_technicien)
                                             ({{ $t->type_technicien instanceof \App\Enums\TypeTechnicien ? $t->type_technicien->label() : $t->type_technicien }})
@@ -726,7 +726,7 @@
         return {
             currentStep: 0,
             typeActivite: '{{ $typeActiviteValue }}',
-            technicienId: '{{ old('technicien_id', $rapport->technicien_id ?? '') }}',
+            technicienId: '{{ old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')) }}',
             canChooseActivite: true,
             steps: [
                 { label: 'Informations générales', completed: false },

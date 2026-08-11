@@ -1,16 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\MarketPriceApiController;
+
+Route::get('/api/market-prices/cote-divoire', [MarketPriceApiController::class, 'coteDIvoire'])
+    ->name('api.market-prices.cote-divoire');
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::middleware('guest')->group(function () {
-    require __DIR__ . '/auth.php';
+    Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+
     require __DIR__ . '/dashboard.php';
     require __DIR__ . '/admin.php';
     require __DIR__ . '/clients.php';
