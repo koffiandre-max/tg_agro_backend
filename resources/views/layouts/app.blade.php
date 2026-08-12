@@ -146,6 +146,7 @@
             }));
         });
     </script>
+    <script src="{{ asset('chart/chart.umd.min.js') }}"></script>
     <script src="/alpine/alpine.js" defer></script>
     <script src="/alpine/collapse.js" defer></script>
     <script src="{{ asset('tailwind/tailwind.js') }}"></script>

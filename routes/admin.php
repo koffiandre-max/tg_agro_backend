@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DataValidationController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\MarketPriceController;
@@ -57,6 +58,12 @@ Route::get('/calendar', [CalendarController::class, 'index'])->name('admin.calen
 Route::post('/calendar/missions', [CalendarController::class, 'store'])->name('admin.calendar.missions.store');
 Route::put('/calendar/missions/{mission}', [CalendarController::class, 'update'])->name('admin.calendar.missions.update');
 Route::delete('/calendar/missions/{mission}', [CalendarController::class, 'destroy'])->name('admin.calendar.missions.destroy');
+
+// ============================================
+// PARAMÈTRES PLATEFORME (KPIs & fonctionnalités)
+// ============================================
+Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
+Route::post('/settings/features', [SettingsController::class, 'updateFeatures'])->name('admin.settings.features.update');
 
 // ============================================
 // ESPACE TECHNICIEN (défini dans routes/technitian.php)
