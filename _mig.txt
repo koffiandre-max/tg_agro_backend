@@ -1,5 +1,0 @@
-
-   INFO  Running migrations.  
-
-  2026_08_12_000001_create_dashboard_features_table .................................................................. 185.13ms DONE
-
