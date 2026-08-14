@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Auth;
 
 class DataEntryController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware(TechnicianMiddleware::class);
-    // }
+    public function __construct()
+    {
+        $this->middleware(TechnicianMiddleware::class);
+    }
 
     public function index()
     {

@@ -8,11 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('rapport_visite_photos')) {
+            return;
+        }
+
         Schema::create('rapport_visite_photos', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('rapport_visite_id')
-                ->constrained('rapports_visite')
+                ->constrained('rapport_visites')
                 ->cascadeOnDelete();
 
             $table->string('chemin');            // chemin/path du fichier stocké

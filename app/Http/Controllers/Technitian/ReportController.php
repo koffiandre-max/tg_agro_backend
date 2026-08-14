@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Technitian;
 
+use App\Events\ReportSubmitted;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\TechnicianMiddleware;
 use App\Models\Report;
@@ -10,6 +11,7 @@ use App\Services\SendmailService;
 use App\Services\FarmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 
 class ReportController extends Controller
 {

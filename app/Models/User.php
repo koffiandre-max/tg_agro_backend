@@ -40,9 +40,22 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'user_id');
     }
 
-    public function messages(): HasMany
+        public function messages(): HasMany
     {
         return $this->hasMany(Message::class, 'user_id');
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'utilisateur_id')
+            ->orderBy('date_creation', 'desc');
+    }
+
+    public function unreadNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'utilisateur_id')
+            ->where('lue', false)
+            ->orderBy('date_creation', 'desc');
     }
 
     protected function casts(): array

@@ -21,10 +21,28 @@
         </button>
     </div>
 
-    {{-- Cartes de Statistiques (KPIs) --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <template x-for="feature in features" :key="feature.key">
-            <div :class="feature.enabled ? '' : 'opacity-50 grayscale'">
+    {{-- Cartes de Statistiques (KPIs) — triables par glisser-déposer --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+         x-on:dragover.prevent
+         x-on:drop.prevent="dropAtEnd()">
+        <template x-for="(feature, index) in features" :key="feature.key">
+            <div draggable="true"
+                 class="transition-all duration-150 cursor-grab active:cursor-grabbing"
+                 :class="[
+                     feature.enabled ? '' : 'opacity-50 grayscale',
+                     dragIndex === index ? 'opacity-40 scale-[0.98]' : '',
+                     dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-yellow-400 rounded-2xl' : '',
+                 ]"
+                 @dragstart="dragStart(index)"
+                 @dragend="dragEnd()"
+                 @dragover.prevent="dragOverIndex = index"
+                 @drop.stop.prevent="dropAt(index)">
+                <div class="flex items-center justify-center gap-1.5 mb-2 py-1 rounded-lg border border-dashed border-slate-200 bg-slate-50/60 text-slate-400 select-none">
+                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 4a1 1 0 100 2h8a1 1 0 100-2H6zM6 9a1 1 0 100 2h8a1 1 0 100-2H6zM6 14a1 1 0 100 2h8a1 1 0 100-2H6z"/>
+                    </svg>
+                    <span class="text-[10px] uppercase tracking-wider font-semibold">Glisser pour réordonner</span>
+                </div>
                 @include('admin.settings.partials.kpi-card-alpine')
             </div>
         </template>
@@ -60,12 +78,49 @@
         </div>
     </div>
 
-    {{-- Graphiques (toutes les fonctionnalités ; grisées si désactivées) --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <x-ui.chart title="Répartition (Barres)" id="chartBar" type="bar" />
-        <x-ui.chart title="Évolution (Linéaire)" id="chartLine" type="line" />
-        <x-ui.chart title="Vue Polaire" id="chartPolar" type="polarArea" center />
-        <x-ui.chart title="Proportion (Donut)" id="chartDoughnut" type="doughnut" center />
+    {{-- Graphiques : un chart par statistique (3 par ligne) --}}
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <svg class="w-4.5 h-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+                </svg>
+                Graphiques par statistique
+            </h2>
+            <span class="text-xs text-slate-400">Évolution des créations sur les 6 derniers mois</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+             x-on:dragover.prevent
+             x-on:drop.prevent="dropAtEnd()">
+            <template x-for="(feature, index) in features" :key="feature.key">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col cursor-grab active:cursor-grabbing transition-all duration-150"
+                     draggable="true"
+                     :class="[
+                         feature.enabled ? '' : 'opacity-50 grayscale',
+                         dragIndex === index ? 'opacity-40 scale-[0.98]' : '',
+                         dragOverIndex === index && dragIndex !== index ? 'ring-2 ring-yellow-400' : '',
+                     ]"
+                     @dragstart="dragStart(index)"
+                     @dragend="dragEnd()"
+                     @dragover.prevent="dragOverIndex = index"
+                     @drop.stop.prevent="dropAt(index)">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 truncate pr-2" x-text="feature.label"></h3>
+                        <span class="text-lg font-black text-slate-900 shrink-0" x-text="feature.count"></span>
+                    </div>
+                    <div class="h-44">
+                        <canvas :id="'chart-' + feature.key"></canvas>
+                    </div>
+                    <p class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-400 text-center">
+                        Tendance
+                        <span :class="feature.trend >= 0 ? 'text-emerald-600' : 'text-red-600'"
+                              x-text="(feature.trend > 0 ? '+' : '') + feature.trend + '%'"></span>
+                        vs mois dernier
+                    </p>
+                </div>
+            </template>
+        </div>
     </div>
 </div>
 @endsection
@@ -76,27 +131,28 @@
         return {
             features: @json($features),
             stats: @json($stats),
+            monthLabels: @json($monthLabels),
             charts: {},
+            dragIndex: null,
+            dragOverIndex: null,
             init() {
                 this.renderCharts();
                 this.$watch('features', () => this.renderCharts(), { deep: true });
             },
             ready() {
                 return typeof Chart !== 'undefined'
-                    && document.getElementById('chartBar')
-                    && document.getElementById('chartLine')
-                    && document.getElementById('chartPolar')
-                    && document.getElementById('chartDoughnut');
+                    && this.features.length > 0
+                    && this.features.every(f => document.getElementById('chart-' + f.key));
             },
             activeFeatures() {
                 return this.features.filter(f => f.enabled);
             },
             chartData() {
-                const labels = this.features.map(f => f.label);
-                const counts = this.features.map(f => f.count);
-                const colors = this.stats.colors;
-                const disabled = this.features.map(f => !f.enabled);
-                return { labels, counts, colors, disabled };
+                return {
+                    labels: this.monthLabels,
+                    features: this.features,
+                    colors: this.stats.colors,
+                };
             },
             destroyCharts() {
                 Object.values(this.charts).forEach(c => c && c.destroy());
@@ -111,102 +167,92 @@
                 const data = this.chartData();
                 this.destroyCharts();
 
-                if (data.labels.length === 0) {
+                if (data.features.length === 0) {
                     return;
                 }
 
-                const ctxBar = document.getElementById('chartBar');
-                const ctxLine = document.getElementById('chartLine');
-                const ctxPolar = document.getElementById('chartPolar');
-                const ctxDoughnut = document.getElementById('chartDoughnut');
+                const colors = data.colors;
 
-                if (ctxBar) {
-                    this.charts.bar = new Chart(ctxBar, {
-                        type: 'bar',
-                        data: {
-                            labels: data.labels,
-                            datasets: [{
-                                label: 'Total',
-                                data: data.counts,
-                                backgroundColor: data.colors,
-                                borderRadius: 6,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                        }
-                    });
-                }
+                data.features.forEach((feature, index) => {
+                    const ctx = document.getElementById('chart-' + feature.key);
+                    if (! ctx) {
+                        return;
+                    }
 
-                if (ctxLine) {
-                    this.charts.line = new Chart(ctxLine, {
+                    const color = colors[index % colors.length];
+
+                    this.charts[feature.key] = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: data.labels,
                             datasets: [{
-                                label: 'Total',
-                                data: data.counts,
-                                borderColor: '#6366f1',
-                                backgroundColor: 'rgba(99,102,241,0.15)',
+                                label: feature.label,
+                                data: feature.monthly,
+                                borderColor: color,
+                                backgroundColor: color + '22',
                                 fill: true,
                                 tension: 0.35,
-                                pointBackgroundColor: '#6366f1',
+                                pointBackgroundColor: color,
+                                pointRadius: 2,
+                                pointHoverRadius: 4,
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (c) => c.parsed.y + ' création(s)',
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6, font: { size: 9 } }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { precision: 0 },
+                                    grid: { color: 'rgba(148,163,184,0.15)' }
+                                }
+                            }
                         }
                     });
+                });
+            },
+            dragStart(index) {
+                this.dragIndex = index;
+            },
+            dragEnd() {
+                this.dragIndex = null;
+                this.dragOverIndex = null;
+            },
+            moveTo(from, to) {
+                if (from === null || from === to) {
+                    return;
                 }
-
-                if (ctxPolar) {
-                    this.charts.polar = new Chart(ctxPolar, {
-                        type: 'polarArea',
-                        data: {
-                            labels: data.labels,
-                            datasets: [{
-                                data: data.counts,
-                                backgroundColor: data.colors.map(c => c + 'cc'),
-                                borderColor: '#fff',
-                                borderWidth: 1,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: { r: { beginAtZero: true, ticks: { precision: 0 } } }
-                        }
-                    });
-                }
-
-                if (ctxDoughnut) {
-                    this.charts.doughnut = new Chart(ctxDoughnut, {
-                        type: 'doughnut',
-                        data: {
-                            labels: data.labels,
-                            datasets: [{
-                                data: data.counts,
-                                backgroundColor: data.colors,
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '60%',
-                        }
-                    });
-                }
+                const arr = [...this.features];
+                const [moved] = arr.splice(from, 1);
+                arr.splice(to === null ? arr.length : to, 0, moved);
+                this.features = arr;
+                this.saveOrder();
+            },
+            dropAt(index) {
+                this.moveTo(this.dragIndex, index);
+                this.dragEnd();
+            },
+            dropAtEnd() {
+                this.moveTo(this.dragIndex, null);
+                this.dragEnd();
             },
             save() {
-                const selected = this.activeFeatures().map(f => f.key);
+                this.saveOrder();
+            },
+            saveOrder() {
+                const payload = this.features.map(f => ({ key: f.key, enabled: f.enabled }));
                 fetch('{{ route('admin.settings.features.update') }}', {
                     method: 'POST',
                     credentials: 'same-origin',
@@ -214,7 +260,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                     },
-                    body: JSON.stringify({ features: selected })
+                    body: JSON.stringify({ features: payload })
                 })
                 .then(() => {
                     if (window.NotificationManager) {
