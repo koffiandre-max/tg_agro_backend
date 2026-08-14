@@ -16,6 +16,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // dd($request->all());
         // Validation via Laravel Data
         $loginData = LoginData::from($request->all());
 

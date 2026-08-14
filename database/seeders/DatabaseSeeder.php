@@ -16,6 +16,7 @@ use App\Models\Subscription;
 use App\Models\Technician;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -23,6 +24,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Rendre le seeder rejouable : on vide les tables peuplées ici
+        // (les users sont gérés via firstOrCreate dans UserSeeder).
+        DB::statement('TRUNCATE TABLE clients, technicians, farms, missions, reports, photos, data_entries, subscriptions, market_prices, messages, invoices, invoice_lines RESTART IDENTITY CASCADE');
+
         // Appeler le UserSeeder pour créer les users de base
         $this->call(UserSeeder::class);
 

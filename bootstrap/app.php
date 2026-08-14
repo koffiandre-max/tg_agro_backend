@@ -25,6 +25,13 @@ return Application::configure(basePath: dirname(__DIR__))
             fn(Request $request) => $request->is('api/*'),
         );
 
+        $exceptions->report(function (Throwable $e) {
+            file_put_contents(
+                'C:/Users/ANDREK~1/AppData/Local/Temp/kilo/exception.txt',
+                get_class($e) . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString()
+            );
+        });
+
         // Gérer ModelNotFoundException pour les routes {user} - rediriger vers 404
         $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, Request $request) {
             if ($request->expectsJson()) {
@@ -52,6 +59,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Page 500 personnalisée
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->expectsJson()) {
+                if (app()->hasDebugModeEnabled()) {
+                    return response()->json([
+                        'error' => 'Erreur serveur interne.',
+                        'debug' => $e->getMessage(),
+                        'file' => $e->getFile() . ':' . $e->getLine(),
+                    ], 500);
+                }
                 return response()->json(['error' => 'Erreur serveur interne.'], 500);
             }
             // Only render custom view for 500 errors in production

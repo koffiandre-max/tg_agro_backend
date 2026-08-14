@@ -142,7 +142,7 @@
                 this.error = '';
 
                 try {
-                    const response = await fetch(@json(route('login')), {
+                    const response = await fetch(@json(url('/login')), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
