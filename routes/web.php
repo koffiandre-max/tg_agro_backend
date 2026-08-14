@@ -9,13 +9,10 @@ use App\Http\Controllers\Portail\MessageController;
 Route::get('/api/market-prices/cote-divoire', [MarketPriceApiController::class, 'coteDIvoire'])
     ->name('api.market-prices.cote-divoire');
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // Guest routes — only for unauthenticated users
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 });
 
