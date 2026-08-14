@@ -10,7 +10,7 @@ Route::get('/api/market-prices/cote-divoire', [MarketPriceApiController::class, 
     ->name('api.market-prices.cote-divoire');
 
 
-// Guest routes — only for unauthenticated users
+// Guest routes — only for unauthenticated users ok 
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
