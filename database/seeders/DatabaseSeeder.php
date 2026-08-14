@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Appeler le UserSeeder pour créer les users de base
-        // UserSeeder::class;
+        $this->call(UserSeeder::class);
 
         // Récupérer les users
         $admin = User::where('email', 'admin@tginvest.com')->first();
@@ -83,7 +83,7 @@ class DatabaseSeeder extends Seeder
 
         // Créer des farms pour client1 (3 farms)
         $farm1Client1 = Farm::create([
-            'user_id' => $client1->id,
+            'user_id' => $clientProfile1->id,
             'name' => 'Ferme de Yamoussoukro',
             'location' => 'Yamoussoukro, Côte d\'Ivoire',
             'latitude' => 6.8276,
@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $farm2Client1 = Farm::create([
-            'user_id' => $client1->id,
+            'user_id' => $clientProfile1->id,
             'name' => 'Plantation de Man',
             'location' => 'Man, Côte d\'Ivoire',
             'latitude' => 7.4123,
@@ -117,7 +117,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $farm3Client1 = Farm::create([
-            'user_id' => $client1->id,
+            'user_id' => $clientProfile1->id,
             'name' => 'Exploitation maraîchère',
             'location' => 'Abidjan, Bingerville',
             'latitude' => 5.3612,
@@ -135,7 +135,7 @@ class DatabaseSeeder extends Seeder
 
         // Créer des farms pour client2 (2 farms)
         $farm1Client2 = Farm::create([
-            'user_id' => $client2->id,
+            'user_id' => $clientProfile2->id,
             'name' => 'Ferme de Korhogo',
             'location' => 'Korhogo, Côte d\'Ivoire',
             'latitude' => 9.4580,
@@ -152,7 +152,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $farm2Client2 = Farm::create([
-            'user_id' => $client2->id,
+            'user_id' => $clientProfile2->id,
             'name' => 'Plantation d\'hévéa',
             'location' => 'San-Pédro, Côte d\'Ivoire',
             'latitude' => 4.7485,
@@ -343,7 +343,6 @@ class DatabaseSeeder extends Seeder
                 'recorded_at' => Carbon::now(),
             ]));
         }
-        ]);
 
         // Créer des messages
         Message::create([
