@@ -19,6 +19,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Farm;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FarmController extends Controller
 {
@@ -214,6 +215,13 @@ class FarmController extends Controller
         $farm->load('user', 'photos', 'reports', 'clients.user', 'assignedTechnician.user');
 
         return view('admin.farms.show', compact('farm'));
+    }
+
+    public function pdf(Farm $farm)
+    {
+        $farm->load('user', 'photos', 'reports', 'clients.user', 'assignedTechnician.user');
+
+        return view('admin.farms.pdf', compact('farm'));
     }
 
     public function edit($id)

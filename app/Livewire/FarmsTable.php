@@ -30,6 +30,7 @@ class FarmsTable extends Component
     public ?int $selectedFarmId = null;
     public string $selectedFarmName = '';
     public ?int $selectedTechnicianId = null;
+    public bool $showAssignModal = false;
     public $technicians;
 
     public function updatingSearch()
@@ -88,7 +89,7 @@ class FarmsTable extends Component
         $this->selectedFarmId = $farm->id;
         $this->selectedFarmName = $farm->name;
         $this->selectedTechnicianId = $farm->assigned_technician_id;
-        $this->dispatch('open-assign-modal');
+        $this->showAssignModal = true;
     }
 
     public function assignTechnicianToFarm(): void
@@ -102,20 +103,20 @@ class FarmsTable extends Component
             'assigned_technician_id' => $this->selectedTechnicianId,
         ]);
 
+        $this->showAssignModal = false;
         $this->selectedFarmId = null;
         $this->selectedFarmName = '';
         $this->selectedTechnicianId = null;
 
-        $this->dispatch('close-assign-modal');
         session()->flash('success', 'Le technicien a été assigné à l\'exploitation avec succès.');
     }
 
     public function closeAssignModal(): void
     {
+        $this->showAssignModal = false;
         $this->selectedFarmId = null;
         $this->selectedFarmName = '';
         $this->selectedTechnicianId = null;
-        $this->dispatch('close-assign-modal');
     }
 
     public function deleteFarm($id): void

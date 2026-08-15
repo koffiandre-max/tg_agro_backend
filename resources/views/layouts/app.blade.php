@@ -660,6 +660,11 @@
 
     @livewireScripts
     <script src="/alpine/collapse.js" defer></script>
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Alpine.start();
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

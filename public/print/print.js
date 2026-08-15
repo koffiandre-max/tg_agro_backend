@@ -1,422 +1,414 @@
-(function($) {
+/**
+ * PrintToPDF.js v1.1.0 - Bibliothèque JavaScript pour imprimer un élément DOM en PDF
+ * Utilisation : $('#monElement').printToPDF(options);
+ * 
+ * Dépendances : html2canvas, jsPDF
+ * @license MIT
+ */
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory(require('jquery'));
+    } else {
+        factory(root.jQuery);
+    }
+}(typeof self !== 'undefined' ? self : this, function ($) {
+
     'use strict';
 
-    var printCounter = 0;
-
-    $.EPrint = function(elementId, options) {
-        if (!(this instanceof $.EPrint)) {
-            return new $.EPrint(elementId, options);
-        }
-
-        var defaults = {
-            titre: document.title || 'Impression',
-            styles: [],
-            scripts: [],
-            cssInline: '',
-            header: '',
-            footer: '',
-            pageMargin: '1cm',
-            beforePrint: null,      // return false pour annuler
-            afterPrint: null,
-            popupWidth: 800,        // taille du cadre d'aperçu (mode preview uniquement)
-            popupHeight: 600,
-            printBodyClass: 'printing',
-            keepOpen: false,        // laisse l'aperçu ouvert (utilisé par preview())
-            closeDelay: 1000,
-            removeScripts: true,
-            preserveStyles: true,
-            timeout: 5000,
-            debug: false
-        };
-
-        this.options = $.extend({}, defaults, options);
-        this.elementId = elementId;
-        this.$element = $('#' + elementId);
-        this._iframe = null;
-        this._backdrop = null;
-        this._isPrinting = false;
-        this._uid = ++printCounter;
-
-        if (!this.$element.length) {
-            console.error('EPrint: Élément avec l\'ID "' + elementId + '" introuvable.');
-            return this;
-        }
-
-        this._log('EPrint initialisé pour l\'ID: ' + elementId);
-
-        return this;
+    var defaults = {
+        filename: 'document.pdf',
+        format: 'a4',
+        orientation: 'portrait',
+        margin: { top: 10, right: 10, bottom: 10, left: 10 },
+        scale: 2,
+        imageType: 'image/png',
+        imageQuality: 0.95,
+        autoPrint: false,
+        autoDownload: true,
+        header: null,
+        footer: null,
+        pageNumbers: false,
+        pageNumberFormat: 'Page {page} / {total}',
+        css: '',
+        beforePrint: null,
+        afterPrint: null,
+        onError: null,
+        debug: false
     };
 
-    $.EPrint.prototype = {
-
-        print: function() {
-            var self = this;
-
-            if (this._isPrinting) {
-                this._log('Impression déjà en cours');
-                return this;
-            }
-
-            if (!this.$element.length) {
-                console.error('EPrint: Élément introuvable');
-                return this;
-            }
-
-            var shouldContinue = this._executeCallback('beforePrint');
-            if (shouldContinue === false) {
-                this._log('Impression annulée par beforePrint');
-                return this;
-            }
-
-            this._isPrinting = true;
-
-            try {
-                var printContent = this._buildPrintContent();
-                var iframe = this.options.keepOpen
-                    ? this._createPreviewIframe()
-                    : this._createHiddenIframe();
-
-                this._iframe = iframe;
-                this._writeContent(iframe, printContent);
-                this._setupIframe(iframe);
-
-                this._timeoutId = setTimeout(function() {
-                    if (self._isPrinting) {
-                        self._log('Timeout: fermeture forcée');
-                        self._closePrintWindow();
+    var Utils = {
+        log: function(msg, debug) {
+            if (debug) console.log('[PrintToPDF]', msg);
+        },
+        extend: function(target, source) {
+            for (var key in source) {
+                if (source.hasOwnProperty(key)) {
+                    if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+                        target[key] = Utils.extend(target[key] || {}, source[key]);
+                    } else {
+                        target[key] = source[key];
                     }
-                }, this.options.timeout);
+                }
+            }
+            return target;
+        },
+        formatDimensions: {
+            a4: { width: 210, height: 297 },
+            a3: { width: 297, height: 420 },
+            a5: { width: 148, height: 210 },
+            letter: { width: 216, height: 279 },
+            legal: { width: 216, height: 356 }
+        }
+    };
 
-            } catch (error) {
-                console.error('EPrint: Erreur lors de l\'impression', error);
-                this._isPrinting = false;
-                this._executeCallback('afterPrint', [error]);
+    // Détection robuste de jsPDF (supporte plusieurs formats d'exposition)
+    function getJsPDF() {
+        if (typeof jspdf !== 'undefined' && jspdf.jsPDF) {
+            return jspdf.jsPDF;
+        }
+        if (typeof jsPDF !== 'undefined') {
+            return jsPDF;
+        }
+        if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) {
+            return window.jspdf.jsPDF;
+        }
+        if (typeof window.jsPDF !== 'undefined') {
+            return window.jsPDF;
+        }
+        return null;
+    }
+
+    function checkDependencies() {
+        var errors = [];
+        if (typeof html2canvas === 'undefined') {
+            errors.push('html2canvas non chargé. Ajoutez : <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>');
+        }
+        var JsPDF = getJsPDF();
+        if (!JsPDF) {
+            errors.push('jsPDF non chargé. Ajoutez : <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>');
+        }
+        return { ok: errors.length === 0, errors: errors, jsPDF: JsPDF };
+    }
+
+    function PrintToPDF(element, options) {
+        this.element = element;
+        this.options = Utils.extend(Utils.extend({}, defaults), options || {});
+        this.pdf = null;
+        this.totalPages = 0;
+    }
+
+    PrintToPDF.prototype = {
+        constructor: PrintToPDF,
+
+        generate: function() {
+            var self = this;
+            var deferred = $.Deferred();
+
+            // Vérification des dépendances
+            var deps = checkDependencies();
+            if (!deps.ok) {
+                var errMsg = 'Dépendances manquantes :\n' + deps.errors.join('\n');
+                var error = new Error(errMsg);
+                Utils.log(errMsg, true);
+                if (self.options.onError) self.options.onError(error);
+                deferred.reject(error);
+                return deferred.promise();
             }
 
-            return this;
-        },
+            var JsPDF = deps.jsPDF;
 
-        /**
-         * Iframe invisible pour une impression directe, sans UI et sans
-         * ouvrir de fenêtre/onglet.
-         */
-        _createHiddenIframe: function() {
-            var iframe = document.createElement('iframe');
-            iframe.setAttribute('id', 'eprint-frame-' + this._uid);
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = '0';
-            iframe.style.visibility = 'hidden';
-            document.body.appendChild(iframe);
-            return iframe;
-        },
+            if (self.options.beforePrint) {
+                try { self.options.beforePrint.call(self.element); } catch(e) {}
+            }
 
-        /**
-         * Iframe visible dans une petite fenêtre modale (utilisée par preview()),
-         * toujours dans la page courante : aucun popup, aucun onglet.
-         */
-        _createPreviewIframe: function() {
-            var self = this;
+            Utils.log('Début génération PDF...', self.options.debug);
 
-            var backdrop = document.createElement('div');
-            backdrop.className = 'eprint-backdrop';
-            backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);' +
-                'z-index:99998;display:flex;align-items:center;justify-content:center;';
-
+            // Cloner l'élément dans un conteneur invisible
             var container = document.createElement('div');
-            container.style.cssText = 'position:relative;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.3);' +
-                'width:' + this.options.popupWidth + 'px;max-width:95vw;' +
-                'height:' + this.options.popupHeight + 'px;max-height:90vh;';
+            container.style.position = 'fixed';
+            container.style.left = '-99999px';
+            container.style.top = '0';
+            container.style.zIndex = '-9999';
+            document.body.appendChild(container);
 
-            var closeBtn = document.createElement('button');
-            closeBtn.type = 'button';
-            closeBtn.textContent = '\u00D7';
-            closeBtn.setAttribute('aria-label', 'Fermer l\'aperçu');
-            closeBtn.style.cssText = 'position:absolute;top:-14px;right:-14px;width:28px;height:28px;' +
-                'border-radius:50%;border:0;background:#222;color:#fff;font-size:16px;line-height:1;' +
-                'cursor:pointer;z-index:99999;';
+            var clone = self.element.cloneNode(true);
+            self._copyStylesRecursive(self.element, clone);
 
-            var iframe = document.createElement('iframe');
-            iframe.setAttribute('id', 'eprint-frame-' + this._uid);
-            iframe.style.cssText = 'width:100%;height:100%;border:0;';
+            if (self.options.css) {
+                var style = document.createElement('style');
+                style.textContent = self.options.css;
+                container.appendChild(style);
+            }
 
-            container.appendChild(iframe);
-            container.appendChild(closeBtn);
-            backdrop.appendChild(container);
-            document.body.appendChild(backdrop);
+            container.appendChild(clone);
 
-            closeBtn.addEventListener('click', function() { self.cancel(); });
-            backdrop.addEventListener('click', function(e) {
-                if (e.target === backdrop) self.cancel();
+            // Forcer le clone à prendre la largeur naturelle de l'original
+            var originalStyle = window.getComputedStyle(self.element);
+            clone.style.width = self.element.scrollWidth + 'px';
+            clone.style.maxWidth = 'none';
+            clone.style.position = 'relative';
+            clone.style.left = '0';
+            clone.style.top = '0';
+            clone.style.margin = '0';
+
+            Utils.log('Clone créé, dimensions : ' + clone.scrollWidth + 'x' + clone.scrollHeight, self.options.debug);
+
+            // Petite temporisation pour laisser le navigateur rendre le clone
+            setTimeout(function() {
+                html2canvas(clone, {
+                    scale: self.options.scale,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: self.options.debug,
+                    backgroundColor: '#ffffff',
+                    width: clone.scrollWidth,
+                    height: clone.scrollHeight,
+                    windowWidth: clone.scrollWidth,
+                    windowHeight: clone.scrollHeight,
+                    x: 0,
+                    y: 0
+                }).then(function(canvas) {
+                    Utils.log('Canvas généré : ' + canvas.width + 'x' + canvas.height, self.options.debug);
+
+                    try {
+                        self._createPDF(canvas, JsPDF);
+
+                        // Nettoyer le DOM
+                        if (container.parentNode) container.parentNode.removeChild(container);
+
+                        if (self.options.autoDownload) {
+                            self.download();
+                        }
+                        if (self.options.autoPrint) {
+                            self.print();
+                        }
+                        if (self.options.afterPrint) {
+                            try { self.options.afterPrint.call(self.element, self.pdf); } catch(e) {}
+                        }
+                        deferred.resolve(self.pdf);
+                    } catch (e) {
+                        if (container.parentNode) container.parentNode.removeChild(container);
+                        Utils.log('Erreur création PDF : ' + e.message, true);
+                        if (self.options.onError) self.options.onError(e);
+                        deferred.reject(e);
+                    }
+                }).catch(function(error) {
+                    if (container.parentNode) container.parentNode.removeChild(container);
+                    Utils.log('Erreur html2canvas : ' + error.message, true);
+                    if (self.options.onError) self.options.onError(error);
+                    deferred.reject(error);
+                });
+            }, 100);
+
+            return deferred.promise();
+        },
+
+        _copyStylesRecursive: function(source, target) {
+            var computed = window.getComputedStyle(source);
+            var essential = [
+                'font-family','font-size','font-weight','font-style','color',
+                'background-color','background-image','border','border-radius',
+                'padding','margin','width','height','min-width','min-height',
+                'max-width','max-height','display','position','top','left',
+                'right','bottom','float','clear','text-align','line-height',
+                'letter-spacing','box-shadow','text-shadow','opacity',
+                'overflow','white-space','word-wrap','word-break',
+                'list-style','text-decoration','vertical-align'
+            ];
+            for (var i = 0; i < essential.length; i++) {
+                try {
+                    target.style[essential[i]] = computed.getPropertyValue(essential[i]);
+                } catch(e) {}
+            }
+            var sChildren = source.children;
+            var tChildren = target.children;
+            for (var j = 0; j < sChildren.length && j < tChildren.length; j++) {
+                this._copyStylesRecursive(sChildren[j], tChildren[j]);
+            }
+        },
+
+        _createPDF: function(canvas, JsPDF) {
+            var self = this;
+            var fmt = Utils.formatDimensions[self.options.format] || Utils.formatDimensions.a4;
+            var isLandscape = self.options.orientation === 'landscape';
+
+            var pageW = isLandscape ? fmt.height : fmt.width;
+            var pageH = isLandscape ? fmt.width : fmt.height;
+            var m = self.options.margin;
+            var contentW = pageW - m.left - m.right;
+            var contentH = pageH - m.top - m.bottom;
+
+            var pdf = new JsPDF({
+                orientation: self.options.orientation,
+                unit: 'mm',
+                format: self.options.format.toUpperCase()
             });
 
-            this._backdrop = backdrop;
-            return iframe;
-        },
+            var imgData = canvas.toDataURL(self.options.imageType, self.options.imageQuality);
 
-        _writeContent: function(iframe, content) {
-            var doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write(content);
-            doc.close();
-        },
+            var imgW = canvas.width;
+            var imgH = canvas.height;
 
-        _setupIframe: function(iframe) {
-            var self = this;
-            var triggered = false;
+            // Ratio pour convertir pixels -> mm (72 dpi = 25.4mm/inch, mais html2canvas est en 96 dpi)
+            var pxToMm = 25.4 / 96;
+            var renderW = imgW * pxToMm;
+            var renderH = imgH * pxToMm;
 
-            var runPrint = function() {
-                if (triggered) return;
-                triggered = true;
+            // Ajuster pour tenir dans la largeur de contenu
+            var scale = contentW / renderW;
+            renderW = contentW;
+            renderH = renderH * scale;
 
-                self._log('Contenu chargé');
+            var totalH = renderH;
+            var pages = Math.ceil(totalH / contentH);
+            if (pages < 1) pages = 1;
+            self.totalPages = pages;
 
-                try {
-                    var body = iframe.contentWindow.document.body;
-                    if (self.options.printBodyClass && body) {
-                        body.classList.add(self.options.printBodyClass);
-                    }
-                } catch (e) {}
+            Utils.log('Pages : ' + pages + ' (hauteur totale ' + totalH.toFixed(1) + 'mm)', self.options.debug);
 
-                // En mode aperçu (keepOpen), on n'imprime pas automatiquement :
-                // l'utilisateur regarde puis lance l'impression lui-même via
-                // Ctrl+P dans l'iframe, ou on peut exposer .doPrint().
-                if (self.options.keepOpen) {
-                    self._executeCallback('afterPrint');
-                    self._isPrinting = false;
-                    return;
+            for (var p = 0; p < pages; p++) {
+                if (p > 0) pdf.addPage();
+
+                var headerH = 0;
+                if (self.options.header) {
+                    headerH = self._drawHeader(pdf, pageW, m);
                 }
 
-                setTimeout(function() {
-                    self._log('Lancement de l\'impression');
-                    try {
-                        iframe.contentWindow.focus();
-                        iframe.contentWindow.print();
-                        self._executeCallback('afterPrint');
-                    } catch (error) {
-                        console.error('EPrint: Erreur lors de l\'impression', error);
-                        self._isPrinting = false;
-                    } finally {
-                        setTimeout(function() {
-                            self._closePrintWindow();
-                        }, self.options.closeDelay);
-                    }
-                }, 300);
-            };
+                // Calculer quelle portion de l'image afficher
+                var sliceTop = p * contentH / scale / pxToMm;
+                var sliceHeight = Math.min(contentH / scale / pxToMm, imgH - sliceTop);
+                var drawHeight = sliceHeight * scale * pxToMm;
 
-            iframe.onload = runPrint;
+                // Créer un canvas temporaire pour la tranche
+                var sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = imgW;
+                sliceCanvas.height = sliceHeight;
+                var ctx = sliceCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, -sliceTop);
+                var sliceData = sliceCanvas.toDataURL(self.options.imageType, self.options.imageQuality);
 
-            try {
-                if (iframe.contentWindow.document.readyState === 'complete') {
-                    runPrint();
+                pdf.addImage(
+                    sliceData,
+                    self.options.imageType === 'image/jpeg' ? 'JPEG' : 'PNG',
+                    m.left,
+                    m.top + headerH,
+                    renderW,
+                    drawHeight
+                );
+
+                if (self.options.footer) {
+                    self._drawFooter(pdf, pageW, pageH, m);
                 }
-            } catch (e) {}
-        },
-
-        _buildPrintContent: function() {
-            var self = this;
-            var content = this.$element.clone();
-
-            if (this.options.removeScripts) {
-                content.find('script').remove();
-            }
-
-            var styles = this.options.preserveStyles ? (this.$element.attr('style') || '') : '';
-            var customStyles = this.options.cssInline;
-
-            var html = '<!DOCTYPE html>\n';
-            html += '<html>\n';
-            html += '<head>\n';
-            html += '<meta charset="UTF-8">\n';
-            html += '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n';
-            // FIX CSS : sans cette balise <base>, les URLs relatives (styles,
-            // images, scripts) ne se résolvent pas car le document de l'iframe
-            // (ou de l'ancien popup) n'a pas la même URL de base que la page.
-            html += '<base href="' + this._escapeHtml(document.baseURI || location.href) + '">\n';
-            html += '<title>' + this._escapeHtml(this.options.titre) + '</title>\n';
-
-            html += '<style>\n';
-            html += '  * { margin: 0; padding: 0; box-sizing: border-box; }\n';
-            html += '  @page { margin: ' + this._escapeHtml(this.options.pageMargin) + '; }\n';
-            html += '  body { \n';
-            html += '    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;\n';
-            html += '    padding: 20px;\n';
-            html += '    background: white;\n';
-            html += '    color: #000;\n';
-            html += '  }\n';
-            html += '  .' + this.options.printBodyClass + ' { background: white; }\n';
-
-            html += '  @media print {\n';
-            html += '    body { padding: 0; margin: 0; }\n';
-            html += '    .no-print { display: none !important; }\n';
-            html += '    .print-only { display: block !important; }\n';
-            html += '    img { max-width: 100% !important; }\n';
-            html += '  }\n';
-
-            if (customStyles) {
-                html += '  /* Styles personnalisés */\n';
-                html += '  ' + customStyles + '\n';
-            }
-
-            html += '</style>\n';
-
-            if (this.options.styles && this.options.styles.length) {
-                $.each(this.options.styles, function(i, styleUrl) {
-                    html += '<link rel="stylesheet" href="' + self._escapeHtml(styleUrl) + '">\n';
-                });
-            }
-
-            if (this.options.scripts && this.options.scripts.length) {
-                $.each(this.options.scripts, function(i, scriptUrl) {
-                    html += '<script src="' + self._escapeHtml(scriptUrl) + '"><\/script>\n';
-                });
-            }
-
-            html += '</head>\n';
-            html += '<body>\n';
-
-            if (this.options.header) {
-                html += '<div class="print-header">' + this.options.header + '</div>\n';
-            }
-
-            html += '<div id="' + this._escapeHtml(this.elementId) + '" style="' + this._escapeHtml(styles) + '">\n';
-            html += content.html() || '';
-            html += '</div>\n';
-
-            if (this.options.footer) {
-                html += '<div class="print-footer">' + this.options.footer + '</div>\n';
-            }
-
-            html += '</body>\n';
-            html += '</html>';
-
-            this._log('Contenu HTML construit (taille: ' + html.length + ' caractères)');
-            return html;
-        },
-
-        /**
-         * Déclenche l'impression manuellement depuis un aperçu (keepOpen).
-         */
-        doPrint: function() {
-            if (!this._iframe) return this;
-            try {
-                this._iframe.contentWindow.focus();
-                this._iframe.contentWindow.print();
-            } catch (e) {
-                console.error('EPrint: Erreur lors de l\'impression manuelle', e);
-            }
-            return this;
-        },
-
-        _closePrintWindow: function() {
-            if (this._timeoutId) {
-                clearTimeout(this._timeoutId);
-                this._timeoutId = null;
-            }
-            if (this._backdrop && this._backdrop.parentNode) {
-                this._backdrop.parentNode.removeChild(this._backdrop);
-            } else if (this._iframe && this._iframe.parentNode) {
-                this._iframe.parentNode.removeChild(this._iframe);
-            }
-            this._iframe = null;
-            this._backdrop = null;
-            this._isPrinting = false;
-        },
-
-        _executeCallback: function(name, args) {
-            var callback = this.options[name];
-            if (typeof callback === 'function') {
-                try {
-                    return callback.apply(this, args || [this.$element]);
-                } catch (error) {
-                    console.error('EPrint: Erreur dans le callback ' + name, error);
+                if (self.options.pageNumbers) {
+                    self._drawPageNumber(pdf, pageW, pageH, m, p + 1);
                 }
             }
+
+            self.pdf = pdf;
+            Utils.log('PDF créé (' + pages + ' pages)', self.options.debug);
         },
 
-        _escapeHtml: function(text) {
-            if (!text) return '';
-            var div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        _drawHeader: function(pdf, pageW, m) {
+            var h = this.options.header;
+            pdf.setFontSize(9);
+            pdf.setTextColor(120);
+            var text = typeof h === 'string' ? h : (h.text || '');
+            var align = typeof h === 'object' ? (h.align || 'center') : 'center';
+            var x = typeof h === 'object' && h.x ? h.x : pageW / 2;
+            var y = typeof h === 'object' && h.y ? h.y : m.top + 4;
+            pdf.text(text, x, y, { align: align });
+            pdf.setDrawColor(200);
+            pdf.line(m.left, m.top + 7, pageW - m.right, m.top + 7);
+            return 10;
         },
 
-        _log: function(message) {
-            if (this.options.debug) {
-                console.log('[EPrint] ' + message);
+        _drawFooter: function(pdf, pageW, pageH, m) {
+            var f = this.options.footer;
+            pdf.setFontSize(9);
+            pdf.setTextColor(120);
+            var text = typeof f === 'string' ? f : (f.text || '');
+            var align = typeof f === 'object' ? (f.align || 'center') : 'center';
+            var x = typeof f === 'object' && f.x ? f.x : pageW / 2;
+            var y = typeof f === 'object' && f.y ? f.y : pageH - m.bottom - 3;
+            pdf.setDrawColor(200);
+            pdf.line(m.left, pageH - m.bottom - 8, pageW - m.right, pageH - m.bottom - 8);
+            pdf.text(text, x, y, { align: align });
+        },
+
+        _drawPageNumber: function(pdf, pageW, pageH, m, current) {
+            var txt = this.options.pageNumberFormat
+                .replace('{page}', current)
+                .replace('{total}', this.totalPages);
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text(txt, pageW - m.right, pageH - m.bottom + 4, { align: 'right' });
+        },
+
+        download: function(filename) {
+            if (!this.pdf) {
+                console.error('[PrintToPDF] Aucun PDF. Appelez generate() d\'abord.');
+                return this;
             }
-        },
-
-        getElement: function() {
-            return this.$element;
-        },
-
-        setOptions: function(options) {
-            this.options = $.extend({}, this.options, options);
-            this._log('Options mises à jour');
+            this.pdf.save(filename || this.options.filename);
             return this;
         },
 
-        cancel: function() {
-            this._log('Annulation de l\'impression');
-            this._closePrintWindow();
+        print: function() {
+            if (!this.pdf) {
+                console.error('[PrintToPDF] Aucun PDF. Appelez generate() d\'abord.');
+                return this;
+            }
+            this.pdf.autoPrint({ variant: 'non-conform' });
+            var blob = this.pdf.output('bloburl');
+            window.open(blob, '_blank');
             return this;
         },
 
-        isPrinting: function() {
-            return this._isPrinting;
+        getBlob: function() {
+            return this.pdf ? this.pdf.output('blob') : null;
         },
 
-        /**
-         * Aperçu intégré à la page (plus de popup) : affiche le contenu dans
-         * un cadre modal ; l'utilisateur imprime ensuite via doPrint() ou
-         * Ctrl+P dans le cadre.
-         */
-        preview: function() {
-            this.options.keepOpen = true;
-            this.print();
-            return this;
+        getDataUrl: function() {
+            return this.pdf ? this.pdf.output('datauristring') : null;
         },
 
         destroy: function() {
-            this._closePrintWindow();
-            this.$element = null;
+            this.element = null;
+            this.pdf = null;
             this.options = null;
         }
     };
 
-    $.fn.EPrint = function(options) {
-        var elementId = this.attr('id');
-        if (!elementId) {
-            console.error('EPrint: L\'élément doit avoir un ID');
-            return this;
-        }
-        return $.EPrint(elementId, options);
+    // Plugin jQuery
+    $.fn.printToPDF = function(options) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return this.each(function() {
+            var $this = $(this);
+            var instance = $this.data('printToPDF');
+            if (typeof options === 'string') {
+                if (instance && typeof instance[options] === 'function') {
+                    instance[options].apply(instance, args);
+                }
+            } else {
+                if (!instance) {
+                    instance = new PrintToPDF(this, options);
+                    $this.data('printToPDF', instance);
+                }
+                instance.generate();
+            }
+        });
     };
 
-    $.EPrint.importStyles = function(css) {
-        var style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
-        return style;
+    // API statique
+    $.printToPDF = {
+        defaults: defaults,
+        version: '1.1.0',
+        setDefaults: function(opts) { Utils.extend(defaults, opts); },
+        checkDependencies: checkDependencies
     };
 
-})(jQuery);
-
-/*
-$.EPrint('monId', {
-    titre: 'Rapport mensuel',
-    styles: ['assets/print.css'],   // résolu correctement grâce à <base> maintenant
-    header: '<h1>En-tête personnalisé</h1>',
-    footer: '<p>Pied de page</p>',
-    debug: true
-}).print(); // impression directe, aucun popup/onglet
-
-// Aperçu intégré (modal dans la page, pas de popup) :
-var ep = $.EPrint('monId', { titre: 'Aperçu' }).preview();
-// puis, sur clic d'un bouton "Imprimer" dans ton UI :
-// ep.doPrint();
-*/
+    return PrintToPDF;
+}));

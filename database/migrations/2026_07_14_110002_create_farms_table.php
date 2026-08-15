@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('farms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name', 255);
             $table->string('location', 255);
             $table->decimal('latitude', 10, 7)->nullable();

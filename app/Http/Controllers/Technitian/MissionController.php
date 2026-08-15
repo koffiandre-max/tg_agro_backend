@@ -11,18 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MissionController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $user = auth()->user();
-
-            if (!$user || !in_array($user->role, ['admin', 'technician'])) {
-                abort(403, 'Accès non autorisé.');
-            }
-
-            return $next($request);
-        })->except('kanban');
-    }
+    
 
     public function index()
     {

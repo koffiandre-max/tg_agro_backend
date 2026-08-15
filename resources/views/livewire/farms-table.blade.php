@@ -141,7 +141,7 @@
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $farm->user->name ?? '-' }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center justify-center" x-data="{ open: false }">
+                                <div class="relative" x-data="{ open: false }">
                                     <button @click="open = !open" @click.away="open = false" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                         <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -149,28 +149,35 @@
                                     </button>
                                     <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10" style="display: none;">
                                         <div class="py-1">
+                                            <a href="{{ route('admin.farms.pdf', $farm->id) }}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h.75m3 12v-1.5m0 0v-1.5m0 1.5h.75" />
+                                                    </svg>
+                                                    Voir la fiche
+                                                </div>
+                                            </a>
+                                            <a href="{{ route('admin.farms.show', $farm->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 3.75h19.5M2.25 3.75v16.5m19.5-16.5v16.5M2.25 12h19.5m-16.5 6.75h19.5" />
+                                                    </svg>
+                                                    Page de détail
+                                                </div>
+                                            </a>
                                             <a href="{{ route('admin.farms.edit', $farm->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                                     </svg>
                                                     Modifier
                                                 </div>
                                             </a>
-                                            <a href="{{ route('admin.farms.show', $farm->id) }}" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5 9.542-7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                    Voir détails
-                                                </div>
-                                            </a>
-                                            <a href="{{ route('admin.gallery.index', ['farm_id' => $farm->id]) }}" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <a href="{{ route('admin.gallery.index', ['farm_id' => $farm->id]) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center justify-between gap-2">
                                                     <div class="flex items-center gap-2">
                                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                                                         </svg>
                                                         Images
                                                     </div>
@@ -235,86 +242,83 @@
     </div>
 
     {{-- Modal d'assignation de technicien --}}
-    <div x-data="{ showAssign: false }"
-         x-show="showAssign"
-         @open-assign-modal.window="showAssign = true"
-         @close-assign-modal.window="showAssign = false"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         style="display: none;">
-        <div class="absolute inset-0 bg-black/50" @click="showAssign = false"></div>
-        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden" @click.stop>
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900">Assigner un technicien</h3>
-                <button type="button" @click="showAssign = false" wire:click="closeAssignModal" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+    @if($showAssignModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50" wire:click="closeAssignModal"></div>
+            <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Assigner un technicien</h3>
+                    <button type="button" wire:click="closeAssignModal" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-            <div class="px-6 py-4 space-y-4">
-                <p class="text-sm text-gray-600">
-                    Exploitation : <span class="font-medium text-gray-900">{{ $selectedFarmName }}</span>
-                </p>
+                <div class="px-6 py-4 space-y-4">
+                    <p class="text-sm text-gray-600">
+                        Exploitation : <span class="font-medium text-gray-900">{{ $selectedFarmName }}</span>
+                    </p>
 
-                <div>
-                    <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
+                    <div>
+                        <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
 
-                    <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
-                        {{-- Aucun --}}
-                        <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
-                                {{ is_null($selectedTechnicianId) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                            <input type="radio" name="technician_choice" value="" wire:model.live="selectedTechnicianId" class="sr-only">
-                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
-                                </svg>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-900">Aucun</p>
-                                <p class="text-xs text-gray-500">Retirer l'assignation</p>
-                            </div>
-                        </label>
-
-                        @foreach($technicians as $technician)
-                            @php
-                                $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
-                                $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
-                                $tType = $technician->type_technicien?->label();
-                            @endphp
+                        <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                            {{-- Aucun --}}
                             <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
-                                    {{ $selectedTechnicianId == $technician->id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                                <input type="radio" name="technician_choice" value="{{ $technician->id }}" wire:model.live="selectedTechnicianId" class="sr-only">
-                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
-                                    {{ strtoupper(substr($tName, 0, 1)) }}
-                                </span>
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
-                                    <p class="truncate text-xs text-gray-500">
-                                        @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
-                                        @if($tType && $tPhone) · @endif
-                                        {{ $tPhone ?? '' }}
-                                    </p>
-                                </div>
-                                @if($selectedTechnicianId == $technician->id)
-                                    <svg class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    {{ is_null($selectedTechnicianId) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                                <input type="radio" name="technician_choice" value="" wire:model.live="selectedTechnicianId" class="sr-only">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
                                     </svg>
-                                @endif
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-gray-900">Aucun</p>
+                                    <p class="text-xs text-gray-500">Retirer l'assignation</p>
+                                </div>
                             </label>
-                        @endforeach
+
+                            @foreach($technicians as $technician)
+                                @php
+                                    $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
+                                    $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
+                                    $tType = $technician->type_technicien?->label();
+                                @endphp
+                                <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
+                                        {{ $selectedTechnicianId == $technician->id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
+                                    <input type="radio" name="technician_choice" value="{{ $technician->id }}" wire:model.live="selectedTechnicianId" class="sr-only">
+                                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                                        {{ strtoupper(substr($tName, 0, 1)) }}
+                                    </span>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
+                                        <p class="truncate text-xs text-gray-500">
+                                            @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
+                                            @if($tType && $tPhone) · @endif
+                                            {{ $tPhone ?? '' }}
+                                        </p>
+                                    </div>
+                                    @if($selectedTechnicianId == $technician->id)
+                                        <svg class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    @endif
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-                <button type="button" @click="showAssign = false" wire:click="closeAssignModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Annuler
-                </button>
-                <button type="button" wire:click="assignTechnicianToFarm" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                    Assigner
-                </button>
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                    <button type="button" wire:click="closeAssignModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Annuler
+                    </button>
+                    <button type="button" wire:click="assignTechnicianToFarm" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                        Assigner
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 </div>

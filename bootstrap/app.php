@@ -26,9 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->report(function (Throwable $e) {
+            $path = storage_path('logs/exception-report.log');
             file_put_contents(
-                'C:/Users/ANDREK~1/AppData/Local/Temp/kilo/exception.txt',
-                get_class($e) . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString()
+                $path,
+                '[' . now()->toDateTimeString() . '] ' . get_class($e) . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString() . "\n\n",
+                FILE_APPEND
             );
         });
 

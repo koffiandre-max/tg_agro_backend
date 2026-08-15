@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
 
         // Appeler le UserSeeder pour créer les users de base
         $this->call(UserSeeder::class);
+        $generateCode  = Str::random(6);
 
         // Récupérer les users
         $admin = User::where('email', 'admin@tginvest.com')->first();
@@ -91,6 +93,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $clientProfile1->id,
             'name' => 'Ferme de Yamoussoukro',
             'location' => 'Yamoussoukro, Côte d\'Ivoire',
+            'reference_dossier' => $generateCode,
             'latitude' => 6.8276,
             'longitude' => -5.2893,
             'total_area_hectares' => 25.5,

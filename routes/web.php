@@ -60,7 +60,7 @@ Route::middleware(['auth', 'admin_or_technician'])->group(function () {
 // ─────────────────────────────────────────────
 // Technician-only routes
 // ─────────────────────────────────────────────
-Route::middleware(['auth', 'technician'])->group(function () {
+Route::middleware('auth')->group(function () {
     require __DIR__ . '/technitian.php';
 });
 
