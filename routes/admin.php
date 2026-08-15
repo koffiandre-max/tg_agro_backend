@@ -64,6 +64,7 @@ Route::delete('/calendar/missions/{mission}', [CalendarController::class, 'destr
 // ============================================
 Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
 Route::post('/settings/features', [SettingsController::class, 'updateFeatures'])->name('admin.settings.features.update');
+Route::post('/settings/system', [SettingsController::class, 'updateSystem'])->name('admin.settings.system.update');
 
 // ============================================
 // ESPACE TECHNICIEN (défini dans routes/technitian.php)

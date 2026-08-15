@@ -122,6 +122,37 @@
             </template>
         </div>
     </div>
+
+    {{-- Paramètres système --}}
+    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+            <svg class="w-4.5 h-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+            </svg>
+            Paramètres système
+        </h2>
+
+        <form method="POST" action="{{ route('admin.settings.system.update') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Couleur principale</label>
+                <input type="color" name="settings[primary_color]" value="{{ $systemSettings['primary_color'] ?? '#111827' }}" class="h-10 w-full rounded-lg border border-slate-200">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nom de l'application</label>
+                <input type="text" name="settings[app_name]" value="{{ $systemSettings['app_name'] ?? config('app.name') }}" class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Contact support</label>
+                <input type="text" name="settings[support_email]" value="{{ $systemSettings['support_email'] ?? '' }}" class="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold shadow-sm hover:bg-slate-800 transition-colors">
+                    Enregistrer les paramètres système
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
 
