@@ -127,7 +127,7 @@ class Navigation
             ],
             [
                 'name' => 'Paramètres Système',
-                'route' => 'admin.settings',
+                'route' => 'admin.settings.system',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>',
                 'segments' => ['admin', 'settings'],
                 'can' => $user->role === 'admin',
@@ -247,6 +247,36 @@ class Navigation
             ],
         ];
 
+        $categories = [
+            'Tableau de Bord' => 'Tableau de bord',
+            'Gestion des Clients' => 'Gestion',
+            'Gestion des Techniciens' => 'Gestion',
+            'Gestion des Missions' => 'Terrain & Visites',
+            'Gestion des Exploitations' => 'Gestion',
+            'Rapports de Visite' => 'Terrain & Visites',
+            'Galleries' => 'Médias',
+            'Calendrier' => 'Terrain & Visites',
+            'Diagnostique du terrain' => 'Terrain & Visites',
+            'Gestion des Abonnements' => 'Gestion',
+            'Gestion des Utilisateurs' => 'Gestion',
+            'Paramètres KPIs' => 'Tableau de bord',
+            'Paramètres Système' => 'Tableau de bord',
+            'Mes Exploitations' => 'Mon espace',
+            'Galerie Photos' => 'Mon espace',
+            'Mes Rapports' => 'Mon espace',
+            'Mes Saisies de Données' => 'Mon espace',
+            'Messagerie' => 'Mon espace',
+            'Mon Abonnement' => 'Mon espace',
+            'Mes Missions' => 'Mon espace',
+            'Upload Photos' => 'Mon espace',
+            'Saisie Données' => 'Mon espace',
+        ];
+
+        foreach ($rules as &$item) {
+            $item['category'] = $categories[$item['name']] ?? 'Autres';
+        }
+        unset($item);
+
         return $rules;
     }
 
@@ -264,6 +294,34 @@ class Navigation
     private static function itemVisible(array $item): bool
     {
         return $item['can'] ?? true;
+    }
+
+    public static function grouped()
+    {
+        $navigation = self::tree();
+
+        $groups = [];
+        $order = [];
+
+        foreach ($navigation as $item) {
+            if (! self::itemVisible($item)) {
+                continue;
+            }
+
+            $category = $item['category'] ?? 'Autres';
+
+            if (! isset($groups[$category])) {
+                $groups[$category] = [];
+                $order[] = $category;
+            }
+
+            $groups[$category][] = $item;
+        }
+
+        return collect($order)
+            ->map(fn($category) => ['label' => $category, 'items' => $groups[$category]])
+            ->values()
+            ->all();
     }
 
     public static function filtered()

@@ -63,6 +63,7 @@ Route::delete('/calendar/missions/{mission}', [CalendarController::class, 'destr
 // PARAMÈTRES PLATEFORME (KPIs & fonctionnalités)
 // ============================================
 Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
+Route::get('/settings/system', [SettingsController::class, 'system'])->name('admin.settings.system');
 Route::post('/settings/features', [SettingsController::class, 'updateFeatures'])->name('admin.settings.features.update');
 Route::post('/settings/system', [SettingsController::class, 'updateSystem'])->name('admin.settings.system.update');
 

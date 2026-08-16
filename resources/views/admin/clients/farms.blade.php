@@ -17,6 +17,7 @@
     ];
 @endphp
 
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
     {{-- Header --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -179,4 +180,5 @@
             @endforeach
         </div>
     @endif
+</div>
 @endsection

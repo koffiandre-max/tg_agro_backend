@@ -34,12 +34,14 @@ class PortailDashboardController extends Controller
         $user = auth()->user();
         $client = $user?->client;
 
+
         $farms = collect();
 
         if ($client) {
             $farms = Farm::where('user_id', $client->user_id)
                 ->orderBy('name')
                 ->get();
+
         }
 
         return view('portail.farms', compact('farms'));

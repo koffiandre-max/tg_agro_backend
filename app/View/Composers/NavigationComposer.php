@@ -9,7 +9,7 @@ class NavigationComposer
 {
     public function compose(View $view)
     {
-        // On récupère le menu via notre classe Support
-        $view->with('navigation', Navigation::filtered());
+        // Menu groupé par catégorie pour la sidebar principale
+        $view->with('navigation', Navigation::grouped());
     }
 }

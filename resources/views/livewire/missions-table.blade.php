@@ -1,4 +1,4 @@
-<div class="bg-gray-50" x-data="{ openFilter: null }" @click.away="openFilter = null">
+<div class="bg-gray-50" x-data="{ openFilter: null, showDelete: false, deleteId: null, deleteTitle: '' }" @click.away="openFilter = null">
 
     {{-- Barre de recherche + filtres --}}
     <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -112,16 +112,12 @@
                                             </svg>
                                         </a>
 
-                                        <form method="POST" action="{{ route('admin.technitian.missions.destroy', $mission->id) }}"
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette mission ?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
-                                                <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="showDelete = true; deleteId = {{ $mission->id }}; deleteTitle = {{ json_encode($mission->title) }};"
+                                            class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
+                                            <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -155,6 +151,38 @@
                 </div>
 
                 {{ $missions->links() }}
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de confirmation de suppression --}}
+    <div x-cloak x-show="showDelete" @click.self="showDelete = false"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div class="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 20a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v15z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Supprimer la mission</h3>
+                    <p class="text-sm text-gray-500">Cette action est irréversible.</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-700 mb-6">
+                Êtes-vous sûr de vouloir supprimer la mission
+                <span class="font-medium" x-text="deleteTitle"></span> ?
+            </p>
+            <div class="flex justify-end gap-3">
+                <button type="button" @click="showDelete = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    Annuler
+                </button>
+                <button type="button" @click="showDelete = false; $wire.call('deleteMission', deleteId)"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    Supprimer
+                </button>
             </div>
         </div>
     </div>

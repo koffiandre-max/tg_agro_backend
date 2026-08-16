@@ -20,6 +20,7 @@ class GalleryController extends Controller
     {
         $user = Auth::user();
 
+
         $client = Client::where('user_id', $user->id)->firstOrFail();
 
         $query = Photo::with(['farm', 'technician'])
@@ -34,7 +35,10 @@ class GalleryController extends Controller
 
         $farms = \App\Models\Farm::whereHas('clients', function ($q) use ($client) {
             $q->where('clients.id', $client->id);
+
         })->orderBy('name')->get();
+
+
 
         return view('portail.gallery', compact('photos', 'client', 'farms'));
     }

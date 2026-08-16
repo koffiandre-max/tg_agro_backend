@@ -107,6 +107,10 @@ class RapportVisiteController extends Controller
             'note_interne' => ['nullable', 'string'],
             'message_client' => ['nullable', 'string'],
             'statut' => ['nullable', 'string', 'in:brouillon,en_attente_validation,valide,rejete'],
+            'photos' => ['nullable', 'array'],
+            'photos.*' => ['nullable', 'image', 'max:10240'],
+            'photo_legendes' => ['nullable', 'array'],
+            'photo_legendes.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         $validated['statut'] = $validated['statut'] ?? 'brouillon';
@@ -173,7 +177,35 @@ class RapportVisiteController extends Controller
             VisiteAutre::create($autreData);
         }
 
+        $this->syncPhotos($rapport, $request);
+
         return redirect()->route('admin.rapports-visite.index')->with('success', 'Rapport de visite créé avec succès.');
+    }
+
+    /**
+     * Enregistre la galerie de photos du rapport (visite).
+     */
+    protected function syncPhotos(RapportVisite $rapport, Request $request): void
+    {
+        if (! $request->hasFile('photos')) {
+            return;
+        }
+
+        $legendes = $request->input('photo_legendes', []);
+
+        foreach ($request->file('photos') as $index => $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $path = $file->store('rapport-visite', 'public');
+
+            $rapport->photos()->create([
+                'chemin' => $path,
+                'legende' => $legendes[$index] ?? null,
+                'pris_le' => now(),
+            ]);
+        }
     }
 
     public function show(RapportVisite $rapports_visite)
@@ -252,6 +284,10 @@ class RapportVisiteController extends Controller
             'note_interne' => ['nullable', 'string'],
             'message_client' => ['nullable', 'string'],
             'statut' => ['nullable', 'string', 'in:brouillon,en_attente_validation,valide,rejete'],
+            'photos' => ['nullable', 'array'],
+            'photos.*' => ['nullable', 'image', 'max:10240'],
+            'photo_legendes' => ['nullable', 'array'],
+            'photo_legendes.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         $rapport->update($validated);
@@ -343,6 +379,8 @@ class RapportVisiteController extends Controller
                 VisiteAutre::create($autreData);
             }
         }
+
+        $this->syncPhotos($rapport, $request);
 
         return redirect()->route('admin.rapports-visite.show', $rapport)->with('success', 'Rapport de visite mis à jour avec succès.');
     }

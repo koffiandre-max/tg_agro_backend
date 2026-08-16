@@ -53,6 +53,13 @@ class SettingsController extends Controller
         return redirect()->route('admin.settings')->with('success', 'Préférences de tableau de bord enregistrées.');
     }
 
+    public function system()
+    {
+        $settings = SystemSetting::all()->pluck('value', 'key');
+
+        return view('admin.settings.system', compact('settings'));
+    }
+
     public function updateSystem(Request $request)
     {
         $validated = $request->validate([
@@ -66,6 +73,6 @@ class SettingsController extends Controller
             );
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Paramètres système enregistrés.');
+        return redirect()->route('admin.settings.system')->with('success', 'Paramètres système enregistrés.');
     }
 }

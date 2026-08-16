@@ -19,6 +19,9 @@ class TechnicianMissionsTable extends Component
     public string $sortDirection = 'desc';
     public int $perPage = 10;
 
+    public $confirmingMissionId = null;
+    public string $confirmingMissionTitle = '';
+
     public function mount()
     {
         if ($this->technicianId === null) {
@@ -55,6 +58,32 @@ class TechnicianMissionsTable extends Component
     {
         $this->reset(['search', 'status']);
         $this->resetPage();
+    }
+
+    public function confirmDelete($id): void
+    {
+        $mission = Mission::where('id', $id)
+            ->where('technician_id', $this->technicianId)
+            ->first();
+
+        if ($mission) {
+            $this->confirmingMissionId = $mission->id;
+            $this->confirmingMissionTitle = $mission->title;
+        }
+    }
+
+    public function deleteMission(): void
+    {
+        if ($this->confirmingMissionId) {
+            Mission::where('id', $this->confirmingMissionId)
+                ->where('technician_id', $this->technicianId)
+                ->delete();
+
+            $this->confirmingMissionId = null;
+            $this->confirmingMissionTitle = '';
+
+            session()->flash('success', 'La mission a été supprimée avec succès.');
+        }
     }
 
     public function render()

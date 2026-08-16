@@ -4,9 +4,9 @@
 @section('page-title', 'Modifier la Mission')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-8 py-8">
     <div class="mb-6">
-        <a href="{{ route('admin.technitian.missions.show', $mission->id) }}" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-4 transition-colors">
+        <a href="{{ route('admin.technitian.missions.index') }}" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-4 transition-colors">
             <svg class="w-4 h-4 mr-1.5 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

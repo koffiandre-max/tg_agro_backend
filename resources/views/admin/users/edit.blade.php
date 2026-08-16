@@ -8,19 +8,21 @@
     $profileColor = $colors[abs(crc32($user->name ?? 'U')) % count($colors)];
 @endphp
 
-<x-ui.page-header
-    title="Modifier l'Utilisateur"
-    subtitle="Modifiez les informations de {{ $user->name }}"
-    :breadcrumbs="[['label' => 'Tableau de bord', 'route' => 'dashboard'], ['label' => 'Utilisateurs', 'route' => 'admin.users.index'], ['label' => 'Modifier']]"
->
-    <x-slot:actions>
-        <x-ui.btn variant="ghost" href="{{ route('admin.users.index') }}" icon="arrow-left">
-            Annuler
-        </x-ui.btn>
-    </x-slot:actions>
-</x-ui.page-header>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6 flex items-center justify-between">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Modifier l'utilisateurs</h1>
+        <p class="mt-2 text-sm text-gray-600">Gérez les comptes utilisateurs et leurs rôles.</p>
+    </div>
+    <div class="flex gap-3">
+            <x-ui.btn variant="ghost" href="{{ route('admin.users.index') }}" icon="arrow-left">
+        Annuler
+    </x-ui.btn>
+    </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="xl:col-span-2">
         <x-ui.card>
             <x-slot:header>
@@ -33,19 +35,19 @@
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">Nom complet <span class="text-red-600">*</span></label>
                         <input type="text" id="name" name="name" required value="{{ old('name', $user->name) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         @error('name')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Adresse email <span class="text-red-600">*</span></label>
                         <input type="email" id="email" name="email" required value="{{ old('email', $user->email) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         @error('email')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">Téléphone</label>
                         <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         @error('phone')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -62,8 +64,8 @@
                     <div class="md:col-span-2">
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe <span class="text-red-600">*</span></label>
                         <input type="password" id="password" name="password"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                               placeholder="Laisser vide pour ne pas changer">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Laisser vide pour ne pas changer">
                         @error('password')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -108,6 +110,7 @@
                 </div>
             </dl>
         </x-ui.card>
+    </div>
     </div>
 </div>
 @endsection

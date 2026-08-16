@@ -60,8 +60,10 @@
         </div>
 
         {{-- Form --}}
-        <form action="{{ $isEdit ? route('admin.rapports-visite.update', $rapport->id) : route('admin.rapports-visite.store') }}" 
+        <form x-ref="form" action="{{ $isEdit ? route('admin.rapports-visite.update', $rapport->id) : route('admin.rapports-visite.store') }}" 
               method="POST"
+              enctype="multipart/form-data"
+              @submit="preparePhotos($event)"
               class="bg-white border border-gray-200 rounded-lg shadow-sm">
             
             @if($isEdit)
@@ -647,10 +649,47 @@
                 </div>
             </div>
 
-            {{-- Étape 4 : Résumé & Envoi --}}
+            {{-- Étape 4 : Photos de la visite --}}
             <div x-show="currentStep === 3" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                 <div class="px-6 py-5 border-b border-gray-100">
-                    <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Étape 4 - Résumé & Envoi</h2>
+                    <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Étape 4 - Photos de la visite</h2>
+                    <p class="text-xs text-gray-500 mt-1">Ajoutez les photos prises lors de la visite</p>
+                </div>
+                <div class="px-6 py-6 space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Photos de la visite</label>
+                        <input type="file" name="photos[]" multiple accept="image/*"
+                               x-ref="photoInput"
+                               @change="addPhotos($event)"
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                        <p class="mt-1 text-xs text-gray-500">Sélectionnez une ou plusieurs photos, puis ajoutez une légende pour chacune.</p>
+                    </div>
+
+                    <div x-show="photos.length" class="space-y-3">
+                        <template x-for="(photo, index) in photos" :key="index">
+                            <div class="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <img :src="photo.url" alt="" class="h-20 w-20 object-cover rounded-md border border-gray-200 shrink-0">
+                                <div class="flex-1 min-w-0">
+                                    <input type="text" x-model="photo.legende" :name="`photo_legendes[${index}]`"
+                                           placeholder="Légende (optionnel)"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
+                                    <p class="mt-1 text-xs text-gray-400 truncate" x-text="photo.name"></p>
+                                </div>
+                                <button type="button" @click="removePhoto(index)"
+                                        class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors">
+                                    Retirer
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <p x-show="!photos.length" class="text-sm text-gray-400">Aucune photo ajoutée pour le moment.</p>
+                </div>
+            </div>
+
+            {{-- Étape 5 : Résumé & Envoi --}}
+            <div x-show="currentStep === 4" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+                <div class="px-6 py-5 border-b border-gray-100">
+                    <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Étape 5 - Résumé & Envoi</h2>
                     <p class="text-xs text-gray-500 mt-1">Notes, messages et statut du rapport</p>
                 </div>
                 <div class="px-6 py-6 space-y-5">
@@ -728,10 +767,12 @@
             typeActivite: '{{ $typeActiviteValue }}',
             technicienId: '{{ old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')) }}',
             canChooseActivite: true,
+            photos: [],
             steps: [
                 { label: 'Informations générales', completed: false },
                 { label: 'Activité', completed: false },
                 { label: 'Observations', completed: false },
+                { label: 'Photos', completed: false },
                 { label: 'Résumé & Envoi', completed: false },
             ],
             init() {
@@ -782,6 +823,36 @@
             goToStep(index) {
                 if (index <= this.currentStep || this.steps[index - 1]?.completed) {
                     this.currentStep = index;
+                }
+            },
+            addPhotos(event) {
+                const files = Array.from(event.target.files || []);
+                this.photos = files.map(file => ({
+                    file: file,
+                    url: URL.createObjectURL(file),
+                    name: file.name,
+                    legende: ''
+                }));
+            },
+            removePhoto(index) {
+                const photo = this.photos[index];
+                if (photo && photo.url) {
+                    URL.revokeObjectURL(photo.url);
+                }
+                this.photos.splice(index, 1);
+            },
+            preparePhotos(event) {
+                // Reconstruit la liste de fichiers réelle à partir des aperçus
+                // (pour rester aligné avec les légendes après ajout/retrait).
+                const input = this.$refs.photoInput;
+                if (input && this.photos.length) {
+                    const dt = new DataTransfer();
+                    this.photos.forEach(p => {
+                        if (p.file) {
+                            dt.items.add(p.file);
+                        }
+                    });
+                    input.files = dt.files;
                 }
             }
         }
