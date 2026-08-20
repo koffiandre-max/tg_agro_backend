@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Report;
+use App\Models\User;
 use App\Services\SendmailService;
 use Exception;
 use Illuminate\Http\Request;
@@ -94,12 +95,20 @@ class ReportController extends Controller
                 'status' => 'pending',
             ]);
 
-            $this->sendmailService->sendView(
-                env("ADMINSTOR_EMAIL"),
-                "Creation de nouveau rapport : " . $report->title,
-                "emails.reports.submitted",
-                ["report" => $report]
-            );
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->sendmailService->sendView(
+                        $admin->email,
+                        'Nouveau rapport à valider : ' . $report->title,
+                        'emails.reports.submitted',
+                        ['report' => $report]
+                    );
+                }
+            }
 
             return redirect()->route('admin.reports.show', $report)->with('success', 'Rapport créé avec succès.');
         } catch (Exception $e) {

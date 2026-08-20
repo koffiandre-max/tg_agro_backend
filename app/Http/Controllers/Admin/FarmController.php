@@ -18,11 +18,14 @@ use App\Enums\TypeSol;
 use App\Http\Controllers\Controller;
 use App\Models\Farm;
 use App\Models\User;
+use App\Services\SendmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FarmController extends Controller
 {
+    public function __construct(private SendmailService $mailer) {}
+
     /**
      * Génère une référence de dossier unique au format DOS-YYYY-NNNN.
      */
@@ -205,7 +208,16 @@ class FarmController extends Controller
 
         $validated['reference_dossier'] = $this->generateReferenceDossier();
 
-        Farm::create($validated);
+        $farm = Farm::create($validated);
+
+        if ($farm->user?->email) {
+            $this->mailer->sendView(
+                $farm->user->email,
+                'Nouvelle exploitation assignée : ' . $farm->name,
+                'emails.farms.assigned_to_client',
+                ['farm' => $farm]
+            );
+        }
 
         return redirect()->route('admin.farms.index')->with('success', 'Exploitation créée avec succès.');
     }
@@ -324,6 +336,15 @@ class FarmController extends Controller
         }
 
         $farm->update($validated);
+
+        if ($farm->user?->email) {
+            $this->mailer->sendView(
+                $farm->user->email,
+                'Exploitation mise à jour : ' . $farm->name,
+                'emails.farms.assigned_to_client',
+                ['farm' => $farm]
+            );
+        }
 
         return redirect()->route('admin.farms.show', $farm)->with('success', 'Exploitation mise à jour avec succès.');
     }

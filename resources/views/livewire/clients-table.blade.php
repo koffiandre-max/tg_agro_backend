@@ -1,4 +1,4 @@
-<div class=" bg-gray-50 min-h-screen" x-data="{ openFilter: null }" @click.away="openFilter = null">
+<div class=" bg-gray-50 min-h-screen" x-data="{ openFilter: null, showAssignTechnician: false, assignClientId: null, assignClientName: '', assignTechnicianId: null }" @click.away="openFilter = null">
 
     {{-- Barre de recherche + filtres --}}
     <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -98,7 +98,8 @@
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('total_investment')">
                             <div class="flex items-center gap-1">Investissement @include('livewire.partials.sort-icon', ['field' => 'total_investment'])</div>
                         </th>
-                        <th class="px-4 py-3 font-medium text-center">Actions</th>
+                         <th class="px-4 py-3 font-medium text-center">Technicien assigné</th>
+                         <th class="px-4 py-3 font-medium text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -148,6 +149,23 @@
                             <td class="px-4 py-3 font-medium text-gray-800">
                                 {{ number_format($client->total_investment, 0, ',', ' ') }} FCFA
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                @php
+                                    $assignedTechnician = optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assignedTechnician?->user;
+                                @endphp
+                                @if($assignedTechnician)
+                                    <div class="flex items-center justify-center gap-2">
+                                        <div class="h-7 w-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-xs ring-2 ring-emerald-200">
+                                            {{ strtoupper(substr($assignedTechnician->name ?? 'T', 0, 1)) }}
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-700">{{ $assignedTechnician->name ?? '' }}</span>
+                                    </div>
+                                @else
+                                    <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                                        -
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-center" x-data="{ open: false }">
                                     <button @click="open = !open" @click.away="open = false" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -174,15 +192,26 @@
                                                     Voir détails
                                                 </div>
                                             </a>
-                                            <a href="{{ route('admin.clients.farms', $client->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <div class="flex items-center gap-2">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                    </svg>
-                                                    Voir fermes
-                                                </div>
-                                            </a>
-                                            <div class="border-t border-gray-100 my-1"></div>
+                                             <a href="{{ route('admin.clients.farms', $client->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                 <div class="flex items-center gap-2">
+                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                     </svg>
+                                                     Voir fermes
+                                                 </div>
+                                             </a>
+                                              <button type="button" data-client-name="{{ addslashes($client->user->name ?? 'Client #' . $client->id) }}" data-client-technician-id="{{ optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assigned_technician_id ?? '' }}" @click="showAssignTechnician = true; assignClientId = {{ $client->id }}; assignClientName = $el.dataset.clientName; assignTechnicianId = $el.dataset.clientTechnicianId ? Number($el.dataset.clientTechnicianId) : null;" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                  <div class="flex items-center gap-2">
+                                                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                      </svg>
+                                                      @php
+                                                          $hasAssignedTechnician = optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assignedTechnician?->user?->name !== null;
+                                                      @endphp
+                                                      {{ $hasAssignedTechnician ? 'Changer technicien' : 'Assigner technicien' }}
+                                                  </div>
+                                              </button>
+                                             <div class="border-t border-gray-100 my-1"></div>
                                             <button wire:click="deleteClient({{ $client->id }})" wire:confirm="Êtes-vous sûr de vouloir supprimer ce client ?" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,7 +227,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-10 text-center text-gray-400">
+                            <td colspan="9" class="px-4 py-10 text-center text-gray-400">
                                 Aucun client ne correspond à vos critères.
                             </td>
                         </tr>
@@ -225,6 +254,84 @@
                 </div>
 
                 {{ $clients->links() }}
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal d'assignation de technicien au client --}}
+    <div x-cloak x-show="showAssignTechnician" @click.self="showAssignTechnician = false"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <span x-text="assignTechnicianId ? 'Changer technicien' : 'Assigner un technicien'"></span>
+                </h3>
+                <button type="button" @click="showAssignTechnician = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="px-6 py-4 space-y-4">
+                <p class="text-sm text-gray-600">
+                    Client : <span class="font-medium text-gray-900" x-text="assignClientName"></span>
+                </p>
+
+                <div>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
+                    <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                        {{-- Aucun --}}
+                        <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors"
+                                :class="!assignTechnicianId ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'">
+                            <input type="radio" name="technician_choice_client" value="" x-model="assignTechnicianId" class="sr-only">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Aucun</p>
+                                <p class="text-xs text-gray-500">Retirer l'assignation</p>
+                            </div>
+                        </label>
+
+                        @foreach($technicians as $technician)
+                            @php
+                                $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
+                                $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
+                                $tType = optional($technician->user)->type_technicien?->label();
+                            @endphp
+                            <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors"
+                                    :class="assignTechnicianId == '{{ $technician->id }}' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'">
+                                <input type="radio" name="technician_choice_client" value="{{ $technician->id }}" x-model="assignTechnicianId" class="sr-only">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                                    {{ strtoupper(substr($tName, 0, 1)) }}
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
+                                    <p class="truncate text-xs text-gray-500">
+                                        @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
+                                        @if($tType && $tPhone) · @endif
+                                        {{ $tPhone ?? '' }}
+                                    </p>
+                                </div>
+                                <svg x-show="assignTechnicianId == '{{ $technician->id }}'" class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" @click="showAssignTechnician = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Annuler
+                </button>
+                <button type="button" @click="showAssignTechnician = false; $wire.saveTechnicianAssignment(assignClientId, assignTechnicianId)" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                    Assigner
+                </button>
             </div>
         </div>
     </div>

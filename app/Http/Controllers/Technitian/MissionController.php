@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Farm;
 use App\Models\Mission;
 use App\Models\Technician;
+use App\Models\User;
+use App\Services\SendmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MissionController extends Controller
 {
-    
+    public function __construct(private SendmailService $mailer) {}
 
     public function index()
     {
@@ -40,6 +42,41 @@ class MissionController extends Controller
         $mission = $query->firstOrFail();
         $mission->update(['status' => $validated['status']]);
         $this->syncCompletion($mission);
+
+        if ($validated['status'] === 'completed') {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Mission terminée : ' . $mission->title,
+                        'emails.missions.completed',
+                        ['mission' => $mission]
+                    );
+                }
+            }
+
+            if ($mission->technician?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->technician->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+
+            if ($mission->farm?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->farm->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -83,9 +120,42 @@ class MissionController extends Controller
 
         $validated = $this->validated($request);
 
-        Mission::create(array_merge($validated, [
+        $mission = Mission::create(array_merge($validated, [
             'technician_id' => $validated['technician_id'],
         ]));
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Nouvelle mission assignée : ' . $mission->title,
+                    'emails.missions.assigned',
+                    ['mission' => $mission]
+                );
+            }
+        }
+
+        if ($mission->technician?->user?->email) {
+            $this->mailer->sendView(
+                $mission->technician->user->email,
+                'Nouvelle mission assignée : ' . $mission->title,
+                'emails.missions.assigned',
+                ['mission' => $mission]
+            );
+        }
+
+        if ($mission->farm?->user?->email) {
+            $this->mailer->sendView(
+                $mission->farm->user->email,
+                'Nouvelle mission sur votre exploitation : ' . $mission->title,
+                'emails.missions.assigned',
+                ['mission' => $mission]
+            );
+        }
 
         return redirect()->route('admin.technitian.missions.index')
             ->with('success', 'La mission a été créée avec succès.');
@@ -116,6 +186,41 @@ class MissionController extends Controller
 
         $this->syncCompletion($mission);
 
+        if ($data['status'] === 'completed') {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Mission terminée : ' . $mission->title,
+                        'emails.missions.completed',
+                        ['mission' => $mission]
+                    );
+                }
+            }
+
+            if ($mission->technician?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->technician->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+
+            if ($mission->farm?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->farm->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+        }
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -138,6 +243,39 @@ class MissionController extends Controller
             'status' => 'completed',
             'completed_at' => now(),
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+        }
+
+        if ($mission->technician?->user?->email) {
+            $this->mailer->sendView(
+                $mission->technician->user->email,
+                'Mission terminée : ' . $mission->title,
+                'emails.missions.completed',
+                ['mission' => $mission]
+            );
+        }
+
+        if ($mission->farm?->user?->email) {
+            $this->mailer->sendView(
+                $mission->farm->user->email,
+                'Mission terminée : ' . $mission->title,
+                'emails.missions.completed',
+                ['mission' => $mission]
+            );
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

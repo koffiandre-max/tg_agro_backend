@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DataEntry;
+use App\Models\User;
 use App\Services\SendmailService;
 use Illuminate\Http\Request;
 
@@ -29,6 +30,30 @@ class DataValidationController extends Controller
             'validated_by' => auth()->id(),
             'validated_at' => now(),
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Saisie de données validée',
+                    'emails.data.validated',
+                    ['dataEntry' => $dataEntry]
+                );
+            }
+        }
+
+        if ($dataEntry->technician?->email) {
+            $this->mailer->sendView(
+                $dataEntry->technician->email,
+                'Saisie de données validée',
+                'emails.data.validated',
+                ['dataEntry' => $dataEntry]
+            );
+        }
 
         if ($dataEntry->client?->user?->email) {
             $this->mailer->sendView(
@@ -56,6 +81,30 @@ class DataValidationController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $validated['rejection_reason'] ?? null,
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Saisie de données rejetée',
+                    'emails.data.rejected',
+                    ['dataEntry' => $dataEntry]
+                );
+            }
+        }
+
+        if ($dataEntry->technician?->email) {
+            $this->mailer->sendView(
+                $dataEntry->technician->email,
+                'Saisie de données rejetée',
+                'emails.data.rejected',
+                ['dataEntry' => $dataEntry]
+            );
+        }
 
         if ($dataEntry->client?->user?->email) {
             $this->mailer->sendView(

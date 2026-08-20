@@ -83,12 +83,20 @@ class ReportForm extends Component
 
         // Notification par e-mail à l'administrateur pour validation
         try {
-            app(SendmailService::class)->sendView(
-                env('ADMINSTOR_EMAIL'),
-                'Nouveau rapport à valider : ' . $report->title,
-                'emails.reports.submitted',
-                ['report' => $report]
-            );
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    app(SendmailService::class)->sendView(
+                        $admin->email,
+                        'Nouveau rapport à valider : ' . $report->title,
+                        'emails.reports.submitted',
+                        ['report' => $report]
+                    );
+                }
+            }
         } catch (\Throwable $e) {
             logger()->error('Échec envoi e-mail rapport soumis', ['message' => $e->getMessage()]);
         }

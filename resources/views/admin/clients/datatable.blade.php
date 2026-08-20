@@ -26,11 +26,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-@livewireScripts
-@endpush
-
-@push('styles')
-@livewireStyles
-@endpush

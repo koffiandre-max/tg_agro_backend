@@ -1,4 +1,4 @@
-<div class=" bg-gray-50" x-data="{ openFilter: null }" @click.away="openFilter = null">
+<div class=" bg-gray-50" x-data="{ openFilter: null, showAssign: false, assignFarmId: null, assignFarmName: '', assignTechnicianId: null }" @click.away="openFilter = null">
 
     {{-- Barre de recherche + filtres --}}
     <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -186,7 +186,7 @@
                                                     </span>
                                                 </div>
                                             </a>
-                                            <button wire:click="assignTechnician({{ $farm->id }})" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <button type="button" data-farm-name="{{ addslashes($farm->name) }}" data-farm-technician="{{ $farm->assigned_technician_id ?? 'null' }}" @click="showAssign = true; assignFarmId = {{ $farm->id }}; assignFarmName = $el.dataset.farmName; assignTechnicianId = $el.dataset.farmTechnician === 'null' ? null : Number($el.dataset.farmTechnician);" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -242,83 +242,79 @@
     </div>
 
     {{-- Modal d'assignation de technicien --}}
-    @if($showAssignModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/50" wire:click="closeAssignModal"></div>
-            <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Assigner un technicien</h3>
-                    <button type="button" wire:click="closeAssignModal" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+    <div x-cloak x-show="showAssign" @click.self="showAssign = false"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Assigner un technicien</h3>
+                <button type="button" @click="showAssign = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-                <div class="px-6 py-4 space-y-4">
-                    <p class="text-sm text-gray-600">
-                        Exploitation : <span class="font-medium text-gray-900">{{ $selectedFarmName }}</span>
-                    </p>
+            <div class="px-6 py-4 space-y-4">
+                <p class="text-sm text-gray-600">
+                    Exploitation : <span class="font-medium text-gray-900" x-text="assignFarmName"></span>
+                </p>
 
-                    <div>
-                        <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
+                <div>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Choisir un technicien</p>
 
-                        <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
-                            {{-- Aucun --}}
-                            <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
-                                    {{ is_null($selectedTechnicianId) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                                <input type="radio" name="technician_choice" value="" wire:model.live="selectedTechnicianId" class="sr-only">
-                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
-                                    <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
-                                    </svg>
+                    <div class="max-h-72 overflow-y-auto space-y-2 pr-1">
+                        {{-- Aucun --}}
+                        <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors"
+                                :class="!assignTechnicianId ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'">
+                            <input type="radio" name="technician_choice" value="" x-model="assignTechnicianId" class="sr-only">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Aucun</p>
+                                <p class="text-xs text-gray-500">Retirer l'assignation</p>
+                            </div>
+                        </label>
+
+                        @foreach($technicians as $technician)
+                            @php
+                                $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
+                                $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
+                                $tType = optional($technician->user)->type_technicien?->label();
+                            @endphp
+                            <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors"
+                                    :class="assignTechnicianId == '{{ $technician->id }}' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'">
+                                <input type="radio" name="technician_choice" value="{{ $technician->id }}" x-model="assignTechnicianId" class="sr-only">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                                    {{ strtoupper(substr($tName, 0, 1)) }}
                                 </span>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-medium text-gray-900">Aucun</p>
-                                    <p class="text-xs text-gray-500">Retirer l'assignation</p>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
+                                    <p class="truncate text-xs text-gray-500">
+                                        @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
+                                        @if($tType && $tPhone) · @endif
+                                        {{ $tPhone ?? '' }}
+                                    </p>
                                 </div>
+                                <svg x-show="assignTechnicianId == '{{ $technician->id }}'" class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </label>
-
-                            @foreach($technicians as $technician)
-                                @php
-                                    $tName = $technician->user->name ?? 'Technicien #' . $technician->id;
-                                    $tPhone = $technician->user && $technician->user->phone ? $technician->user->phone : null;
-                                    $tType = $technician->type_technicien?->label();
-                                @endphp
-                                <label class="flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors
-                                        {{ $selectedTechnicianId == $technician->id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50' }}">
-                                    <input type="radio" name="technician_choice" value="{{ $technician->id }}" wire:model.live="selectedTechnicianId" class="sr-only">
-                                    <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
-                                        {{ strtoupper(substr($tName, 0, 1)) }}
-                                    </span>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="truncate text-sm font-medium text-gray-900">{{ $tName }}</p>
-                                        <p class="truncate text-xs text-gray-500">
-                                            @if($tType)<span class="capitalize">{{ $tType }}</span>@endif
-                                            @if($tType && $tPhone) · @endif
-                                            {{ $tPhone ?? '' }}
-                                        </p>
-                                    </div>
-                                    @if($selectedTechnicianId == $technician->id)
-                                        <svg class="size-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    @endif
-                                </label>
-                            @endforeach
-                        </div>
+                        @endforeach
                     </div>
                 </div>
+            </div>
 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-                    <button type="button" wire:click="closeAssignModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        Annuler
-                    </button>
-                    <button type="button" wire:click="assignTechnicianToFarm" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                        Assigner
-                    </button>
-                </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" @click="showAssign = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Annuler
+                </button>
+                <button type="button" @click="showAssign = false; $wire.call('assignTechnicianToFarm', assignFarmId, assignTechnicianId)" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                    Assigner
+                </button>
             </div>
         </div>
-    @endif
+    </div>
 </div>

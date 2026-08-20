@@ -4,10 +4,12 @@ namespace App\Livewire;
 
 use App\Models\Farm;
 use App\Models\User;
+use App\Services\SendmailService;
 use Livewire\Component;
 
 class FarmForm extends Component
 {
+    public function __construct(private ?SendmailService $mailer = null) {}
     public ?int $farmId = null;
 
     public string $name = '';
@@ -508,9 +510,27 @@ class FarmForm extends Component
             $farm = Farm::findOrFail($this->farmId);
             $farm->update($data);
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Exploitation mise à jour avec succès.']);
+
+            if ($this->mailer && $farm->user?->email) {
+                $this->mailer->sendView(
+                    $farm->user->email,
+                    'Exploitation mise à jour : ' . $farm->name,
+                    'emails.farms.assigned_to_client',
+                    ['farm' => $farm]
+                );
+            }
         } else {
-            Farm::create($data);
+            $farm = Farm::create($data);
             $this->dispatch('notify', ['type' => 'success', 'message' => 'Exploitation créée avec succès.']);
+
+            if ($this->mailer && $farm->user?->email) {
+                $this->mailer->sendView(
+                    $farm->user->email,
+                    'Nouvelle exploitation assignée : ' . $farm->name,
+                    'emails.farms.assigned_to_client',
+                    ['farm' => $farm]
+                );
+            }
         }
 
         return $this->redirect(route('admin.farms.index'));

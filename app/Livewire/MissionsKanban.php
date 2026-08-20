@@ -5,12 +5,15 @@ namespace App\Livewire;
 use App\Models\Mission;
 use App\Models\Technician;
 use App\Models\Farm;
+use App\Models\User;
+use App\Services\SendmailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class MissionsKanban extends Component
 {
+    public function __construct(private ?SendmailService $mailer = null) {}
     public array $columns = [
         'pending' => ['label' => 'En attente', 'color' => 'bg-sky-50 border-sky-200', 'header' => 'bg-sky-100 text-sky-800', 'badge' => 'bg-sky-100 text-sky-700'],
         'in_progress' => ['label' => 'En cours', 'color' => 'bg-amber-50 border-amber-200', 'header' => 'bg-amber-100 text-amber-800', 'badge' => 'bg-amber-100 text-amber-700'],
@@ -96,6 +99,41 @@ class MissionsKanban extends Component
             'completed_at' => $newStatus === 'completed' ? now() : ($mission->status === 'completed' && $newStatus !== 'completed' ? null : $mission->completed_at),
         ]);
 
+        if ($newStatus === 'completed' && $this->mailer) {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Mission terminée : ' . $mission->title,
+                        'emails.missions.completed',
+                        ['mission' => $mission]
+                    );
+                }
+            }
+
+            if ($mission->technician?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->technician->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+
+            if ($mission->farm?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->farm->user->email,
+                    'Mission terminée : ' . $mission->title,
+                    'emails.missions.completed',
+                    ['mission' => $mission]
+                );
+            }
+        }
+
         $this->loadMissions();
     }
 
@@ -131,6 +169,47 @@ class MissionsKanban extends Component
             'scheduled_date' => $validated['new_scheduled_date'],
             'status' => $validated['new_status'],
         ]);
+
+        $mission = Mission::where('technician_id', $validated['new_technician_id'])
+            ->where('farm_id', $validated['new_farm_id'])
+            ->where('title', $validated['new_title'])
+            ->latest()
+            ->first();
+
+        if ($this->mailer && $mission) {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Nouvelle mission assignée : ' . $mission->title,
+                        'emails.missions.assigned',
+                        ['mission' => $mission]
+                    );
+                }
+            }
+
+            if ($mission->technician?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->technician->user->email,
+                    'Nouvelle mission assignée : ' . $mission->title,
+                    'emails.missions.assigned',
+                    ['mission' => $mission]
+                );
+            }
+
+            if ($mission->farm?->user?->email) {
+                $this->mailer->sendView(
+                    $mission->farm->user->email,
+                    'Nouvelle mission sur votre exploitation : ' . $mission->title,
+                    'emails.missions.assigned',
+                    ['mission' => $mission]
+                );
+            }
+        }
 
         $this->reset(['new_technician_id', 'new_farm_id', 'new_title', 'new_description', 'new_scheduled_date', 'new_status']);
         $this->new_status = 'pending';

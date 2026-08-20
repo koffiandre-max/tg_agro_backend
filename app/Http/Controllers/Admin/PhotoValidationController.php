@@ -7,10 +7,13 @@ use App\Models\Client;
 use App\Models\Farm;
 use App\Models\Photo;
 use App\Models\User;
+use App\Services\SendmailService;
 use Illuminate\Http\Request;
 
 class PhotoValidationController extends Controller
 {
+    public function __construct(private SendmailService $mailer) {}
+
     public function index()
     {
         $photos = Photo::with(['farm', 'client.user', 'technician'])
@@ -41,6 +44,39 @@ class PhotoValidationController extends Controller
             'is_validated' => true,
             'validated_at' => now(),
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Photo validée : ' . ($photo->farm?->name ?? 'Photo'),
+                    'emails.photos.validated',
+                    ['photo' => $photo]
+                );
+            }
+        }
+
+        if ($photo->client?->user?->email) {
+            $this->mailer->sendView(
+                $photo->client->user->email,
+                'Photo validée : ' . ($photo->farm?->name ?? 'Photo'),
+                'emails.photos.validated',
+                ['photo' => $photo]
+            );
+        }
+
+        if ($photo->technician?->email) {
+            $this->mailer->sendView(
+                $photo->technician->email,
+                'Photo validée : ' . ($photo->farm?->name ?? 'Photo'),
+                'emails.photos.validated',
+                ['photo' => $photo]
+            );
+        }
 
         if (request()->ajax()) {
             return response()->json(['success' => true]);

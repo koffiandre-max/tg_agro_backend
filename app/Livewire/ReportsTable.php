@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Report;
+use App\Models\User;
 use App\Services\SendmailService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -76,14 +77,39 @@ class ReportsTable extends Component
             'validated_at' => now(),
         ]);
 
-        // Notification email au client (étape 4)
-        if ($report->client?->user?->email && $this->mailer) {
-            $this->mailer->sendView(
-                $report->client->user->email,
-                'Rapport validé : ' . $report->title,
-                'emails.reports.validated',
-                ['report' => $report]
-            );
+        if ($this->mailer) {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Rapport validé : ' . $report->title,
+                        'emails.reports.validated',
+                        ['report' => $report]
+                    );
+                }
+            }
+
+            if ($report->technician?->email) {
+                $this->mailer->sendView(
+                    $report->technician->email,
+                    'Rapport validé : ' . $report->title,
+                    'emails.reports.validated',
+                    ['report' => $report]
+                );
+            }
+
+            if ($report->client?->user?->email) {
+                $this->mailer->sendView(
+                    $report->client->user->email,
+                    'Rapport validé : ' . $report->title,
+                    'emails.reports.validated',
+                    ['report' => $report]
+                );
+            }
         }
 
         $this->dispatch('report-validated');
@@ -97,14 +123,39 @@ class ReportsTable extends Component
             'rejection_reason' => null,
         ]);
 
-        // Notification email au client (étape 4)
-        if ($report->client?->user?->email && $this->mailer) {
-            $this->mailer->sendView(
-                $report->client->user->email,
-                'Rapport rejeté : ' . $report->title,
-                'emails.reports.rejected',
-                ['report' => $report]
-            );
+        if ($this->mailer) {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Rapport rejeté : ' . $report->title,
+                        'emails.reports.rejected',
+                        ['report' => $report]
+                    );
+                }
+            }
+
+            if ($report->technician?->email) {
+                $this->mailer->sendView(
+                    $report->technician->email,
+                    'Rapport rejeté : ' . $report->title,
+                    'emails.reports.rejected',
+                    ['report' => $report]
+                );
+            }
+
+            if ($report->client?->user?->email) {
+                $this->mailer->sendView(
+                    $report->client->user->email,
+                    'Rapport rejeté : ' . $report->title,
+                    'emails.reports.rejected',
+                    ['report' => $report]
+                );
+            }
         }
 
         $this->dispatch('report-rejected');

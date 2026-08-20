@@ -4,12 +4,16 @@ namespace App\Livewire;
 
 use App\Models\Farm;
 use App\Models\Technician;
+use App\Models\User;
+use App\Services\SendmailService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class FarmsTable extends Component
 {
     use WithPagination;
+
+    public function __construct(private ?SendmailService $mailer = null) {}
 
     public string $search = '';
 
@@ -92,8 +96,11 @@ class FarmsTable extends Component
         $this->showAssignModal = true;
     }
 
-    public function assignTechnicianToFarm(): void
+    public function assignTechnicianToFarm($farmId = null, $technicianId = null): void
     {
+        $this->selectedFarmId = $farmId;
+        $this->selectedTechnicianId = $technicianId ?: null;
+
         $this->validate([
             'selectedTechnicianId' => 'nullable|exists:technicians,id',
         ]);
@@ -102,6 +109,43 @@ class FarmsTable extends Component
         $farm->update([
             'assigned_technician_id' => $this->selectedTechnicianId,
         ]);
+
+        $technicianName = $farm->assignedTechnician?->user?->name ?? 'Aucun';
+
+        if ($this->mailer) {
+            $admins = User::where('role', 'admin')
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($admins as $admin) {
+                if ($admin->email) {
+                    $this->mailer->sendView(
+                        $admin->email,
+                        'Technicien assigné à l\'exploitation : ' . $farm->name,
+                        'emails.farms.technician_assigned',
+                        ['farm' => $farm, 'technicianName' => $technicianName]
+                    );
+                }
+            }
+
+            if ($farm->user?->email) {
+                $this->mailer->sendView(
+                    $farm->user->email,
+                    'Technicien assigné à votre exploitation : ' . $farm->name,
+                    'emails.farms.technician_assigned',
+                    ['farm' => $farm, 'technicianName' => $technicianName]
+                );
+            }
+
+            if ($farm->assignedTechnician?->user?->email) {
+                $this->mailer->sendView(
+                    $farm->assignedTechnician->user->email,
+                    'Vous avez été assigné à l\'exploitation : ' . $farm->name,
+                    'emails.farms.technician_assigned',
+                    ['farm' => $farm, 'technicianName' => $technicianName]
+                );
+            }
+        }
 
         $this->showAssignModal = false;
         $this->selectedFarmId = null;

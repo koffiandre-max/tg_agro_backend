@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Report;
+use App\Models\User;
 use App\Services\SendmailService;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,30 @@ class ReportValidationController extends Controller
             'validated_by' => auth()->id(),
             'validated_at' => now(),
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Rapport validé : ' . $report->title,
+                    'emails.reports.validated',
+                    ['report' => $report]
+                );
+            }
+        }
+
+        if ($report->technician?->email) {
+            $this->mailer->sendView(
+                $report->technician->email,
+                'Rapport validé : ' . $report->title,
+                'emails.reports.validated',
+                ['report' => $report]
+            );
+        }
 
         if ($report->client?->user?->email) {
             $this->mailer->sendView(
@@ -42,6 +67,30 @@ class ReportValidationController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $validated['rejection_reason'] ?? null,
         ]);
+
+        $admins = User::where('role', 'admin')
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            if ($admin->email) {
+                $this->mailer->sendView(
+                    $admin->email,
+                    'Rapport rejeté : ' . $report->title,
+                    'emails.reports.rejected',
+                    ['report' => $report]
+                );
+            }
+        }
+
+        if ($report->technician?->email) {
+            $this->mailer->sendView(
+                $report->technician->email,
+                'Rapport rejeté : ' . $report->title,
+                'emails.reports.rejected',
+                ['report' => $report]
+            );
+        }
 
         if ($report->client?->user?->email) {
             $this->mailer->sendView(
