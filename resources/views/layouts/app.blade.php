@@ -147,8 +147,6 @@
         });
     </script>
     <script src="{{ asset('chart/chart.umd.min.js') }}"></script>
-    <script src="/alpine/alpine.js" defer></script>
-    <script src="/alpine/collapse.js" defer></script>
     <script src="{{ asset('tailwind/tailwind.js') }}"></script>
    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -671,9 +669,6 @@
     <script>
         document.addEventListener('alpine:init', () => {
             @stack('alpine-components')
-        });
-        document.addEventListener('livewire:init', () => {
-            Alpine.start();
         });
     </script>
     @stack('scripts')

@@ -20,6 +20,7 @@ class Client extends Model
         'subscription_expires_at',
         'total_investment',
         'avatar',
+        'assigned_technician_id',
         'notes',
     ];
 
@@ -27,6 +28,7 @@ class Client extends Model
     {
         return [
             'subscription_expires_at' => 'date',
+            'assigned_technician_id' => 'integer',
             'total_investment' => 'decimal:2',
         ];
     }
@@ -34,6 +36,11 @@ class Client extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function assignedTechnician(): BelongsTo
+    {
+        return $this->belongsTo(Technician::class, 'assigned_technician_id');
     }
 
     public function farms(): HasMany

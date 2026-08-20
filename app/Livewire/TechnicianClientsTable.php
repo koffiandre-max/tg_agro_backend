@@ -57,7 +57,8 @@ class TechnicianClientsTable extends Component
 
         $farmIds = Farm::where('assigned_technician_id', $technician->id)->pluck('id');
 
-        $clientIds = Client::whereIn('user_id', function ($query) use ($farmIds) {
+        $clientIds = Client::where('assigned_technician_id', $technician->id)
+            ->orWhereIn('user_id', function ($query) use ($farmIds) {
                 $query->select('user_id')->from('farms')->whereIn('id', $farmIds);
             })
             ->orWhereHas('assignedFarms', function ($query) use ($farmIds) {

@@ -151,7 +151,8 @@
                             </td>
                             <td class="px-4 py-3 text-center">
                                 @php
-                                    $assignedTechnician = optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assignedTechnician?->user;
+                                    $assignedTechnician = $client->assignedTechnician?->user
+                                        ?? optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assignedTechnician?->user;
                                 @endphp
                                 @if($assignedTechnician)
                                     <div class="flex items-center justify-center gap-2">
@@ -200,13 +201,14 @@
                                                      Voir fermes
                                                  </div>
                                              </a>
-                                              <button type="button" data-client-name="{{ addslashes($client->user->name ?? 'Client #' . $client->id) }}" data-client-technician-id="{{ optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assigned_technician_id ?? '' }}" @click="showAssignTechnician = true; assignClientId = {{ $client->id }}; assignClientName = $el.dataset.clientName; assignTechnicianId = $el.dataset.clientTechnicianId ? Number($el.dataset.clientTechnicianId) : null;" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                              <button type="button" data-client-name="{{ addslashes($client->user->name ?? 'Client #' . $client->id) }}" data-client-technician-id="{{ $client->assigned_technician_id ?? optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assigned_technician_id ?? '' }}" @click="showAssignTechnician = true; assignClientId = {{ $client->id }}; assignClientName = $el.dataset.clientName; assignTechnicianId = $el.dataset.clientTechnicianId ? Number($el.dataset.clientTechnicianId) : null;" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                   <div class="flex items-center gap-2">
                                                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                       </svg>
                                                       @php
-                                                          $hasAssignedTechnician = optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assignedTechnician?->user?->name !== null;
+                                                          $hasAssignedTechnician = $client->assigned_technician_id
+                                                              || optional($client->farms->firstWhere('assigned_technician_id', '!=', null))->assigned_technician_id;
                                                       @endphp
                                                       {{ $hasAssignedTechnician ? 'Changer technicien' : 'Assigner technicien' }}
                                                   </div>

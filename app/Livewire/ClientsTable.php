@@ -89,10 +89,12 @@ class ClientsTable extends Component
         $this->selectedClientId = $client->id;
         $this->selectedClientName = $client->user?->name ?? 'Client #' . $client->id;
 
-        $currentTechnicianId = null;
-        if ($client->farms()->whereNotNull('assigned_technician_id')->exists()) {
+        $currentTechnicianId = $client->assigned_technician_id;
+
+        if (! $currentTechnicianId && $client->farms()->whereNotNull('assigned_technician_id')->exists()) {
             $currentTechnicianId = $client->farms()->whereNotNull('assigned_technician_id')->value('assigned_technician_id');
         }
+
         $this->selectedTechnicianId = $currentTechnicianId;
         $this->showAssignTechnicianModal = true;
     }
@@ -107,23 +109,28 @@ class ClientsTable extends Component
                 'selectedTechnicianId' => 'nullable|integer|exists:technicians,id',
             ]);
 
-            $client = Client::with(['user', 'assignedFarms'])->findOrFail($this->selectedClientId);
+            $client = Client::with(['user', 'assignedFarms', 'farms'])->findOrFail($this->selectedClientId);
+
+            $technicianId = $this->selectedTechnicianId;
+
+            // Assignation directe au client (toujours possible, même sans exploitation).
+            $client->update([
+                'assigned_technician_id' => $technicianId,
+            ]);
 
             $ownedFarmIds = $client->farms()->pluck('id')->toArray();
             $assignedFarmIds = $client->assignedFarms()->pluck('id')->toArray();
             $allFarmIds = array_unique(array_merge($ownedFarmIds, $assignedFarmIds));
 
-            if (empty($allFarmIds)) {
-                session()->flash('error', 'Ce client n\'est lié à aucune exploitation : l\'assignation n\'a pas été enregistrée.');
-                return;
+            // Si le client possède des exploitations, on propage l'assignation sur chacune.
+            if (! empty($allFarmIds)) {
+                Farm::whereIn('id', $allFarmIds)->update([
+                    'assigned_technician_id' => $technicianId,
+                ]);
             }
 
-            Farm::whereIn('id', $allFarmIds)->update([
-                'assigned_technician_id' => $this->selectedTechnicianId,
-            ]);
-
-            $technicianName = $this->selectedTechnicianId
-                ? Technician::find($this->selectedTechnicianId)?->user?->name
+            $technicianName = $technicianId
+                ? Technician::find($technicianId)?->user?->name
                 : 'Aucun';
 
             if ($this->mailer) {
@@ -197,7 +204,7 @@ class ClientsTable extends Component
     public function render()
     {
         $query = Client::query()
-            ->with(['user', 'farms.assignedTechnician'])
+            ->with(['user', 'assignedTechnician', 'farms.assignedTechnician'])
             ->when($this->search, function ($q) {
                 $q->whereHas('user', function ($q) {
                     $q->where('name', 'like', "%{$this->search}%")
