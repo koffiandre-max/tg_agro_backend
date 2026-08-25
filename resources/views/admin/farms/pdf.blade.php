@@ -52,6 +52,10 @@
                     <span class="w-[58%]">{{ $farm->culture_type ?? '—' }}</span>
                 </div>
                 <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Type d'exploitation</span>
+                    <span class="w-[58%]">{{ $farm->type?->label() ?? '—' }}</span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
                     <span class="font-semibold text-slate-700 w-[42%]">Surface totale</span>
                     <span class="w-[58%]">{{ number_format($farm->total_area_hectares, 2) }} ha</span>
                 </div>
@@ -160,6 +164,16 @@
                 <div class="flex border-b border-slate-200 py-1.5">
                     <span class="font-semibold text-slate-700 w-[42%]">Source pH</span>
                     <span class="w-[58%]">{{ $farm->source_ph ?? '—' }}</span>
+                </div>
+                @if($farm->analyse_sol_realisee_precision)
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Précision analyse sol</span>
+                    <span class="w-[58%]">{{ $farm->analyse_sol_realisee_precision }}</span>
+                </div>
+                @endif
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Commentaire analyse</span>
+                    <span class="w-[58%]">{{ $farm->commentaire_analyse ?? '—' }}</span>
                 </div>
             </div>
         </div>
@@ -328,7 +342,41 @@
                 </div>
                 <div class="flex border-b border-slate-200 py-1.5">
                     <span class="font-semibold text-slate-700 w-[42%]">Recommandation</span>
-                    <span class="w-[58%]">{{ $farm->recommandation ?? '—' }}</span>
+                    <span class="w-[58%]">
+                        @php
+                            $recommandationValue = $farm->recommandation;
+                            if ($recommandationValue) {
+                                try {
+                                    $recommandationEnum = \App\Enums\Recommandation::from($recommandationValue);
+                                    echo $recommandationEnum->label();
+                                } catch (\ValueError $e) {
+                                    echo $recommandationValue;
+                                }
+                            } else {
+                                echo '—';
+                            }
+                        @endphp
+                    </span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Nb critères</span>
+                    <span class="w-[58%]">{{ $farm->nombre_criteres ?? '—' }}</span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Conformes</span>
+                    <span class="w-[58%]">{{ $farm->conformes ?? '—' }}</span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Écarts</span>
+                    <span class="w-[58%]">{{ $farm->ecarts ?? '—' }}</span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Total</span>
+                    <span class="w-[58%]">{{ $farm->total ?? '—' }}</span>
+                </div>
+                <div class="flex border-b border-slate-200 py-1.5">
+                    <span class="font-semibold text-slate-700 w-[42%]">Écarts significatifs</span>
+                    <span class="w-[58%]">{{ $farm->ecarts_significatifs ?? '—' }}</span>
                 </div>
             </div>
         </div>

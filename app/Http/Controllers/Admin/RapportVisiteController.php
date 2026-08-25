@@ -114,6 +114,14 @@ class RapportVisiteController extends Controller
         ]);
 
         $validated['statut'] = $validated['statut'] ?? 'brouillon';
+        if (empty($validated['statut'])) {
+            $validated['statut'] = 'brouillon';
+        }
+
+        $validated['niveau_alerte'] = $validated['niveau_alerte'] ?? 'aucune';
+        if (empty($validated['niveau_alerte'])) {
+            $validated['niveau_alerte'] = 'aucune';
+        }
 
         // Créer le rapport principal
         $rapport = RapportVisite::create($validated);
@@ -289,6 +297,16 @@ class RapportVisiteController extends Controller
             'photo_legendes' => ['nullable', 'array'],
             'photo_legendes.*' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $validated['statut'] = $validated['statut'] ?? $rapport->statut ?? 'brouillon';
+        if (empty($validated['statut'])) {
+            $validated['statut'] = $rapport->statut ?? 'brouillon';
+        }
+
+        $validated['niveau_alerte'] = $validated['niveau_alerte'] ?? $rapport->niveau_alerte ?? 'aucune';
+        if (empty($validated['niveau_alerte'])) {
+            $validated['niveau_alerte'] = $rapport->niveau_alerte ?? 'aucune';
+        }
 
         $rapport->update($validated);
 

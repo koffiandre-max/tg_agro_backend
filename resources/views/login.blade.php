@@ -3,129 +3,125 @@
 @section('title', 'Connexion')
 
 @section('content')
-<div
-    class="min-h-screen flex flex-col items-center justify-center px-4 py-10 sm:px-6"
-    x-data="loginForm()"
-    x-cloak
->
-    {{-- En-tête marque --}}
-    <div class="mb-8 text-center">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-600/25">
-            <svg class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
+<div class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-10 sm:px-6" x-data="loginForm()" x-cloak style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%232D6A4F&quot; fill-opacity=&quot;0.04&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
+    <div class="w-full max-w-sm animate-rise">
+        {{-- Brand --}}
+        <div class="mb-8 text-center">
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-2.5-6-6-6-10a6 6 0 0112 0c0 4-2 7.5-6 10z"/>
+                    <path stroke-linecap="round" d="M12 21V9"/>
+                </svg>
+            </span>
+            <h1 class="mt-4 text-lg font-semibold text-slate-900">{{ config('app.name', 'TG Agro') }}</h1>
+            <p class="mt-0.5 text-sm text-slate-500">Connectez-vous à votre espace</p>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ config('app.name', 'TG Agro') }}</h1>
-        <p class="mt-1 text-sm text-gray-500">Plateforme de gestion agricole</p>
-    </div>
 
-    {{-- Carte login --}}
-    <x-ui.card class="w-full max-w-sm" :padding="false">
-        <div class="h-1 bg-emerald-600 rounded-t-xl"></div>
-
-        <div class="p-6 sm:p-8">
-            <div class="mb-6">
-                <h2 class="text-lg font-semibold text-gray-900">Connexion</h2>
-                <p class="mt-1 text-sm text-gray-500">Accédez à votre espace de travail</p>
-            </div>
-
-            <div
-                x-show="error"
-                x-transition
-                class="mb-5"
-                style="display: none;"
-            >
-                <x-ui.alert type="error" x-bind:message="error" />
-            </div>
-
-            @if($errors->any())
-                <div class="mb-5">
-                    <x-ui.alert type="error" :message="$errors->first()" />
+        {{-- Card --}}
+        <div class="rounded-xl bg-white border border-slate-200 shadow-sm">
+            <div class="px-6 py-5 sm:px-8 sm:py-6">
+                <div class="mb-6">
+                    <h2 class="text-sm font-semibold text-slate-900">Bon retour</h2>
+                    <p class="mt-1 text-xs text-slate-500">Entrez vos identifiants pour continuer.</p>
                 </div>
-            @endif
 
-            <form @submit.prevent="submit" class="space-y-4" novalidate>
-                <x-ui.input
-                    type="email"
-                    name="email"
-                    label="Adresse email"
-                    placeholder="vous@exemple.com"
-                    required
-                    x-model="email"
-                    :value="old('email')"
-                    :icon="'<svg class=\'h-5 w-5\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\' stroke-width=\'1.75\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\'/></svg>'"
-                />
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">
-                        Mot de passe <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
-                        </div>
-                        <input
-                            :type="showPassword ? 'text' : 'password'"
-                            id="password"
-                            name="password"
-                            x-model="password"
-                            required
-                            autocomplete="current-password"
-                            placeholder="••••••••"
-                            class="block bg-white w-full rounded-md border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 sm:text-sm transition-colors pl-10 pr-10 py-2.5"
-                        >
-                        <button
-                            type="button"
-                            @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                            :aria-label="showPassword ? 'Masquer' : 'Afficher'"
-                        >
-                            <svg x-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 -1.274 4.057-5.064 7 -9.542 7 -4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            <svg x-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" style="display: none;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                            </svg>
-                        </button>
+                {{-- Error --}}
+                <div class="mb-5" role="alert" aria-live="polite">
+                    <div x-show="error" x-transition style="display: none;">
+                        <div class="rounded-md bg-red-50 border border-red-100 px-3 py-2.5 text-xs text-red-700" x-text="error"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                <form @submit.prevent="submit" class="space-y-4" novalidate>
+                    <div>
+                        <label for="email" class="mb-1.5 block text-xs font-medium text-slate-700">Email</label>
                         <input
-                            type="checkbox"
-                            x-model="remember"
-                            class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                            type="email"
+                            id="email"
+                            name="email"
+                            x-model="email"
+                            required
+                            autocomplete="email"
+                            inputmode="email"
+                            placeholder="vous@exemple.com"
+                            class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
                         >
-                        <span class="text-sm text-gray-600">Se souvenir de moi</span>
-                    </label>
-                    <a href="#" class="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
-                        Mot de passe oublié ?
-                    </a>
-                </div>
+                    </div>
 
-                <x-ui.btn
-                    type="submit"
-                    variant="success"
-                    class="w-full mt-2"
-                    x-bind:loading="loading"
-                    x-bind:disabled="loading"
-                >
-                    <span x-text="loading ? 'Connexion...' : 'Se connecter'"></span>
-                </x-ui.btn>
-            </form>
+                    <div>
+                        <label for="password" class="mb-1.5 block text-xs font-medium text-slate-700">Mot de passe</label>
+                        <div class="relative">
+                            <input
+                                :type="showPassword ? 'text' : 'password'"
+                                id="password"
+                                name="password"
+                                x-model="password"
+                                required
+                                autocomplete="current-password"
+                                placeholder="••••••••"
+                                class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
+                            >
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+                                :aria-label="showPassword ? 'Masquer' : 'Afficher'"
+                            >
+                                <svg x-show="!showPassword" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 -1.274 4.057-5.064 7 -9.542 7 -4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPassword" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" style="display:none" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" name="remember" x-model="remember" class="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600">
+                            <span class="text-xs text-slate-600">Se souvenir de moi</span>
+                        </label>
+                        @if(Route::has('password.request'))
+                            <a href="{{ route('password.request') }}" class="text-xs font-medium text-emerald-700 hover:text-emerald-800 transition-colors">Mot de passe oublié ?</a>
+                        @endif
+                    </div>
+
+                    <button
+                        type="submit"
+                        x-bind:disabled="loading"
+                        class="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 active:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-1"
+                    >
+                        <svg x-show="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                            <path class="opacity-90" d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        <span x-text="loading ? 'Connexion…' : 'Se connecter'"></span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="border-t border-slate-100 px-6 py-4 text-center sm:px-8">
+                <p class="text-xs text-slate-500">
+                    Pas encore de compte ?
+                    <a href="{{ route('register') }}" class="font-medium text-emerald-700 hover:text-emerald-800 transition-colors">S'inscrire</a>
+                </p>
+            </div>
         </div>
-    </x-ui.card>
 
-    <p class="mt-8 text-center text-xs text-gray-400">
-        &copy; {{ date('Y') }} {{ config('app.name', 'TG Agro') }}
-    </p>
+        <p class="mt-6 text-center text-[11px] text-slate-400">
+            &copy; {{ date('Y') }} {{ config('app.name', 'TG Agro') }}
+        </p>
+    </div>
 </div>
 
-<style>[x-cloak] { display: none !important; }</style>
+<style>
+    [x-cloak] { display: none !important; }
+    .animate-rise { animation: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .animate-rise { animation: none; }
+    }
+</style>
 
 <script>
     function loginForm() {
@@ -138,6 +134,8 @@
             error: '',
 
             async submit() {
+                if (this.loading) return;
+
                 this.loading = true;
                 this.error = '';
 
@@ -147,19 +145,25 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
                         },
                         body: JSON.stringify({
-                            email: this.email,
+                            email: this.email.trim(),
                             password: this.password,
                             remember: this.remember,
                         }),
-                    });
+                    };
 
-                    const data = await response.json();
+                    let data = {};
+                    try { data = await response.json(); } catch {}
 
                     if (response.ok && data.success) {
                         window.location.href = data.redirect;
+                        return;
+                    }
+
+                    if (response.status === 429) {
+                        this.error = data.message || 'Trop de tentatives. Veuillez réessayer dans quelques instants.';
                         return;
                     }
 
@@ -170,7 +174,7 @@
 
                     this.error = data.message || 'Email ou mot de passe incorrect.';
                 } catch {
-                    this.error = 'Une erreur est survenue. Veuillez réessayer.';
+                    this.error = 'Une erreur est survenue. Vérifiez votre connexion et réessayez.';
                 } finally {
                     this.loading = false;
                 }

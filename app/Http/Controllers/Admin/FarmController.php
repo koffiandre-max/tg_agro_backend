@@ -6,6 +6,7 @@ use App\Enums\CouleurSol;
 use App\Enums\CultureType;
 use App\Enums\ExpositionParcelle;
 use App\Enums\FarmStatus;
+use App\Enums\FarmType;
 use App\Enums\FormeParcelle;
 use App\Enums\OccupationActuelle;
 use App\Enums\PenteMoyenne;
@@ -95,6 +96,10 @@ class FarmController extends Controller
             'value' => $case->value,
             'label' => $case->label()
         ]);
+        $farmTypeOptions = collect(FarmType::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
         $stadePhenologiqueOptions = collect(StadePhenologique::cases())->map(fn($case) => [
             'value' => $case->value,
             'label' => $case->label()
@@ -114,6 +119,7 @@ class FarmController extends Controller
             'recommandationOptions' => $recommandationOptions,
             'farmStatusOptions' => $farmStatusOptions,
             'cultureTypeOptions' => $cultureTypeOptions,
+            'farmTypeOptions' => $farmTypeOptions,
             'stadePhenologiqueOptions' => $stadePhenologiqueOptions,
         ]);
     }
@@ -124,6 +130,7 @@ class FarmController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id'],
             'location' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'in:culture,elevage'],
             'culture_type' => ['required', 'string', 'max:255'],
             'total_area_hectares' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:active,inactive,fallow'],
@@ -238,7 +245,86 @@ class FarmController extends Controller
 
     public function edit($id)
     {
-        return view('admin.farms.edit', compact('id'));
+        $farm = Farm::findOrFail($id);
+        $farm->load('user');
+
+        $typeSolOptions = collect(TypeSol::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $typePointEauOptions = collect(TypePointEau::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $typeIrrigationOptions = collect(TypeIrrigation::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $topographieOptions = collect(Topographie::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $penteMoyenneOptions = collect(PenteMoyenne::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $formeParcelleOptions = collect(FormeParcelle::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $expositionParcelleOptions = collect(ExpositionParcelle::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $occupationActuelleOptions = collect(OccupationActuelle::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $couleurSolOptions = collect(CouleurSol::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $recommandationOptions = collect(Recommandation::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $farmStatusOptions = collect(FarmStatus::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $cultureTypeOptions = collect(CultureType::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $farmTypeOptions = collect(FarmType::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+        $stadePhenologiqueOptions = collect(StadePhenologique::cases())->map(fn($case) => [
+            'value' => $case->value,
+            'label' => $case->label()
+        ]);
+
+        $clients = User::where('role', 'client')->get(['id', 'name']);
+
+        return view('admin.farms.edit', [
+            'farm' => $farm,
+            'clients' => $clients,
+            'typeSolOptions' => $typeSolOptions,
+            'typePointEauOptions' => $typePointEauOptions,
+            'typeIrrigationOptions' => $typeIrrigationOptions,
+            'topographieOptions' => $topographieOptions,
+            'penteMoyenneOptions' => $penteMoyenneOptions,
+            'formeParcelleOptions' => $formeParcelleOptions,
+            'expositionParcelleOptions' => $expositionParcelleOptions,
+            'occupationActuelleOptions' => $occupationActuelleOptions,
+            'couleurSolOptions' => $couleurSolOptions,
+            'recommandationOptions' => $recommandationOptions,
+            'farmStatusOptions' => $farmStatusOptions,
+            'cultureTypeOptions' => $cultureTypeOptions,
+            'farmTypeOptions' => $farmTypeOptions,
+            'stadePhenologiqueOptions' => $stadePhenologiqueOptions,
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -247,6 +333,7 @@ class FarmController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id'],
             'location' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'in:culture,elevage'],
             'culture_type' => ['required', 'string', 'max:255'],
             'total_area_hectares' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:active,inactive,fallow'],

@@ -14,9 +14,11 @@ Route::get('/', function () {
 });
 
 // Guest routes — only for unauthenticated users
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:100,60'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
 // Authenticated routes — logout + dashboard + chat (role-agnostic)
@@ -35,7 +37,7 @@ Route::middleware('auth')->group(function () {
 // ─────────────────────────────────────────────
 // Admin-only routes
 // ─────────────────────────────────────────────
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'admin', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/admin.php';
     require __DIR__ . '/clients.php';
     require __DIR__ . '/technicians.php';
@@ -53,20 +55,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // ─────────────────────────────────────────────
 // Shared admin + technician routes (visit reports)
 // ─────────────────────────────────────────────
-Route::middleware(['auth', 'admin_or_technician'])->group(function () {
+Route::middleware(['auth', 'admin_or_technician', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/rapports-visite.php';
 });
 
 // ─────────────────────────────────────────────
 // Technician-only routes
 // ─────────────────────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/technitian.php';
 });
 
 // ─────────────────────────────────────────────
 // Client (portail) routes
 // ─────────────────────────────────────────────
-Route::middleware(['auth', 'client'])->group(function () {
+Route::middleware(['auth', 'client', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/portail.php';
 });

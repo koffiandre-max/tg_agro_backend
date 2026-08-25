@@ -19,6 +19,8 @@ class FarmsTable extends Component
 
     public string $status = '';
 
+    public string $type = '';
+
     public string $cultureType = '';
 
     public string $client = '';
@@ -42,6 +44,10 @@ class FarmsTable extends Component
         $this->resetPage();
     }
     public function updatingStatus()
+    {
+        $this->resetPage();
+    }
+    public function updatingType()
     {
         $this->resetPage();
     }
@@ -78,7 +84,7 @@ class FarmsTable extends Component
 
     public function resetFilters(): void
     {
-        $this->reset(['search', 'status', 'cultureType', 'client', 'dateFrom', 'dateTo']);
+        $this->reset(['search', 'status', 'type', 'cultureType', 'client', 'dateFrom', 'dateTo']);
         $this->resetPage();
     }
 
@@ -182,6 +188,7 @@ class FarmsTable extends Component
                 });
             })
             ->when($this->status, fn($q) => $q->where('status', $this->status))
+            ->when($this->type, fn($q) => $q->where('type', $this->type))
             ->when($this->cultureType, fn($q) => $q->where('culture_type', $this->cultureType))
             ->when($this->client, function ($q) {
                 $q->whereHas('user', function ($q) {

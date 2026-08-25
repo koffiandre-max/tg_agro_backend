@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\FarmStatus;
+use App\Enums\FarmType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ class Farm extends Model
         'latitude',
         'longitude',
         'total_area_hectares',
+        'type',
         'culture_type',
         'status',
         'expected_harvest_date',
@@ -186,6 +188,7 @@ class Farm extends Model
     protected function casts(): array
     {
         return [
+            'type' => FarmType::class,
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'total_area_hectares' => 'decimal:2',

@@ -93,6 +93,19 @@
                             @error('location') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
+                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                Type d'exploitation <span class="text-red-600">*</span>
+                            </label>
+                            <x-select 
+                                    name="type" 
+                                    label="Type d'exploitation" 
+                                    :options="$farmTypeOptions" 
+                                    placeholder="Sélectionner" 
+                                    error="type"
+                            />
+                            @error('type') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
                             <label for="culture_type" class="block text-sm font-medium text-gray-700 mb-1.5">
                                 Type de culture <span class="text-red-600">*</span>
                             </label>
