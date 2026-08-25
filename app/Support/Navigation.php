@@ -171,13 +171,13 @@ class Navigation
                 'segments' => ['admin', 'portail', 'reports'],
                 'can' => $user->role === 'client',
             ],
-            [
-                'name' => 'Mes Saisies de Données',
-                'route' => 'admin.portail.data',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
-                'segments' => ['admin', 'portail', 'data'],
-                'can' => $user->role === 'client',
-            ],
+            // [
+            //     'name' => 'Mes Saisies de Données',
+            //     'route' => 'admin.portail.data',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
+            //     'segments' => ['admin', 'portail', 'data'],
+            //     'can' => $user->role === 'client',
+            // ],
             [
                 'name' => 'Messagerie',
                 'route' => 'admin.portail.messages',

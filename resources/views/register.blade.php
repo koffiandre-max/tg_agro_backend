@@ -40,7 +40,6 @@
                                 type="text"
                                 id="name"
                                 name="name"
-                                x-model="name"
                                 required
                                 autocomplete="name"
                                 placeholder="Jean Kouassi"
@@ -54,7 +53,6 @@
                                 type="email"
                                 id="email"
                                 name="email"
-                                x-model="email"
                                 required
                                 autocomplete="email"
                                 inputmode="email"
@@ -69,7 +67,6 @@
                                 type="tel"
                                 id="phone"
                                 name="phone"
-                                x-model="phone"
                                 autocomplete="tel"
                                 placeholder="+225 01 00 00 00 00"
                                 class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
@@ -82,7 +79,6 @@
                                 type="text"
                                 id="city_of_residence"
                                 name="city_of_residence"
-                                x-model="city_of_residence"
                                 placeholder="Abidjan"
                                 class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
                             >
@@ -94,7 +90,6 @@
                                 type="text"
                                 id="country_of_residence"
                                 name="country_of_residence"
-                                x-model="country_of_residence"
                                 placeholder="Côte d'Ivoire"
                                 class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
                             >
@@ -106,7 +101,6 @@
                                 type="text"
                                 id="country_of_origin"
                                 name="country_of_origin"
-                                x-model="country_of_origin"
                                 placeholder="Côte d'Ivoire"
                                 class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
                             >
@@ -121,7 +115,6 @@
                                     :type="showPassword ? 'text' : 'password'"
                                     id="password"
                                     name="password"
-                                    x-model="password"
                                     required
                                     autocomplete="new-password"
                                     placeholder="••••••••"
@@ -146,7 +139,6 @@
                                     :type="showPasswordConfirm ? 'text' : 'password'"
                                     id="password_confirmation"
                                     name="password_confirmation"
-                                    x-model="password_confirmation"
                                     required
                                     autocomplete="new-password"
                                     placeholder="••••••••"
@@ -208,18 +200,43 @@
 <script>
     function registerForm() {
         return {
-            name: @json(old('name', '')),
-            email: @json(old('email', '')),
-            phone: @json(old('phone', '')),
-            country_of_residence: @json(old('country_of_residence', '')),
-            country_of_origin: @json(old('country_of_origin', '')),
-            city_of_residence: @json(old('city_of_residence', '')),
-            password: '',
-            password_confirmation: '',
             showPassword: false,
             showPasswordConfirm: false,
             loading: false,
             error: '',
+
+            get name() {
+                var el = document.getElementById('name');
+                return el ? el.value.trim() : '';
+            },
+            get email() {
+                var el = document.getElementById('email');
+                return el ? el.value.trim() : '';
+            },
+            get phone() {
+                var el = document.getElementById('phone');
+                return el ? el.value.trim() : '';
+            },
+            get city_of_residence() {
+                var el = document.getElementById('city_of_residence');
+                return el ? el.value.trim() : '';
+            },
+            get country_of_residence() {
+                var el = document.getElementById('country_of_residence');
+                return el ? el.value.trim() : '';
+            },
+            get country_of_origin() {
+                var el = document.getElementById('country_of_origin');
+                return el ? el.value.trim() : '';
+            },
+            get password() {
+                var el = document.getElementById('password');
+                return el ? el.value : '';
+            },
+            get password_confirmation() {
+                var el = document.getElementById('password_confirmation');
+                return el ? el.value : '';
+            },
 
             async submit() {
                 if (this.loading) return;
@@ -242,12 +259,12 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
                         },
                         body: JSON.stringify({
-                            name: this.name.trim(),
-                            email: this.email.trim(),
-                            phone: this.phone.trim(),
-                            country_of_residence: this.country_of_residence.trim(),
-                            country_of_origin: this.country_of_origin.trim(),
-                            city_of_residence: this.city_of_residence.trim(),
+                            name: this.name,
+                            email: this.email,
+                            phone: this.phone,
+                            city_of_residence: this.city_of_residence,
+                            country_of_residence: this.country_of_residence,
+                            country_of_origin: this.country_of_origin,
                             password: this.password,
                             password_confirmation: this.password_confirmation,
                         }),

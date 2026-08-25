@@ -19,7 +19,7 @@
     $statusColor = $isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700';
 @endphp
 
-<div class="mx-auto max-w-7xl p-6">
+<div class="space-y-6 p-6">
     {{-- En-tête --}}
     <div class="mb-6 flex items-center justify-between">
         <div>

@@ -273,7 +273,11 @@ class Farm extends Model
 
     public function statusLabel(): string
     {
-        return FarmStatus::from($this->status)->label();
+        try {
+            return FarmStatus::from($this->status)->label();
+        } catch (\ValueError $e) {
+            return 'Inconnu';
+        }
     }
 
     public function statusBadgeClasses(): string

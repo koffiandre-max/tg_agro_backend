@@ -15,7 +15,6 @@ class Client extends Model
         'country_of_residence',
         'country_of_origin',
         'city_of_residence',
-        'phone',
         'subscription_type',
         'subscription_expires_at',
         'total_investment',

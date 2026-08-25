@@ -4,8 +4,7 @@
 
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-10 sm:px-6" x-data="loginForm()" x-cloak style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%232D6A4F&quot; fill-opacity=&quot;0.04&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
-    <div class="w-full max-w-sm animate-rise">
-        {{-- Brand --}}
+    <div class="w-full max-w-sm">
         <div class="mb-8 text-center">
             <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
@@ -17,7 +16,6 @@
             <p class="mt-0.5 text-sm text-slate-500">Connectez-vous à votre espace</p>
         </div>
 
-        {{-- Card --}}
         <div class="rounded-xl bg-white border border-slate-200 shadow-sm">
             <div class="px-6 py-5 sm:px-8 sm:py-6">
                 <div class="mb-6">
@@ -25,7 +23,6 @@
                     <p class="mt-1 text-xs text-slate-500">Entrez vos identifiants pour continuer.</p>
                 </div>
 
-                {{-- Error --}}
                 <div class="mb-5" role="alert" aria-live="polite">
                     <div x-show="error" x-transition style="display: none;">
                         <div class="rounded-md bg-red-50 border border-red-100 px-3 py-2.5 text-xs text-red-700" x-text="error"></div>
@@ -39,7 +36,6 @@
                             type="email"
                             id="email"
                             name="email"
-                            x-model="email"
                             required
                             autocomplete="email"
                             inputmode="email"
@@ -55,7 +51,6 @@
                                 :type="showPassword ? 'text' : 'password'"
                                 id="password"
                                 name="password"
-                                x-model="password"
                                 required
                                 autocomplete="current-password"
                                 placeholder="••••••••"
@@ -126,12 +121,18 @@
 <script>
     function loginForm() {
         return {
-            email: @json(old('email', '')),
-            password: '',
-            remember: false,
             showPassword: false,
             loading: false,
             error: '',
+
+            get email() {
+                var el = document.getElementById('email');
+                return el ? el.value.trim() : '';
+            },
+            get password() {
+                var el = document.getElementById('password');
+                return el ? el.value : '';
+            },
 
             async submit() {
                 if (this.loading) return;
@@ -140,7 +141,7 @@
                 this.error = '';
 
                 try {
-                    const response = await fetch(@json(url('/login')), {
+                    var response = await fetch(@json(url('/login')), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -148,13 +149,13 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
                         },
                         body: JSON.stringify({
-                            email: this.email.trim(),
+                            email: this.email,
                             password: this.password,
-                            remember: this.remember,
+                            remember: false,
                         }),
-                    };
+                    });
 
-                    let data = {};
+                    var data = {};
                     try { data = await response.json(); } catch {}
 
                     if (response.ok && data.success) {

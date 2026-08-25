@@ -72,7 +72,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500">Rapports Disponibles</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">8</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1">{{ $reportsCount }}</p>
                 </div>
                 <div class="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +86,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500">Photos</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">24</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1">{{ $photosCount }}</p>
                 </div>
                 <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,7 +100,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500">Messages Non Lus</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">2</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1">{{ $unreadMessages }}</p>
                 </div>
                 <div class="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
                     <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,51 +111,19 @@
         </div>
     </div>
 
-    {{-- Mes Exploitations --}}
-    <div class="bg-white rounded-xl p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Mes Exploitations</h2>
-            <a href="{{ route('admin.portail.index') }}" class="text-sm text-indigo-600 hover:text-indigo-700">Voir tout</a>
-        </div>
-
-        @if($farms->isEmpty())
-            <p class="text-sm text-gray-500">Vous n'avez aucune exploitation enregistrée pour le moment.</p>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach($farms as $farm)
-                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex items-start justify-between mb-3">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">{{ $farm->name }}</h3>
-                                <p class="text-xs text-gray-500 mt-1">{{ $farm->location ?? '—' }}</p>
-                            </div>
-                            <span class="px-2 py-1 {{ $farm->statusBadgeClasses() }} text-xs rounded-full">{{ $farm->statusLabel() }}</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Superficie:</span>
-                                <span class="font-medium text-gray-800">{{ $farm->total_area_hectares ? $farm->total_area_hectares . ' ha' : '—' }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Culture:</span>
-                                <span class="font-medium text-gray-800">{{ $farm->culture_type ?? '—' }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Stade:</span>
-                                <span class="font-medium text-gray-800">{{ $farm->crop_stage ?? '—' }}</span>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ $farm->crop_stage_progress ?? 0 }}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Progression: {{ $farm->crop_stage_progress ?? 0 }}%</p>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
+    {{-- Charts --}}
+    @if($farms->isNotEmpty())
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+        <x-ui.chart title="Répartition par culture" id="chart-culture" type="doughnut" center />
+        <x-ui.chart title="Statut des exploitations" id="chart-status" type="doughnut" center />
+        <x-ui.chart title="Estimation des récoltes / Naissances" id="chart-harvest" type="bar" />
+        <x-ui.chart title="Effectif du cheptel" id="chart-livestock" type="bar" />
     </div>
+    @else
+    <div class="bg-white rounded-xl p-12 border border-gray-200 text-center">
+        <p class="text-sm text-gray-500">Vous n'avez aucune exploitation enregistrée pour le moment.</p>
+    </div>
+    @endif
 
     {{-- Derniers Rapports --}}
     <div class="bg-white rounded-xl p-6 border border-gray-200">
@@ -164,50 +132,169 @@
             <a href="{{ route('admin.portail.reports') }}" class="text-sm text-indigo-600 hover:text-indigo-700">Voir tout</a>
         </div>
         <div class="space-y-3">
-            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
-                        <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>
-                        </svg>
+            @forelse($reports as $report)
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 border border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">{{ $report->title }}</p>
+                            <p class="text-xs text-gray-500">{{ $report->farm?->name ?? 'Exploitation inconnue' }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">Rapport Mensuel - Janvier 2026</p>
-                        <p class="text-xs text-gray-500">Ferme de Yamoussoukro</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Validé</span>
-                    <button class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-800">Rapport d'Analyse de Sol</p>
-                        <p class="text-xs text-gray-500">Ferme de Bouaké</p>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Validé</span>
+                        <a href="{{ route('admin.portail.reports.download', $report) }}" class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600" title="Télécharger">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">Validé</span>
-                    <button class="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+            @empty
+                <p class="text-sm text-gray-500">Aucun rapport disponible pour le moment.</p>
+            @endforelse
         </div>
     </div>
-</div>
+    </div>
 @endsection
+
+@push('scripts')
+@if($farms->isNotEmpty())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11 } }
+            }
+        }
+    };
+
+    const farmNames = @json($farmNames);
+    const farmProgress = @json($farmProgress);
+    const cultureTypes = @json($cultureTypes);
+    const farmStatuses = @json($farmStatuses);
+    const harvestEstimates = @json($harvestEstimates);
+    const livestockBirths = @json($livestockBirths);
+    const livestockTotals = @json($livestockTotals);
+
+    const cultureLabels = Object.keys(cultureTypes);
+    const cultureData = Object.values(cultureTypes);
+    const cultureColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+    const statusLabels = Object.keys(farmStatuses).map(s => s === 'active' ? 'Actif' : (s === 'fallow' ? 'En jachère' : 'Inactif'));
+    const statusData = Object.values(farmStatuses);
+    const statusColors = ['#10b981', '#f59e0b', '#ef4444'];
+
+    const harvestLabels = Object.keys(harvestEstimates);
+    const harvestData = Object.values(harvestEstimates);
+
+    const livestockLabels = Object.keys(livestockTotals);
+    const livestockBirthData = Object.values(livestockBirths);
+    const livestockTotalData = Object.values(livestockTotals);
+
+    if (document.getElementById('chart-culture')) {
+        new Chart(document.getElementById('chart-culture'), {
+            type: 'doughnut',
+            data: {
+                labels: cultureLabels,
+                datasets: [{
+                    data: cultureData,
+                    backgroundColor: cultureColors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                cutout: '60%'
+            }
+        });
+    }
+
+    if (document.getElementById('chart-status')) {
+        new Chart(document.getElementById('chart-status'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: statusColors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                cutout: '60%'
+            }
+        });
+    }
+
+    if (document.getElementById('chart-harvest')) {
+        new Chart(document.getElementById('chart-harvest'), {
+            type: 'bar',
+            data: {
+                labels: harvestLabels.length ? harvestLabels : ['Aucune donnée'],
+                datasets: [{
+                    label: 'Estimation récolte (kg)',
+                    data: harvestData.length ? harvestData : [0],
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                plugins: { ...chartDefaults.plugins, legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.15)' }, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+
+    if (document.getElementById('chart-livestock')) {
+        new Chart(document.getElementById('chart-livestock'), {
+            type: 'bar',
+            data: {
+                labels: livestockLabels.length ? livestockLabels : ['Aucune donnée'],
+                datasets: [
+                    {
+                        label: 'Naissances',
+                        data: livestockBirthData.length ? livestockBirthData : [0],
+                        backgroundColor: '#10b981',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    },
+                    {
+                        label: 'Effectif total',
+                        data: livestockTotalData.length ? livestockTotalData : [0],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }
+                ]
+            },
+            options: {
+                ...chartDefaults,
+                plugins: { ...chartDefaults.plugins, legend: { display: true, position: 'top' } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.15)' }, ticks: { precision: 0 } }
+                }
+            }
+        });
+    }
+});
+</script>
+@endif
+@endpush

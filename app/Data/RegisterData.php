@@ -9,25 +9,21 @@ use Spatie\LaravelData\Attributes\Validation\Required;
 
 class RegisterData extends Data
 {
-    #[Required]
-    public string $name;
+    public ?string $name = '';
 
-    #[Required]
-    #[Email]
-    public string $email;
+    public ?string $email = '';
 
     #[Required]
     #[Min(8)]
     public string $password;
 
-    #[Required]
-    public string $password_confirmation;
+    public ?string $password_confirmation = '';
 
-    public ?string $phone;
+    public ?string $phone = '';
 
-    public ?string $country_of_residence;
+    public ?string $country_of_residence = '';
 
-    public ?string $country_of_origin;
+    public ?string $country_of_origin = '';
 
-    public ?string $city_of_residence;
+    public ?string $city_of_residence = '';
 }

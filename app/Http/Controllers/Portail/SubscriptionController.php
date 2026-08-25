@@ -13,13 +13,14 @@ class SubscriptionController extends Controller
         $user = auth()->user();
         $client = $user?->client;
 
-        $subscriptions = collect();
-
-        if ($client) {
-            $subscriptions = Subscription::where('user_id', $client->user_id)
-                ->orderByDesc('start_date')
-                ->get();
+        if (! $client) {
+            return redirect()->route('admin.portail.index')
+                ->with('error', 'Aucune fiche client trouvée pour votre compte. Veuillez contacter le support.');
         }
+
+        $subscriptions = Subscription::where('user_id', $client->user_id)
+            ->orderByDesc('start_date')
+            ->get();
 
         return view('portail.subscription', compact('client', 'subscriptions'));
     }

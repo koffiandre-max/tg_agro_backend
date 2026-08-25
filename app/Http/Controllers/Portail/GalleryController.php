@@ -20,8 +20,12 @@ class GalleryController extends Controller
     {
         $user = Auth::user();
 
+        $client = Client::where('user_id', $user->id)->first();
 
-        $client = Client::where('user_id', $user->id)->firstOrFail();
+        if (! $client) {
+            return redirect()->route('admin.portail.index')
+                ->with('error', 'Aucune fiche client trouvée pour votre compte. Veuillez contacter le support.');
+        }
 
         $query = Photo::with(['farm', 'technician'])
             ->where('client_id', $client->id)
@@ -35,10 +39,7 @@ class GalleryController extends Controller
 
         $farms = \App\Models\Farm::whereHas('clients', function ($q) use ($client) {
             $q->where('clients.id', $client->id);
-
         })->orderBy('name')->get();
-
-
 
         return view('portail.gallery', compact('photos', 'client', 'farms'));
     }

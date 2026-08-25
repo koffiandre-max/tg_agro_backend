@@ -40,7 +40,7 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'user_id');
     }
 
-        public function messages(): HasMany
+    public function messages(): HasMany
     {
         return $this->hasMany(Message::class, 'user_id');
     }

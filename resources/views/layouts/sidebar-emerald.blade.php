@@ -33,7 +33,7 @@ $textColor = 'text-white';
      aria-hidden="true"></div>
 
 <aside id="sidebar-lateral"
-       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out overflow-hidden bg-{{ $sidebarBg }}"
+       class="fixed z-20 left-0 top-0 bottom-0 h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out overflow-hidden bg-{{ $sidebarBg }} {{ auth()->user() && auth()->user()->role === 'client' ? 'lg:hidden' : '' }}"
        :class="{
            'w-20': sidebarCollapsed && isDesktop,
            'w-64': !sidebarCollapsed && isDesktop,

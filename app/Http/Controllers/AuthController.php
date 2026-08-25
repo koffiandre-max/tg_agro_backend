@@ -6,7 +6,10 @@ use App\Data\LoginData;
 use App\Data\RegisterData;
 use App\Models\Client;
 use App\Models\User;
+use App\Support\Helpers;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -60,30 +63,60 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $registerData = RegisterData::from($request->all());
+        try {
 
-        $user = User::create([
-            'name' => $registerData->name,
-            'email' => $registerData->email,
-            'password' => Hash::make($registerData->password),
-            'role' => 'client',
-        ]);
+            $validated = $request->validate([
+                'email' => 'required|unique:users,email',
+                'password' => 'required|min:8|confirmed',
+                'phone' => 'required|max:15',
+                'city_of_residence' => 'nullable|max:20',
+                'country_of_residence' =>  'nullable|max:20'
 
-        Client::create([
-            'user_id' => $user->id,
-            'phone' => $registerData->phone,
-            'country_of_residence' => $registerData->country_of_residence,
-            'country_of_origin' => $registerData->country_of_origin,
-            'city_of_residence' => $registerData->city_of_residence,
-            'subscription_type' => 'basic',
-        ]);
+            ]);
+            $registerData = RegisterData::from($validated);
 
-        Auth::login($user);
+            $_client = User::where('email', $registerData->email)->first();
 
-        return response()->json([
-            'success' => true,
-            'redirect' => route('admin.portail.index'),
-        ]);
+            if ($_client) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "ce compte existe deja",
+                ]);
+            }
+
+            $user = User::create([
+                'name' => $registerData->name,
+                'email' => $registerData->email,
+                'password' => Hash::make($registerData->password),
+                'role' => 'client',
+                'phone' => $registerData->phone ?: null,
+            ]);
+
+            $code = Helpers::generateUniqueClientCode();
+
+            Client::create([
+                'user_id' => $user->id,
+                'code' => $code,
+                'country_of_residence' => $registerData->country_of_residence ?: null,
+                'country_of_origin' => $registerData->country_of_origin ?: null,
+                'city_of_residence' => $registerData->city_of_residence ?: null,
+                'subscription_type' => 'basic',
+                'subscription_expires_at' => now()->addMonth(),
+            ]);
+
+            Auth::login($user);
+
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.portail.index'),
+            ]);
+        } catch (Exception $e) {
+            \Log::error("File: " . $e->getFile() . " Line: " . $e->getLine() . " Error: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => "une erreur est survenue",
+            ]);
+        }
     }
 
     public function logout(Request $request)

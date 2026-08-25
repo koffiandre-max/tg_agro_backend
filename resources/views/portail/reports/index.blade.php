@@ -4,8 +4,8 @@
 @section('page-title', 'Mes Rapports')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="space-y-6 p-6">
+    <div class="">
         {{-- En-tête --}}
         <div class="mb-6 flex items-center justify-between">
             <div>

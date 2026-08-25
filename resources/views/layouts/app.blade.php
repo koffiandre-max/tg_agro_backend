@@ -226,13 +226,48 @@
     {{-- Header Desktop --}}
     <header class="hidden lg:flex fixed top-0 right-0 h-16 {{ $headerBg }} border-b {{ $headerBorder }} z-20 items-center justify-between px-6 transition-all duration-300 ease-in-out"
         :class="{
-            'left-64': !sidebarCollapsed && isDesktop,
-            'left-20': sidebarCollapsed && isDesktop,
-            'left-0': !isDesktop
+            'left-64': !sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+            'left-20': sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+            'left-0': !isDesktop || '{{ $userRole }}' === 'client'
         }">
         <div class="flex items-center gap-2">
-            <h1 class="text-lg font-semibold {{ $headerText }}">@yield('page-title', 'Dashboard')</h1>
+            @if(($userRole ?? 'client') === 'client')
+                <div class="h-8 w-8 bg-white/10 rounded-lg flex items-center justify-center shrink-0 border border-white/10">
+                    <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+                    </svg>
+                </div>
+                <span class="font-bold text-sm tracking-wider text-white whitespace-nowrap">
+                    TG'INVEST <span class="font-normal text-white/60">CONSULTING</span>
+                </span>
+            @else
+                <h1 class="text-lg font-semibold {{ $headerText }}">@yield('page-title', 'Dashboard')</h1>
+            @endif
         </div>
+
+        {{-- Navigation client dans le header --}}
+        @if(($userRole ?? 'client') === 'client')
+        <nav class="hidden md:flex items-center gap-1 mx-4">
+            <a href="{{ route('admin.portail.index') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.index') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Dashboard
+            </a>
+            <a href="{{ route('admin.portail.farms') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.farms') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Mes Exploitations
+            </a>
+            <a href="{{ route('admin.portail.gallery') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.gallery') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Galerie Photos
+            </a>
+            <a href="{{ route('admin.portail.reports') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.reports') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Mes Rapports
+            </a>
+            <a href="{{ route('admin.portail.messages') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.messages') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Messagerie
+            </a>
+            <a href="{{ route('admin.portail.subscription') }}" class="px-3 py-1.5 rounded-md text-sm font-medium {{ request()->routeIs('admin.portail.subscription') ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }} transition-colors">
+                Mon Abonnement
+            </a>
+        </nav>
+        @endif
 
         <div class="flex items-center gap-4">
             {{-- Messages --}}
@@ -376,9 +411,9 @@
     <main id="main-content" 
           class="min-h-screen transition-all duration-300 ease-in-out pt-20"
           :class="{
-              'ml-64': !sidebarCollapsed && isDesktop,
-              'ml-20': sidebarCollapsed && isDesktop,
-              'ml-0': !isDesktop
+              'ml-64': !sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+              'ml-20': sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+              'ml-0': !isDesktop || '{{ $userRole }}' === 'client'
           }">
         {{-- Bandeau prix du marché (clients) --}}
         @if(($userRole ?? 'client') === 'client')
@@ -390,9 +425,9 @@
     {{-- Footer --}}
     <footer class="transition-all duration-300 ease-in-out p-4 text-center text-xs text-gray-500"
             :class="{
-                'lg:ml-64': !sidebarCollapsed && isDesktop,
-                'lg:ml-20': sidebarCollapsed && isDesktop,
-                'ml-0': !isDesktop
+                'lg:ml-64': !sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+                'lg:ml-20': sidebarCollapsed && isDesktop && '{{ $userRole }}' !== 'client',
+                'ml-0': !isDesktop || '{{ $userRole }}' === 'client'
             }">
         <p>&copy; {{ date('Y') }} {{ config('app.name', 'TG Invest') }}. Tous droits réservés.</p>
     </footer>
