@@ -16,7 +16,8 @@
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.3",
         "mallardduck/blade-lucide-icons": "^1.26",
-        "spatie/laravel-data": "^4.23"
+        "spatie/laravel-data": "^4.23",
+        "suite/sdk": "dev-main"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -37,7 +38,10 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        "classmap": [
+            "tests/ModuleTestCase.php"
+        ]
     },
     "scripts": {
         "setup": [
@@ -89,6 +93,12 @@
             "php-http/discovery": true
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/koffiandre-max/suite_sdk"
+        }
+    ],
     "minimum-stability": "stable",
     "prefer-stable": true
 }

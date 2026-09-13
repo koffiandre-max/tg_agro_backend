@@ -20,10 +20,11 @@ class MissionController extends Controller
         return view('technitian.missions.index');
     }
 
-    public function kanban()
-    {
-        return view('technitian.missions.kanban');
-    }
+    // Partie Kanban des missions (désactivée)
+    // public function kanban()
+    // {
+    //     return view('technitian.missions.kanban');
+    // }
 
     public function updateStatus(Request $request, $id)
     {

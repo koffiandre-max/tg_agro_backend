@@ -75,4 +75,30 @@ class SettingsController extends Controller
 
         return redirect()->route('admin.settings.system')->with('success', 'Paramètres système enregistrés.');
     }
+
+    public function payments()
+    {
+        $settings = SystemSetting::where('group', 'payments')->get()->pluck('value', 'key');
+
+        return view('admin.settings.payments', compact('settings'));
+    }
+
+    public function updatePayments(Request $request)
+    {
+        $validated = $request->validate([
+            'payment_default_provider' => ['nullable', 'string', 'max:100'],
+            'payment_default_phone' => ['nullable', 'string', 'max:20'],
+            'payment_default_code_prefix' => ['nullable', 'string', 'max:50'],
+            'payment_reminder_days_before' => ['nullable', 'integer', 'min:1', 'max:30'],
+        ]);
+
+        foreach ($validated as $key => $value) {
+            SystemSetting::updateOrCreate(
+                ['key' => $key, 'group' => 'payments'],
+                ['value' => $value, 'type' => is_array($value) ? 'array' : 'text']
+            );
+        }
+
+        return redirect()->route('admin.settings.payments')->with('success', 'Paramètres de paiement enregistrés.');
+    }
 }

@@ -29,9 +29,23 @@ class Navigation
             [
                 'name' => 'Gestion des Clients',
                 'route' => 'admin.clients.index',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>',
                 'segments' => ['admin', 'clients'],
                 'can' => $user->role === 'admin',
+            ],
+            [
+                'name' => 'Mes Clients',
+                'route' => 'admin.technitian.clients',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>',
+                'segments' => ['admin', 'technitian', 'clients'],
+                'can' => $user->role === 'technician',
+            ],
+            [
+                'name' => 'Mes Exploitations',
+                'route' => 'admin.technitian.farms',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.188-1.066A2.25 2.25 0 012.25 17.5v-11.5a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v11.5a2.25 2.25 0 01-2.25 2.25L9 18.75v-8.25z"/>',
+                'segments' => ['admin', 'technitian', 'farms'],
+                'can' => $user->role === 'technician',
             ],
 
             [
@@ -42,10 +56,11 @@ class Navigation
                 'can' => $user->role === 'admin',
             ],
             [
+                // Partie Kanban des missions (désactivée) : le menu pointe désormais vers la liste des missions
                 'name' => 'Gestion des Missions',
-                'route' => 'admin.technitian.missions.kanban',
+                'route' => 'admin.technitian.missions',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
-                'segments' => ['admin', 'technitian', 'missions', 'kanban'],
+                'segments' => ['admin', 'technitian', 'missions'],
                 'can' => $user->role === 'admin',
             ],
             [
@@ -203,6 +218,20 @@ class Navigation
                 'segments' => ['admin', 'technitian', 'missions'],
                 'can' => $user->role === 'technician',
             ],
+            // [
+            //     'name' => 'Mes Clients',
+            //     'route' => 'admin.technitian.clients',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>',
+            //     'segments' => ['admin', 'technitian', 'clients'],
+            //     'can' => $user->role === 'technician',
+            // ],
+            // [
+            //     'name' => 'Mes Exploitations',
+            //     'route' => 'admin.technitian.farms',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.188-1.066A2.25 2.25 0 012.25 17.5v-11.5a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v11.5a2.25 2.25 0 01-2.25 2.25L9 18.75v-8.25z"/>',
+            //     'segments' => ['admin', 'technitian', 'farms'],
+            //     'can' => $user->role === 'technician',
+            // ],
             [
                 'name' => 'Rapports de Visite',
                 'route' => 'admin.rapports-visite.index',
@@ -217,13 +246,13 @@ class Navigation
             //     'segments' => ['admin', 'technitian', 'missions', 'kanban'],
             //     'can' => $user->role === 'technician' || $user->role === 'admin',
             // ],
-            [
-                'name' => 'Upload Photos',
-                'route' => 'admin.technitian.photos.create',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12a2.25 2.25 0 002.25 2.25z"/>',
-                'segments' => ['admin', 'technitian', 'photos'],
-                'can' => $user->role === 'technician',
-            ],
+            // [
+            //     'name' => 'Upload Photos',
+            //     'route' => 'admin.technitian.photos.create',
+            //     'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12a2.25 2.25 0 002.25 2.25z"/>',
+            //     'segments' => ['admin', 'technitian', 'photos'],
+            //     'can' => $user->role === 'technician',
+            // ],
             [
                 'name' => 'Galerie Photos',
                 'route' => 'admin.gallery.index',
@@ -232,8 +261,8 @@ class Navigation
                 'can' => $user->role === 'technician',
             ],
             [
-                'name' => 'Saisie Données',
-                'route' => 'admin.technitian.data.create',
+                'name' => 'Diagnostique du terrain',
+                'route' => 'admin.technitian.data.index',
                 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>',
                 'segments' => ['admin', 'technitian', 'data'],
                 'can' => $user->role === 'technician',
@@ -256,20 +285,19 @@ class Navigation
             'Rapports de Visite' => 'Terrain & Visites',
             'Galleries' => 'Médias',
             'Calendrier' => 'Terrain & Visites',
-            'Diagnostique du terrain' => 'Terrain & Visites',
             'Gestion des Abonnements' => 'Gestion',
             'Gestion des Utilisateurs' => 'Gestion',
             'Paramètres KPIs' => 'Tableau de bord',
             'Paramètres Système' => 'Tableau de bord',
             'Mes Exploitations' => 'Mon espace',
+            'Mes Clients' => 'Mon espace',
+            'Mes Missions' => 'Mon espace',
             'Galerie Photos' => 'Mon espace',
-            'Mes Rapports' => 'Mon espace',
-            'Mes Saisies de Données' => 'Mon espace',
+            'Diagnostique du terrain' => 'Mon espace',
+            'Calendrier' => 'Mon espace',
             'Messagerie' => 'Mon espace',
             'Mon Abonnement' => 'Mon espace',
-            'Mes Missions' => 'Mon espace',
-            'Upload Photos' => 'Mon espace',
-            'Saisie Données' => 'Mon espace',
+            'Mes Rapports' => 'Mon espace',
         ];
 
         foreach ($rules as &$item) {

@@ -18,6 +18,7 @@
                     </svg>
                     Ajouter des photos
                 </a>
+                @if(auth()->user()?->role === 'admin')
                 <a href="{{ route('admin.photos.validation') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 relative">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -29,6 +30,7 @@
                         </span>
                     @endif
                 </a>
+                @endif
             </div>
         </div>
 

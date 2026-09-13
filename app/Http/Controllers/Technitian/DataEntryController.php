@@ -25,36 +25,26 @@ class DataEntryController extends Controller
     public function create()
     {
         $user = Auth::user();
-        // dd($user->role);
-        // $farmData = app(FarmService::class)->getFarmsAndClients();
-        // extract($farmData->toArray());
+        $technician = \App\Models\Technician::where('user_id', $user->id)->firstOrFail();
 
-        // if (!$user || $user->role !== 'technician' || !$user->role !== 'admin') {
-        //     abort(403, 'Accès non autorisé.');
-        // }
+        $farmIds = \App\Models\Farm::where('assigned_technician_id', $technician->id)->pluck('id');
 
-        $farms = Farm::with('clients.user')
+        $farms = \App\Models\Farm::where('assigned_technician_id', $technician->id)
+            ->with('clients.user')
             ->orderBy('name')
             ->get();
 
-        $clientIds = $farms->flatMap(function ($farm) {
-            return $farm->clients->pluck('id');
-        })->unique();
-
-        $clients = Client::whereIn('id', $clientIds)
-            ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
-            ->select('clients.*')
-            ->with('user')
+        $clients = Client::query()
+            ->where('assigned_technician_id', $technician->id)
+            ->orWhereIn('user_id', function ($query) use ($farmIds) {
+                $query->select('user_id')->from('farms')->whereIn('id', $farmIds);
+            })
+            ->orWhereHas('assignedFarms', function ($query) use ($farmIds) {
+                $query->whereIn('farms.id', $farmIds);
+            })
+            ->distinct()
+            ->orderBy('code')
             ->get();
-
-        if ($clients->isEmpty()) {
-            $clients = Client::join('users', 'users.id', '=', 'clients.user_id')
-                ->orderBy('users.name')
-                ->select('clients.*')
-                ->with('user')
-                ->get();
-        }
 
         return view('technitian.data.create', compact('farms', 'clients'));
     }

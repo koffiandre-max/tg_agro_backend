@@ -21,14 +21,14 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6">
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <a href="{{ route('admin.clients.show', $client->id) }}" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-2 transition-colors duration-150">
+            <a href="#" onClick= "history.back()" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-2 transition-colors duration-150">
                 <svg class="w-4 h-4 mr-1.5 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
                 Retour au client
             </a>
             <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
-                Information sur <span class="text-indigo-600">{{ $client->user->name ?? 'Client' }}</span>
+                Information sur <span class="text-indigo-600">@if(auth()->user()->type === 'admin') {{ $client->user->name ?? 'Client' }} @else {{ $client->user->code ?? '-' }} @endif</span>
             </h1>
             {{-- <p class="mt-1.5 text-sm text-slate-500 flex items-center gap-1.5">
                 <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Technitian\TechnitianDashboardController;
 use App\Models\Farm;
 use App\Models\MarketPrice;
 use App\Support\DashboardFeatures;
@@ -18,7 +19,7 @@ class DashboardController extends Controller
         return match ($user->role) {
             'admin' => $this->adminDashboard(),
             'client' => $this->clientDashboard($user),
-            'technician' => view('technitian.dashboard'),
+            'technician' => app(TechnitianDashboardController::class)->index(),
             default => $this->adminDashboard(),
         };
     }

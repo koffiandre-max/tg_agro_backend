@@ -90,7 +90,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
                             <option value="">Sélectionner un client</option>
                             @foreach($clients as $client)
-                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>{{ $client->user->name ?? 'Client #'.$client->id }}</option>
+                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>{{ $client->code ?? ('Client #'.$client->id) }}</option>
                             @endforeach
                         </select>
                         @error('client_id') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror

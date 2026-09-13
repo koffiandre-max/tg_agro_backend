@@ -26,6 +26,7 @@ class Photo extends Model
         'file_size',
         'photoable_type',
         'photoable_id',
+        'client_updated_at',
     ];
 
     protected function casts(): array
@@ -38,6 +39,7 @@ class Photo extends Model
             'is_validated' => 'boolean',
             'validated_at' => 'datetime',
             'file_size' => 'integer',
+            'client_updated_at' => 'datetime',
         ];
     }
 

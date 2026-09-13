@@ -25,11 +25,24 @@
     $peerName = $peer['name'] ?? 'Assistance TG\'AGRO';
     $peerInitials = $peer['initials'] ?? 'TG';
     $apiBase = $apiBase ?? '/portail/messages';
+    $isReadOnly = isset($subscriptionExpired) && $subscriptionExpired;
 @endphp
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if($isReadOnly)
+            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">Abonnement expiré ou inactif</p>
+                    <p class="text-xs text-amber-700 mt-1">Vous êtes en mode consultation uniquement. Veuillez renouveler votre abonnement pour envoyer des messages.</p>
+                </div>
+            </div>
+        @endif
+
         <div class="mb-6 flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">{{ $isAdmin ? 'Support Client' : 'Chat Page' }}</h1>
@@ -42,7 +55,7 @@
             </nav>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden" style="height: 600px;">
+        <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden {{ $isReadOnly ? 'opacity-60 grayscale' : '' }}" style="height: 600px;">
 
             {{-- ===== Colonne gauche : liste des conversations ===== --}}
             <div class="border-r border-gray-100 flex flex-col min-h-0">
@@ -183,14 +196,14 @@
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" d="M9 10h.01M15 10h.01M8.5 14.5a4 4 0 007 0" /></svg>
                     </button>
                     <input type="text" id="messageInput" required placeholder="Type a message"
-                        class="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none" {{ $isAdmin && empty($activeUserId) ? 'disabled' : '' }}>
+                        class="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none {{ $isReadOnly ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isAdmin && empty($activeUserId) ? 'disabled' : '' }} {{ $isReadOnly ? 'disabled' : '' }}>
                     <button type="button" class="text-gray-400 hover:text-gray-600 shrink-0" title="Joindre un fichier">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3.5 3.5 0 014.95 4.95l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" /></svg>
                     </button>
                     <button type="button" class="text-gray-400 hover:text-gray-600 shrink-0" title="Message vocal">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3zM19 10v2a7 7 0 01-14 0v-2M12 19v4" /></svg>
                     </button>
-                    <button type="button" id="sendBtn" class="h-10 w-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shrink-0 shadow-sm">
+                    <button type="button" id="sendBtn" class="h-10 w-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-all shrink-0 shadow-sm {{ $isReadOnly ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $isReadOnly ? 'disabled' : '' }}>
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                         </svg>

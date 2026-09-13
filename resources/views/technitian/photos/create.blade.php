@@ -4,9 +4,15 @@
 @section('page-title', 'Ajouter des photos à la galerie')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
+<div class="max-w-7xl mx-auto p-6">
     <form method="POST" action="{{ route('admin.technitian.photos.store') }}" enctype="multipart/form-data" id="photoForm">
         @csrf
+
+        @php
+            // Options pour les composants x-select
+            $clientOptions = $clients->mapWithKeys(fn ($client) => [$client->id => $client->code ?? ('Client #'.$client->id)])->all();
+            $farmOptions = $farms->mapWithKeys(fn ($farm) => [$farm->id => trim($farm->name . ($farm->location ? ' — '.$farm->location : ''))])->all();
+        @endphp
 
         {{-- Client --}}
         <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-6">
@@ -16,15 +22,8 @@
                 </svg>
                 Client
             </h3>
-            <select name="client_id" id="client_id" required
-                class="block w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="">Sélectionner un client</option>
-                @foreach($clients as $client)
-                    <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                        {{ $client->user?->name ?? 'Client #'.$client->id }}
-                    </option>
-                @endforeach
-            </select>
+            <x-select name="client_id" id="client_id" :options="$clientOptions"
+                      placeholder="Sélectionner un client" error="client_id" />
             @error('client_id')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -38,15 +37,8 @@
                 </svg>
                 Plantation / Exploitation
             </h3>
-            <select name="farm_id" id="farm_id" required
-                class="block w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="">Sélectionner une exploitation</option>
-                @foreach($farms as $farm)
-                    <option value="{{ $farm->id }}" data-client="{{ $farm->clients->pluck('id')->join(',') }}" {{ old('farm_id') == $farm->id ? 'selected' : '' }}>
-                        {{ $farm->name }}
-                    </option>
-                @endforeach
-            </select>
+            <x-select name="farm_id" id="farm_id" :options="$farmOptions"
+                      placeholder="Sélectionner une exploitation" error="farm_id" />
             @error('farm_id')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

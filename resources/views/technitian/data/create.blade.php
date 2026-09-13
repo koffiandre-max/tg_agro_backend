@@ -3,6 +3,45 @@
 @section('title', 'Saisir des Données')
 @section('page-title', 'Saisir des Données Agronomiques')
 
+@php
+    // Options pour les composants x-select
+    $farmOptions = $farms->mapWithKeys(fn ($farm) => [$farm->id => $farm->name])->all();
+    $clientOptions = $clients->mapWithKeys(fn ($client) => [$client->id => $client->code ?? ('Client #'.$client->id)])->all();
+
+    // Stades culturaux prédéfinis (+ valeur saisie précédemment si libre)
+    $cropStageOptions = [
+        'Semis',
+        'Germination / Levée',
+        'Croissance végétative',
+        'Repiquage',
+        'Floraison',
+        'Fructification',
+        'Maturation',
+        'Récolte',
+    ];
+    if ($stage = old('crop_stage')) {
+        if (! in_array($stage, $cropStageOptions)) {
+            $cropStageOptions[] = $stage;
+        }
+    }
+
+    // Conditions météo prédéfinies (+ valeur libre précédente si présente)
+    $weatherOptions = [
+        'Ensoleillé',
+        'Partiellement nuageux',
+        'Nuageux',
+        'Pluvieux',
+        'Orageux',
+        'Venteux',
+        'Sec',
+    ];
+    if ($weather = old('weather_conditions')) {
+        if (! in_array($weather, $weatherOptions)) {
+            $weatherOptions[] = $weather;
+        }
+    }
+@endphp
+
 @section('content')
 <div class="max-w-7xl mx-auto px-4 pb-12">
     <form method="POST" action="{{ route('admin.technitian.data.store') }}" id="dataEntryForm">
@@ -23,15 +62,8 @@
                     <label for="farm_id" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Exploitation agricole <span class="text-red-500">*</span>
                     </label>
-                    <select name="farm_id" id="farm_id" required 
-                            class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-semibold focus:outline-none">
-                        <option value="">Sélectionner une exploitation</option>
-                        @foreach($farms as $farm)
-                            <option value="{{ $farm->id }}" {{ old('farm_id') == $farm->id ? 'selected' : '' }}>
-                                {{ $farm->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-select name="farm_id" id="farm_id" :options="$farmOptions"
+                              placeholder="Sélectionner une exploitation" error="farm_id" />
                     @error('farm_id')
                         <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
                     @enderror
@@ -42,15 +74,8 @@
                     <label for="client_id" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         Client associé <span class="text-red-500">*</span>
                     </label>
-                    <select name="client_id" id="client_id" required 
-                            class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-semibold focus:outline-none">
-                        <option value="">Sélectionner un client</option>
-                        @foreach($clients as $client)
-                            <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                {{ $client->user?->name ?? 'Client #'.$client->id }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <x-select name="client_id" id="client_id" :options="$clientOptions"
+                              placeholder="Sélectionner un client" error="client_id" />
                     @error('client_id')
                         <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
                     @enderror
@@ -72,9 +97,8 @@
                 {{-- Stade Cultural --}}
                 <div class="space-y-1.5">
                     <label for="crop_stage" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Stade Cultural</label>
-                    <input type="text" name="crop_stage" id="crop_stage" value="{{ old('crop_stage') }}"
-                           class="block w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
-                           placeholder="Ex: Floraison, Croissance...">
+                    <x-select name="crop_stage" id="crop_stage" :options="$cropStageOptions"
+                              placeholder="Sélectionner un stade..." error="crop_stage" />
                     @error('crop_stage')
                         <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
                     @enderror
@@ -94,9 +118,8 @@
                 {{-- Météo --}}
                 <div class="space-y-1.5">
                     <label for="weather_conditions" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Conditions Météo</label>
-                    <input type="text" name="weather_conditions" id="weather_conditions" value="{{ old('weather_conditions') }}"
-                           class="block w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium"
-                           placeholder="Ex: Ensoleillé, Pluvieux...">
+                    <x-select name="weather_conditions" id="weather_conditions" :options="$weatherOptions"
+                              placeholder="Sélectionner la météo..." error="weather_conditions" />
                     @error('weather_conditions')
                         <p class="mt-1 text-xs font-semibold text-rose-600">{{ $message }}</p>
                     @enderror

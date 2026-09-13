@@ -31,7 +31,7 @@
                         <option value="">Tous les clients</option>
                         @foreach($clients as $client)
                             <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
-                                {{ $client->user?->name ?? 'Client #'.$client->id }}
+                                {{ $client->code ?? ('Client #'.$client->id) }}
                             </option>
                         @endforeach
                     </select>
@@ -71,7 +71,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                         @foreach($farmPhotos as $index => $photo)
                             <div class="relative group rounded-2xl overflow-hidden border bg-white shadow-sm hover:shadow-md transition-all cursor-pointer {{ !$photo->is_validated ? 'border-amber-200' : 'border-gray-100' }} {{ $index >= 6 ? 'hidden photo-extra' : '' }}"
-                                 onclick="openPhotoModal({{ $photo->id }}, '{{ asset('storage/' . $photo->photo_path) }}', '{{ addslashes($photo->client?->user?->name ?? 'Client') }}', '{{ addslashes($photo->farm?->name ?? 'Plantation') }}', '{{ addslashes($photo->technician?->name ?? '—') }}', '{{ $photo->created_at?->format('d/m/Y H:i') ?? '' }}', '{{ $photo->caption ?? '' }}', {{ $photo->latitude ?? 'null' }}, {{ $photo->longitude ?? 'null' }})">
+                                 onclick="openPhotoModal({{ $photo->id }}, '{{ asset('storage/' . $photo->photo_path) }}', '{{ addslashes($photo->client?->code ?? ('Client #'.($photo->client?->id ?? ''))) }}', '{{ addslashes($photo->farm?->name ?? 'Plantation') }}', '{{ addslashes($photo->technician?->name ?? '—') }}', '{{ $photo->created_at?->format('d/m/Y H:i') ?? '' }}', '{{ $photo->caption ?? '' }}', {{ $photo->latitude ?? 'null' }}, {{ $photo->longitude ?? 'null' }})">
                                 <div class="aspect-square">
                                     <img src="{{ asset('storage/' . $photo->photo_path) }}"
                                          alt="{{ $photo->caption ?? 'Photo' }}"
@@ -89,7 +89,7 @@
 
                                 {{-- Overlay au survol --}}
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
-                                    <p class="text-white text-xs font-medium truncate">{{ $photo->client?->user?->name ?? 'Client' }}</p>
+                                     <p class="text-white text-xs font-medium truncate">{{ $photo->client?->code ?? ('Client #'.$photo->client?->id ?? 'Client') }}</p>
                                     <p class="text-white/70 text-xs truncate">{{ $photo->farm?->name ?? 'Plantation' }}</p>
                                     @if($photo->caption)
                                         <p class="text-white/60 text-xs mt-1 truncate">{{ $photo->caption }}</p>

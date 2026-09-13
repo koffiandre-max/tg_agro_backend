@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\TechnicianController;
+use App\Http\Controllers\Technitian\TechnicianClientController;
+use App\Http\Controllers\Technitian\TechnicianFarmController;
 use App\Http\Controllers\Technitian\TechnitianDashboardController;
 use App\Http\Controllers\Technitian\MissionController;
 use App\Http\Controllers\Technitian\ReportController;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('technician')->group(function () {
     Route::get('/technitian', [TechnitianDashboardController::class, 'index'])->name('admin.technitian.index');
+    Route::get('/technitian/clients', [TechnicianClientController::class, 'index'])->name('admin.technitian.clients');
+    Route::get('/technitian/farms', [TechnicianFarmController::class, 'index'])->name('admin.technitian.farms');
     Route::post('/technitian/missions/{mission}/complete', [MissionController::class, 'complete'])->name('admin.technitian.missions.complete');
     Route::get('/technitian/reports/create', [ReportController::class, 'create'])->name('admin.technitian.reports.create');
     Route::post('/technitian/reports', [ReportController::class, 'store'])->name('admin.technitian.reports.store');
@@ -19,7 +23,8 @@ Route::middleware('technician')->group(function () {
 });
 
 Route::middleware('admin_or_technician')->group(function () {
-    Route::get('/technitian/missions/kanban', [MissionController::class, 'kanban'])->name('admin.technitian.missions.kanban');
+    // Partie Kanban des missions (désactivée)
+    // Route::get('/technitian/missions/kanban', [MissionController::class, 'kanban'])->name('admin.technitian.missions.kanban');
     Route::get('/technitian/missions', [MissionController::class, 'index'])->name('admin.technitian.missions');
     Route::get('/technitian/missions/{mission}', [MissionController::class, 'show'])->name('admin.technitian.missions.show');
     Route::post('/technitian/missions/{mission}/status', [MissionController::class, 'updateStatus'])->name('admin.technitian.missions.status');

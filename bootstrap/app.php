@@ -18,12 +18,30 @@ return Application::configure(basePath: dirname(__DIR__))
             'technician' => \App\Http\Middleware\TechnicianMiddleware::class,
             'client' => \App\Http\Middleware\ClientMiddleware::class,
             'admin_or_technician' => \App\Http\Middleware\AdminOrTechnicianMiddleware::class,
+            'feature' => \App\Http\Middleware\CheckFeatureMiddleware::class,
+            'verified' => \App\Http\Middleware\EnsureUserIsVerified::class,
+            // API mobile
+            'api.log' => \App\Http\Middleware\ApiLogRequests::class,
+            'api.technician' => \App\Http\Middleware\ApiTechnicianMiddleware::class,
+        ]);
+
+        // Webhooks des passerelles de paiement (module Payment) : pas de CSRF.
+        $middleware->validateCsrfTokens(except: [
+            'payment/webhook/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn(Request $request) => $request->is('api/*'),
         );
+
+        // API : jeton absent/invalide/révqué → 401 (doit précéder le catch-all Throwable)
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Non authentifié. Veuillez vous reconnecter.'], 401);
+            }
+            return null; // web : comportement par défaut (redirection vers login)
+        });
 
         $exceptions->report(function (Throwable $e) {
             $path = storage_path('logs/exception-report.log');

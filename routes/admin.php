@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\CalendarController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DataValidationController;
-use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\MarketPriceController;
 use App\Http\Controllers\Admin\PhotoValidationController;
 use App\Http\Controllers\Admin\SubscriptionController;
@@ -11,9 +10,7 @@ use App\Http\Controllers\Admin\SupportChatController;
 use App\Http\Controllers\Technitian\DataEntryController;
 use Illuminate\Support\Facades\Route;
 
-// Gallery
-Route::get('/gallery', [GalleryController::class, 'index'])->name('admin.gallery.index');
-Route::get('/gallery/geocode', [GalleryController::class, 'geocode'])->name('admin.gallery.geocode');
+// Gallery → définie dans routes/gallery.php (admin + technicien)
 
 // Photos Validation
 Route::get('/photos/validation', [PhotoValidationController::class, 'index'])->name('admin.photos.validation');
@@ -35,8 +32,13 @@ Route::delete('/market-prices/{marketPrice}', [MarketPriceController::class, 'de
 
 // Subscriptions
 Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('admin.subscriptions.index');
+Route::get('/subscriptions/create', [SubscriptionController::class, 'create'])->name('admin.subscriptions.create');
+Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('admin.subscriptions.store');
+Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('admin.subscriptions.show');
 Route::get('/subscriptions/{subscription}/edit', [SubscriptionController::class, 'edit'])->name('admin.subscriptions.edit');
 Route::put('/subscriptions/{subscription}', [SubscriptionController::class, 'update'])->name('admin.subscriptions.update');
+Route::post('/subscriptions/{subscription}/confirm-payment', [SubscriptionController::class, 'confirmPayment'])->name('admin.subscriptions.confirm-payment');
+Route::post('/subscriptions/{subscription}/reject-payment', [SubscriptionController::class, 'rejectPayment'])->name('admin.subscriptions.reject-payment');
 
 // ============================================
 // MESSAGES ADMIN (Support Chat)
@@ -64,6 +66,8 @@ Route::delete('/calendar/missions/{mission}', [CalendarController::class, 'destr
 // ============================================
 Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');
 Route::get('/settings/system', [SettingsController::class, 'system'])->name('admin.settings.system');
+Route::get('/settings/payments', [SettingsController::class, 'payments'])->name('admin.settings.payments');
+Route::post('/settings/payments', [SettingsController::class, 'updatePayments'])->name('admin.settings.payments.update');
 Route::post('/settings/features', [SettingsController::class, 'updateFeatures'])->name('admin.settings.features.update');
 Route::post('/settings/system', [SettingsController::class, 'updateSystem'])->name('admin.settings.system.update');
 

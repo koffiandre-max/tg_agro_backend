@@ -16,8 +16,9 @@ class PhotoController extends Controller
     {
         $user = Auth::user();
         $technicianId = $user->id;
+        $technician = \App\Models\Technician::where('user_id', $user->id)->firstOrFail();
 
-        $query = Photo::with(['farm', 'client.user', 'technician'])
+        $query = Photo::with(['farm', 'client', 'technician'])
             ->where('technician_id', $technicianId)
             ->where('is_validated', true);
 
@@ -37,26 +38,46 @@ class PhotoController extends Controller
             ->where('technician_id', $technicianId)
             ->count();
 
-        $clients = Client::with('user')
-            ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
-            ->select('clients.*')
+        $farmIds = \App\Models\Farm::where('assigned_technician_id', $technician->id)->pluck('id');
+
+        $clients = Client::query()
+            ->where('assigned_technician_id', $technician->id)
+            ->orWhereIn('user_id', function ($query) use ($farmIds) {
+                $query->select('user_id')->from('farms')->whereIn('id', $farmIds);
+            })
+            ->orWhereHas('assignedFarms', function ($query) use ($farmIds) {
+                $query->whereIn('farms.id', $farmIds);
+            })
+            ->distinct()
+            ->orderBy('code')
             ->get();
 
-        $farms = Farm::orderBy('name')->get();
+        $farms = \App\Models\Farm::where('assigned_technician_id', $technician->id)->orderBy('name')->get();
 
         return view('technician.gallery.index', compact('photos', 'clients', 'farms', 'pendingCount'));
     }
 
     public function create()
     {
-        $clients = Client::with('user')
-            ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
-            ->select('clients.*')
+        $user = Auth::user();
+        $technician = \App\Models\Technician::where('user_id', $user->id)->firstOrFail();
+
+        $farmIds = \App\Models\Farm::where('assigned_technician_id', $technician->id)->pluck('id');
+
+        $clients = Client::query()
+            ->where('assigned_technician_id', $technician->id)
+            ->orWhereIn('user_id', function ($query) use ($farmIds) {
+                $query->select('user_id')->from('farms')->whereIn('id', $farmIds);
+            })
+            ->orWhereHas('assignedFarms', function ($query) use ($farmIds) {
+                $query->whereIn('farms.id', $farmIds);
+            })
+            ->distinct()
+            ->orderBy('code')
             ->get();
 
-        $farms = Farm::with('clients.user')
+        $farms = \App\Models\Farm::where('assigned_technician_id', $technician->id)
+            ->with('clients.user')
             ->orderBy('name')
             ->get();
 

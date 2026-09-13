@@ -22,6 +22,7 @@ class DataEntry extends Model
         'validated_at',
         'rejection_reason',
         'seen_by_client',
+        'client_updated_at',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class DataEntry extends Model
             'estimated_harvest_date' => 'date',
             'validated_at' => 'datetime',
             'seen_by_client' => 'boolean',
+            'client_updated_at' => 'datetime',
         ];
     }
 

@@ -91,7 +91,7 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $report->farm?->name ?? '-' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $report->client?->user?->name ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $report->client?->code ?? '-' }}</td>
                             <td class="px-4 py-3">
                                 @if($report->status === 'validated')
                                     <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">

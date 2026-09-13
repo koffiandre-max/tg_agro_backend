@@ -81,6 +81,15 @@
                         <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('payment_method')">
                             <div class="flex items-center gap-1">Paiement @include('livewire.partials.sort-icon', ['field' => 'payment_method'])</div>
                         </th>
+                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('payment_provider')">
+                            <div class="flex items-center gap-1">Opérateur @include('livewire.partials.sort-icon', ['field' => 'payment_provider'])</div>
+                        </th>
+                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('auto_payment')">
+                            <div class="flex items-center gap-1">Auto @include('livewire.partials.sort-icon', ['field' => 'auto_payment'])</div>
+                        </th>
+                        <th class="px-4 py-3 font-medium cursor-pointer select-none" wire:click="sortBy('payment_status')">
+                            <div class="flex items-center gap-1">Paiement @include('livewire.partials.sort-icon', ['field' => 'payment_status'])</div>
+                        </th>
                         <th class="px-4 py-3 font-medium text-center">Actions</th>
                     </tr>
                 </thead>
@@ -137,6 +146,32 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-gray-600">{{ $subscription->payment_method ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $subscription->payment_provider ?? '-' }}</td>
+                            <td class="px-4 py-3 text-center">
+                                @if($subscription->auto_payment)
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                        <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                        Oui
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Non</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                @php
+                                    $paymentStatusColors = [
+                                        'pending_payment' => 'bg-amber-100 text-amber-700',
+                                        'paid' => 'bg-emerald-100 text-emerald-700',
+                                        'failed' => 'bg-red-100 text-red-700',
+                                    ];
+                                    $paymentStatusColor = $paymentStatusColors[$subscription->payment_status] ?? 'bg-gray-100 text-gray-700';
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $paymentStatusColor }}">
+                                    {{ ucfirst(str_replace('_', ' ', $subscription->payment_status ?? 'pending_payment')) }}
+                                </span>
+                            </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-center" x-data="{ open: false }">
                                     <button @click="open = !open" @click.away="open = false" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -146,6 +181,15 @@
                                     </button>
                                     <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10" style="display: none;">
                                         <div class="py-1">
+                                            <a href="{{ route('admin.subscriptions.show', $subscription->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    Voir
+                                                </div>
+                                            </a>
                                             <a href="{{ route('admin.subscriptions.edit', $subscription->id) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,6 +198,31 @@
                                                     Modifier
                                                 </div>
                                             </a>
+                                            @if($subscription->payment_status === 'pending_payment')
+                                                <div class="border-t border-gray-100 my-1"></div>
+                                                <form method="POST" action="{{ route('admin.subscriptions.confirm-payment', $subscription->id) }}" class="block">
+                                                    @csrf
+                                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                            </svg>
+                                                            Confirmer le paiement
+                                                        </div>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.subscriptions.reject-payment', $subscription->id) }}" class="block" onsubmit="return confirm('Marquer ce paiement comme échoué ?');">
+                                                    @csrf
+                                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                        <div class="flex items-center gap-2">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                            Rejeter le paiement
+                                                        </div>
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <div class="border-t border-gray-100 my-1"></div>
                                             <button wire:click="cancelSubscription({{ $subscription->id }})" wire:confirm="Annuler cet abonnement ?" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                                 <div class="flex items-center gap-2">

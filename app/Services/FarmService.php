@@ -22,14 +22,14 @@ class FarmService
 
         $clients = Client::whereIn('id', $clientIds)
             ->join('users', 'users.id', '=', 'clients.user_id')
-            ->orderBy('users.name')
+            ->orderBy('clients.code')
             ->select('clients.*')
             ->with('user')
             ->get();
 
         if ($clients->isEmpty()) {
             $clients = Client::join('users', 'users.id', '=', 'clients.user_id')
-                ->orderBy('users.name')
+                ->orderBy('clients.code')
                 ->select('clients.*')
                 ->with('user')
                 ->get();

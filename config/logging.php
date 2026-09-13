@@ -73,6 +73,16 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Canal dédié aux API mobiles (espace technicien, changelog).
+        // Fichiers : storage/logs/api-YYYY-MM-DD.log
+        'api' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/api.log'),
+            'level' => env('API_LOG_LEVEL', 'debug'),
+            'days' => env('API_LOG_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

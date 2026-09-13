@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\DataEntry;
 use App\Models\Farm;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -61,8 +62,11 @@ class DataEntriesTable extends Component
 
     public function render()
     {
+        $technicianId = \App\Models\Technician::where('user_id', Auth::id())->value('id');
+
         $query = DataEntry::query()
-            ->with(['farm', 'client.user', 'technician'])
+            ->with(['farm', 'client', 'technician'])
+            ->where('technician_id', $technicianId)
             ->when($this->search, function ($q) {
                 $q->where(function ($q) {
                     $q->where('crop_stage', 'like', "%{$this->search}%")
@@ -71,8 +75,8 @@ class DataEntriesTable extends Component
                         ->orWhereHas('farm', function ($q) {
                             $q->where('name', 'like', "%{$this->search}%");
                         })
-                        ->orWhereHas('client.user', function ($q) {
-                            $q->where('name', 'like', "%{$this->search}%");
+                        ->orWhereHas('client', function ($q) {
+                            $q->where('code', 'like', "%{$this->search}%");
                         });
                 });
             })

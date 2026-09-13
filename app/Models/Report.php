@@ -24,6 +24,7 @@ class Report extends Model
         'validated_by',
         'validated_at',
         'seen_by_client',
+        'client_updated_at',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class Report extends Model
             'file_size' => 'integer',
             'is_validated' => 'boolean',
             'validated_at' => 'datetime',
+            'client_updated_at' => 'datetime',
         ];
     }
 

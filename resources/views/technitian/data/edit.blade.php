@@ -44,7 +44,7 @@
                 <option value="">Sélectionner un client</option>
                 @foreach($clients as $client)
                     <option value="{{ $client->id }}" {{ old('client_id', $entry->client_id) == $client->id ? 'selected' : '' }}>
-                        {{ $client->user?->name ?? 'Client #'.$client->id }}
+                        {{ $client->code ?? ('Client #'.$client->id) }}
                     </option>
                 @endforeach
             </select>

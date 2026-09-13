@@ -16,13 +16,14 @@
             <div class="flex items-center gap-3">
                 {{-- Bascule de vue + actions --}}
                 <div class="inline-flex rounded-lg p-1 bg-white border border-gray-200 shadow-sm">
-                    <a href="{{ route('admin.technitian.missions.kanban') }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m0 10V7"/>
-                        </svg>
-                        Kanban
-                    </a>
+                {{-- Partie Kanban des missions (désactivée) --}}
+                {{-- <a href="{{ route('admin.technitian.missions.kanban') }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m0 10V7"/>
+                    </svg>
+                    Kanban
+                </a> --}}
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 rounded-md">
                         Liste
                     </span>

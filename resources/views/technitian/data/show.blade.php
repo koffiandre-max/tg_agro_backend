@@ -16,7 +16,7 @@
                 Saisie du {{ $entry->created_at?->format('d/m/Y') ?? '—' }}
             </h1>
             <p class="mt-1.5 text-sm text-slate-500">
-                {{ $entry->farm?->name ?? 'Exploitation inconnue' }} — {{ $entry->client?->user?->name ?? 'Client inconnu' }}
+                {{ $entry->farm?->name ?? 'Exploitation inconnue' }} — {{ $entry->client?->code ?? ('Client #'.$entry->client?->id ?? 'Client inconnu') }}
             </p>
         </div>
     </div>
@@ -25,9 +25,9 @@
         <div class="lg:col-span-1 space-y-6">
             <x-ui.card>
                 <div class="text-center">
-                    <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold bg-indigo-600">
-                        {{ strtoupper(substr($entry->client?->user?->name ?? 'C', 0, 1)) }}
-                    </div>
+                        <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold bg-indigo-600">
+                            {{ strtoupper(substr($entry->client?->code ?? 'C', 0, 1)) }}
+                        </div>
                     <h2 class="mt-4 text-lg font-bold text-gray-900">Saisie de données</h2>
                     <div class="flex items-center justify-center gap-2 mt-2">
                         @if($entry->status === 'validated')
@@ -51,7 +51,7 @@
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-user-tag w-4 text-gray-400"></i>
-                        {{ $entry->client?->user?->name ?? '—' }}
+                        {{ $entry->client?->code ?? '—' }}
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-600">
                         <i class="fas fa-calendar w-4 text-gray-400"></i>

@@ -1,0 +1,24 @@
+{
+    "name": "SendEmail",
+    "alias": "send_email",
+    "description": "Envoi d'emails depuis l'application avec historique et relance des échecs",
+    "long_description": "Composez et envoyez des emails (HTML ou texte brut) depuis votre application, avec expéditeur et préfixe de sujet personnalisables via configuration. Chaque envoi est journalisé en base : destinataire, sujet, statut (envoyé/échec) et message d'erreur éventuel. Les échecs peuvent être relancés en un clic depuis l'historique. L'expédition utilise la configuration mail standard de Laravel de l'application hôte (SMTP, Mailpit en local, etc.).",
+    "version": "1.0.0",
+    "min_app_version": "1.0.0",
+    "feature_code": "send_email",
+    "feature_label": "SendEmail",
+    "type": "paid",
+    "amount": 0,
+    "author": "",
+    "author_email": "",
+    "author_url": "",
+    "requires": [],
+    "providers": ["Modules\\SendEmail\\Providers\\SendEmailServiceProvider"],
+    "files": [],
+    "marketplace_id": null,
+    "revenue_share": 70,
+    "screenshot_urls": [],
+    "changelog": [
+        {"version": "1.0.0", "date": "2026-08-28", "notes": "Version initiale."}
+    ]
+}

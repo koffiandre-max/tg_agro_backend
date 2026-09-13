@@ -1,0 +1,24 @@
+{
+    "name": "Payment",
+    "alias": "payment",
+    "description": "Abonnements et paiements par carte bancaire ou mobile money, avec option de renouvellement automatique",
+    "long_description": "Gestion complète des abonnements : offres mensuelles et annuelles, paiement par carte Visa/Mastercard ou Mobile Money via FedaPay / CinetPay (ou passerelle de simulation en local), renouvellement automatique optionnel avec lien de paiement envoyé par email, historique des transactions et commande artisan de renouvellement quotidien.",
+    "version": "1.0.0",
+    "min_app_version": "1.0.0",
+    "feature_code": "payment",
+    "feature_label": "Payment",
+    "type": "paid",
+    "amount": 0,
+    "author": "",
+    "author_email": "",
+    "author_url": "",
+    "requires": [],
+    "providers": ["Modules\\Payment\\Providers\\PaymentServiceProvider"],
+    "files": [],
+    "marketplace_id": null,
+    "revenue_share": 70,
+    "screenshot_urls": [],
+    "changelog": [
+        {"version": "1.0.0", "date": "2026-08-28", "notes": "Version initiale."}
+    ]
+}

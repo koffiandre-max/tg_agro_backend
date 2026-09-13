@@ -63,15 +63,15 @@ class TechnicianReportsTable extends Component
     {
         $query = Report::query()
             ->where('technician_id', $this->userId)
-            ->with(['farm', 'client.user'])
+            ->with(['farm', 'client'])
             ->when($this->search, function ($q) {
                 $q->where(function ($q) {
                     $q->where('title', 'like', "%{$this->search}%")
                         ->orWhereHas('farm', function ($q) {
                             $q->where('name', 'like', "%{$this->search}%");
                         })
-                        ->orWhereHas('client.user', function ($q) {
-                            $q->where('name', 'like', "%{$this->search}%");
+                        ->orWhereHas('client', function ($q) {
+                            $q->where('code', 'like', "%{$this->search}%");
                         });
                 });
             })

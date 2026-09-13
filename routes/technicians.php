@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\TechnicianController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/technicians', [TechnicianController::class, 'index'])->name('admin.technicians.index');
 Route::get('/technicians/create', [TechnicianController::class, 'create'])->name('admin.technicians.create');

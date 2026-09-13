@@ -9,16 +9,25 @@
 @endphp
 
 {{-- Header --}}
-<div class="mb-8">
-    <a href="{{ route('admin.clients.index') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors">
-        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Retour à la liste
-    </a>
-    <h1 class="text-2xl font-bold text-gray-900">Modifier le Client</h1>
-    <p class="mt-1 text-gray-500">Modifiez les informations de {{ $client->user->name ?? 'Client' }}</p>
-</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <a href="#" onclick="history.back()" class="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 mb-2 transition-colors duration-150">
+                <svg class="w-4 h-4 mr-1.5 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Retour au client
+            </a>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+                Information sur <span class="text-indigo-600">{{ $client->user->name ?? 'Client' }}</span>
+            </h1>
+            {{-- <p class="mt-1.5 text-sm text-slate-500 flex items-center gap-1.5">
+                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                {{ $client->farms->count() }} exploitation(s) associée(s)
+            </p> --}}
+        </div>
+    </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-2  gap-6">
     <div class="xl:col-span-3">
@@ -145,5 +154,6 @@
             </dl>
         </x-ui.card>
     </div> --}}
+</div>
 </div>
 @endsection

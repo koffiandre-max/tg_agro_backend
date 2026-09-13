@@ -4,7 +4,23 @@
 @section('page-title', 'Mon Espace')
 
 @section('content')
+@php
+    $isReadOnly = isset($subscriptionExpired) && $subscriptionExpired;
+@endphp
+
 <div class="space-y-6 p-6">
+    @if($isReadOnly)
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-amber-800">Abonnement expiré ou inactif</p>
+                <p class="text-xs text-amber-700 mt-1">Vous êtes en mode consultation uniquement. Veuillez renouveler votre abonnement pour créer ou modifier des données.</p>
+            </div>
+        </div>
+    @endif
+
     {{-- Welcome Card --}}
     <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
         <h2 class="text-2xl font-bold mb-2">Bienvenue, {{ auth()->user()->name }} !</h2>
@@ -53,7 +69,7 @@
     </div> --}}
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 {{ $isReadOnly ? 'opacity-60 grayscale' : '' }}">
         <div class="bg-white rounded-xl p-6 border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
@@ -90,7 +106,7 @@
                 </div>
                 <div class="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12a2.25 2.25 0 002.25 2.25z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H3.75A2.25 2.25 0 001.5 6v12A2.25 2.25 0 006 20.25z"/>
                     </svg>
                 </div>
             </div>

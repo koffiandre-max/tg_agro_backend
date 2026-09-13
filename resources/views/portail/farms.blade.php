@@ -12,6 +12,7 @@
         'from-rose-100 to-pink-200',
         'from-sky-100 to-blue-200',
     ];
+    $isReadOnly = isset($subscriptionExpired) && $subscriptionExpired;
 @endphp
 
 <div class="space-y-6 p-6">
@@ -31,6 +32,18 @@
             Retour
         </a>
     </div>
+
+    @if($isReadOnly)
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-amber-800">Abonnement expiré ou inactif</p>
+                <p class="text-xs text-amber-700 mt-1">Vous êtes en mode consultation uniquement. Veuillez renouveler votre abonnement pour créer ou modifier des données.</p>
+            </div>
+        </div>
+    @endif
 
     @if($farms->isEmpty())
         {{-- État vide --}}
@@ -57,7 +70,7 @@
                     $imageUrl = $photo && $photo->photo_path ? asset('storage/' . $photo->photo_path) : null;
                 @endphp
 
-                <article class="group flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-sm transition-all hover:shadow-md md:flex-row">
+                <article class="group flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-sm transition-all hover:shadow-md md:flex-row {{ $isReadOnly ? 'opacity-60 grayscale' : '' }}">
                     {{-- Image à gauche --}}
                     <div class="relative h-48 w-full shrink-0 overflow-hidden bg-[var(--color-border-light)] md:h-auto md:w-48">
                         @if($imageUrl)
@@ -137,21 +150,23 @@
                                 </svg>
                             </a>
 
-                            {{-- Éditer --}}
-                            <a href="{{ route('admin.portail.farms.edit', $farm->id) }}" title="Éditer"
-                               class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-page)] text-[var(--color-text-secondary)] shadow-sm transition-colors hover:bg-[var(--color-brand-600)] hover:text-white focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-50)]">
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                                </svg>
-                            </a>
+                            @if(!$isReadOnly)
+                                {{-- Éditer --}}
+                                <a href="{{ route('admin.portail.farms.edit', $farm->id) }}" title="Éditer"
+                                   class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-page)] text-[var(--color-text-secondary)] shadow-sm transition-colors hover:bg-[var(--color-brand-600)] hover:text-white focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-50)]">
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                                    </svg>
+                                </a>
 
-                            {{-- Supprimer --}}
-                            <button type="button" title="Supprimer" data-delete-url="{{ route('admin.portail.farms.destroy', $farm->id) }}"
-                                    class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-page)] text-[var(--color-text-secondary)] shadow-sm transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-100">
-                                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                            </button>
+                                {{-- Supprimer --}}
+                                <button type="button" title="Supprimer" data-delete-url="{{ route('admin.portail.farms.destroy', $farm->id) }}"
+                                        class="inline-flex size-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-page)] text-[var(--color-text-secondary)] shadow-sm transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-100">
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </article>

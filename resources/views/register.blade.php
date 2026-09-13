@@ -25,6 +25,13 @@
                     <p class="mt-1 text-xs text-slate-500">Remplissez vos informations pour commencer.</p>
                 </div>
 
+                {{-- Success --}}
+                <div class="mb-5" role="status" aria-live="polite">
+                    <div x-show="success" x-transition style="display: none;">
+                        <div class="rounded-md bg-emerald-50 border border-emerald-100 px-3 py-2.5 text-xs text-emerald-700" x-text="success"></div>
+                    </div>
+                </div>
+
                 {{-- Error --}}
                 <div class="mb-5" role="alert" aria-live="polite">
                     <div x-show="error" x-transition style="display: none;">
@@ -204,6 +211,7 @@
             showPasswordConfirm: false,
             loading: false,
             error: '',
+            success: '',
 
             get name() {
                 var el = document.getElementById('name');
@@ -243,6 +251,7 @@
 
                 this.loading = true;
                 this.error = '';
+                this.success = '';
 
                 if (this.password !== this.password_confirmation) {
                     this.error = 'Les mots de passe ne correspondent pas.';
@@ -274,6 +283,11 @@
                     try { data = await response.json(); } catch {}
 
                     if (response.ok && data.success) {
+                        if (data.requires_verification) {
+                            this.success = data.message || 'Inscription réussie. Veuillez vérifier votre email.';
+                            return;
+                        }
+
                         window.location.href = data.redirect;
                         return;
                     }

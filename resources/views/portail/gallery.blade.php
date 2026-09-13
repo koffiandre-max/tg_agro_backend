@@ -3,7 +3,23 @@
 @section('page-title', 'Ma Galerie Photos')
 
 @section('content')
+@php
+    $isReadOnly = isset($subscriptionExpired) && $subscriptionExpired;
+@endphp
+
 <div class="space-y-6 p-6">
+    @if($isReadOnly)
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+                <p class="text-sm font-semibold text-amber-800">Abonnement expiré ou inactif</p>
+                <p class="text-xs text-amber-700 mt-1">Vous êtes en mode consultation uniquement. Veuillez renouveler votre abonnement pour créer ou modifier des données.</p>
+            </div>
+        </div>
+    @endif
+
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Ma Galerie Photos</h1>
@@ -42,7 +58,7 @@
 
     {{-- Grille de photos --}}
     @if($photos->count() > 0)
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 {{ $isReadOnly ? 'opacity-60 grayscale' : '' }}">
             @foreach($photos as $photo)
                 <div class="relative group rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer"
                      onclick="openPhotoModal({{ $photo->id }}, '{{ asset('storage/' . $photo->photo_path) }}', '{{ addslashes($photo->client?->user?->name ?? 'Client') }}', '{{ addslashes($photo->farm?->name ?? 'Plantation') }}', '{{ addslashes($photo->technician?->name ?? '—') }}', '{{ $photo->created_at?->format('d/m/Y H:i') ?? '' }}', '{{ $photo->caption ?? '' }}', {{ $photo->latitude ?? 'null' }}, {{ $photo->longitude ?? 'null' }})">

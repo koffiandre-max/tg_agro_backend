@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b9ec984ca08cf78be8211e900994b219",
+    "content-hash": "165e70bbce860ec9f0d12cfd4e55f8eb",
     "packages": [
         {
             "name": "anousss007/blatui",
@@ -4229,6 +4229,53 @@
                 }
             ],
             "time": "2026-06-15T07:14:32+00:00"
+        },
+        {
+            "name": "suite/sdk",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:koffiandre-max/suite_sdk.git",
+                "reference": "f3759c619300c57deee14d50a01b8479ed7303a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koffiandre-max/suite_sdk/zipball/f3759c619300c57deee14d50a01b8479ed7303a6",
+                "reference": "f3759c619300c57deee14d50a01b8479ed7303a6",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": ">=11.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Suite\\Sdk\\SuiteSdkServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Suite\\Sdk\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "31andre",
+                    "email": "koffikoffiandre2000@gmail.com"
+                }
+            ],
+            "description": "permet de creer des application ou module pour Business Suite placeforme saas",
+            "support": {
+                "source": "https://github.com/koffiandre-max/suite_sdk/tree/main",
+                "issues": "https://github.com/koffiandre-max/suite_sdk/issues"
+            },
+            "time": "2026-08-28T09:53:49+00:00"
         },
         {
             "name": "symfony/clock",
@@ -9386,7 +9433,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "suite/sdk": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

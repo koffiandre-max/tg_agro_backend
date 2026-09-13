@@ -1,0 +1,24 @@
+{
+    "name": "ResetPassword",
+    "alias": "reset_password",
+    "description": "Réinitialisation de mot de passe (mot de passe oublié)",
+    "long_description": "Permet à un utilisateur non connecté de reinitialiser son mot de passe : saisie de l'email, envoi d'un lien sécurisé (token) par email, puis definition d'un nouveau mot de passe.",
+    "version": "1.0.0",
+    "min_app_version": "1.0.0",
+    "feature_code": "reset_password",
+    "feature_label": "Réinitialisation de mot de passe",
+    "type": "paid",
+    "amount": 0,
+    "author": "",
+    "author_email": "",
+    "author_url": "",
+    "requires": [],
+    "providers": ["Modules\\ResetPassword\\Providers\\ResetPasswordServiceProvider"],
+    "files": [],
+    "marketplace_id": null,
+    "revenue_share": 70,
+    "screenshot_urls": [],
+    "changelog": [
+        {"version": "1.0.0", "date": "2026-08-28", "notes": "Version initiale."}
+    ]
+}

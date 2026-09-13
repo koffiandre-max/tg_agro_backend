@@ -13,7 +13,7 @@
 
 @php
     $id = $id ?? $name ?? 'select-' . Str::random(8);
-    $hasError = $error && $errors->has($error);
+    $hasError = $error && !empty($errors) && $errors->has($error);
     
     // Normalisation intelligente des options
     $formattedOptions = collect($options)->map(function ($opt, $key) {

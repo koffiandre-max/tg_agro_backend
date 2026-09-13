@@ -4,8 +4,24 @@
 @section('page-title', 'Mes Saisies de Données Agronomiques')
 
 @section('content')
+@php
+    $isReadOnly = isset($subscriptionExpired) && $subscriptionExpired;
+@endphp
+
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if($isReadOnly)
+            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">Abonnement expiré ou inactif</p>
+                    <p class="text-xs text-amber-700 mt-1">Vous êtes en mode consultation uniquement. Veuillez renouveler votre abonnement pour créer ou modifier des données.</p>
+                </div>
+            </div>
+        @endif
+
         {{-- En-tête --}}
         <div class="mb-6">
             <div>
@@ -25,7 +41,7 @@
                 <p class="mt-1 text-sm text-gray-500">Les saisies validées apparaîtront ici.</p>
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 {{ $isReadOnly ? 'opacity-60 grayscale' : '' }}">
                 @foreach($entries as $entry)
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">
                         <div class="flex items-start justify-between">

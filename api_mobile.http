@@ -1,0 +1,427 @@
+### ============================================================================
+#  API MOBILE TG AGRO — Collection HTTP (format REST Client / VS Code)
+#  ----------------------------------------------------------------------------
+#  Utilisation (extension VS Code "REST Client") :
+#    1. Démarrer le serveur : php artisan serve (ou Herd → @host ci-dessous)
+#    2. Exécuter "1.1 Connexion" : le jeton est capturé automatiquement dans
+#       la variable @token (ligne "@token = {{login.response.body...}}").
+#    3. Cliquer sur "Send Request" au-dessus de chaque requête.
+#
+#  Enveloppe standard des réponses :
+#    { "success": true|false, "message": "...", "data": ..., "errors": {...}? }
+#    (+ bloc "debug" en cas d'erreur 500 quand APP_DEBUG=true)
+#
+#  Mode HORS-LIGNE (détails dans OFFLINE_SYNC.md) :
+#    - 1er lancement      → GET  /mobile/bootstrap  (instantané + curseur)
+#    - reconnexion        → GET  /mobile/changelog  (incrémental, curseur)
+#    - remontée locale    → POST /mobile/sync       (outbox idempotente)
+#    - fichiers (PDF/photos) → endpoints multipart dédiés, JAMAIS dans l'outbox
+# ============================================================================
+
+@host = http://127.0.0.1:8003
+@baseUrl = {{host}}/api/v1
+
+# Jeton : capturé après exécution de la requête "1.1 Connexion" (# @name login).
+# En cas de besoin manuel, remplacer la ligne par :  @token = collez-le-jeton
+@token = {{login.response.body.$.data.token}}
+
+# ── Identifiants de test (à adapter) ─────────────────────────────────────────
+@email = technicien2@tginvest.com
+@password = password123
+@deviceName = samsung-a14-dev
+
+# ── Identifiants d'exemple (adapter à votre base) ────────────────────────────
+@missionId = 1
+@farmId = 1
+@clientId = 1
+@dataEntryId = 1
+@reportId = 1
+@cursor = 0
+
+### ============================================================================
+#  1. AUTHENTIFICATION
+# ============================================================================
+
+### 1.1 Connexion (public — throttle 5/min) — capture le jeton de la collection
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "device_name": "{{deviceName}}"
+}
+
+### 1.2 Profil de l'utilisateur connecté
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 1.3 Déconnexion — révoque le jeton courant
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ============================================================================
+#  2. SYNCHRONISATION MOBILE (architecture changelog — mode hors-ligne)
+# ============================================================================
+
+### 2.1 Bootstrap — instantané complet (1er lancement / réinstallation)
+# Réponse : current_cursor (à stocker localement) + data (missions, fermes,
+# clients, saisies, rapports, photos autorisés pour cet utilisateur).
+GET {{baseUrl}}/mobile/bootstrap
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 2.2 Changelog incrémental — entrées postérieures au curseur local
+# Query params :
+#   cursor      : dernier curseur connu (défaut 0)
+#   entity_type : Mission | Farm | Client | Report | Photo | DataEntry
+#   limit       : 1..500 (défaut 100)
+# Réponse : [{cursor, entity_type, entity_id, operation, payload, created_at}]
+# + en-tête X-Next-Cursor (nouveau curseur local à persister).
+GET {{baseUrl}}/mobile/changelog?cursor={{cursor}}&limit=100
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 2.2bis Changelog filtré sur une entité
+GET {{baseUrl}}/mobile/changelog?cursor={{cursor}}&entity_type=Mission&limit=50
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 2.3 Acquittement du curseur local (suivi / traçabilité)
+POST {{baseUrl}}/mobile/changelog/ack
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "cursor": 42
+}
+
+### 2.4 Outbox — remontée des opérations effectuées hors-ligne (idempotent)
+#   operations[].client_uuid       : UUID local (clé d'idempotence, ≤ 64 car.)
+#   operations[].entity_type       : DataEntry → created | updated | deleted
+#                                    Mission   → updated (status uniquement)
+#                                    Report/Photo → rejetés (binaire : voir §3.6/§3.7)
+#   operations[].client_updated_at : horodatage local (conflits → Last-Write-Wins)
+# Statuts renvoyés par opération (results[]) :
+#   applied    → appliquée (entity_id = ID serveur à mémoriser)
+#   idempotent → déjà appliquée lors d'un renvoi (même ID serveur)
+#   skipped    → conflit LWW, la version serveur gagne
+#   error      → rejetée (champ "error" = motif)
+POST {{baseUrl}}/mobile/sync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "device_id": "{{deviceName}}",
+  "operations": [
+    {
+      "client_uuid": "de-local-20260908-0001",
+      "entity_type": "DataEntry",
+      "operation": "created",
+      "entity_id": null,
+      "payload": {
+        "farm_id": {{farmId}},
+        "client_id": {{clientId}},
+        "crop_stage": "vegetative",
+        "crop_stage_progress": 45,
+        "estimated_harvest_date": "2026-11-15",
+        "inputs_used": "NPK 15-15-15 (50 kg)",
+        "observations": "Levée homogène, peu d'adventices.",
+        "weather_conditions": "ensoleille"
+      },
+      "client_updated_at": "2026-09-08T09:00:00Z"
+    },
+    {
+      "client_uuid": "mi-local-20260908-0002",
+      "entity_type": "Mission",
+      "operation": "updated",
+      "entity_id": {{missionId}},
+      "payload": { "status": "in_progress" }
+    },
+    {
+      "client_uuid": "de-local-20260907-0099",
+      "entity_type": "DataEntry",
+      "operation": "deleted",
+      "entity_id": {{dataEntryId}}
+    }
+  ]
+}
+
+### 2.4bis Outbox — renvoi du même lot (test d'idempotence → statut "idempotent")
+POST {{baseUrl}}/mobile/sync
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "device_id": "{{deviceName}}",
+  "operations": [
+    {
+      "client_uuid": "de-local-20260908-0001",
+      "entity_type": "DataEntry",
+      "operation": "created",
+      "entity_id": null,
+      "payload": {
+        "farm_id": {{farmId}},
+        "client_id": {{clientId}},
+        "observations": "Renvoi après perte de réseau — ne doit pas dupliquer."
+      },
+      "client_updated_at": "2026-09-08T09:00:00Z"
+    }
+  ]
+}
+
+### ============================================================================
+#  3. ESPACE TECHNICIEN (rôle requis — sinon 403 via middleware api.technician)
+# ============================================================================
+
+### 3.1 Tableau de bord — stats missions/fermes/clients + validations en attente
+GET {{baseUrl}}/technician/dashboard
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ── 3.2 Missions ────────────────────────────────────────────────────────────
+
+### 3.2.1 Liste des missions
+# Filtres optionnels : status=pending|in_progress|completed|cancelled, date=YYYY-MM-DD
+GET {{baseUrl}}/technician/missions?status=pending
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.2.2 Détail d'une mission
+GET {{baseUrl}}/technician/missions/{{missionId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.2.3 Changement de statut d'une mission (idempotent via client_uuid)
+# status ∈ pending | in_progress | completed | cancelled
+PATCH {{baseUrl}}/technician/missions/{{missionId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "in_progress",
+  "client_uuid": "mi-local-20260908-0003"
+}
+
+### ── 3.3 Exploitations (fermes) ──────────────────────────────────────────────
+
+### 3.3.1 Exploitations assignées au technicien (filtre optionnel : type)
+GET {{baseUrl}}/technician/farms
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.3.2 Détail d'une exploitation (+ clients et propriétaire)
+GET {{baseUrl}}/technician/farms/{{farmId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ── 3.4 Clients ─────────────────────────────────────────────────────────────
+
+### 3.4.1 Clients rattachés au technicien ou à ses exploitations
+GET {{baseUrl}}/technician/clients
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.4.2 Détail d'un client (+ ses exploitations)
+GET {{baseUrl}}/technician/clients/{{clientId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ── 3.5 Saisies de données (DataEntry) ──────────────────────────────────────
+
+### 3.5.1 Liste des saisies (filtres optionnels : farm_id, client_id)
+GET {{baseUrl}}/technician/data?farm_id={{farmId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.5.2 Détail d'une saisie
+GET {{baseUrl}}/technician/data/{{dataEntryId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.5.3 Créer une saisie (idempotent via client_uuid)
+POST {{baseUrl}}/technician/data
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "farm_id": {{farmId}},
+  "client_id": {{clientId}},
+  "crop_stage": "vegetative",
+  "crop_stage_progress": 45,
+  "estimated_harvest_date": "2026-11-15",
+  "inputs_used": "NPK 15-15-15 (50 kg)",
+  "observations": "Levée homogène, traitement herbicide prévu.",
+  "weather_conditions": "ensoleille",
+  "client_uuid": "de-direct-20260908-0010",
+  "client_updated_at": "2026-09-08T10:30:00Z"
+}
+
+### 3.5.4 Mettre à jour une saisie (champs partiels acceptés)
+PUT {{baseUrl}}/technician/data/{{dataEntryId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "crop_stage_progress": 60,
+  "observations": "Progression normale, traitement effectué."
+}
+
+### 3.5.5 Supprimer une saisie
+DELETE {{baseUrl}}/technician/data/{{dataEntryId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ── 3.6 Rapports (PDF) ──────────────────────────────────────────────────────
+
+### 3.6.1 Liste des rapports (filtres optionnels : status=pending|validated|rejected, farm_id)
+GET {{baseUrl}}/technician/reports?status=pending
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.6.2 Soumettre un rapport PDF (multipart — JAMAIS via l'outbox)
+# type ∈ monthly | soil_analysis | harvest | other | inspection | diagnostic | suivi
+# file : PDF ≤ 10 Mo. client_uuid : ré-envoi sans doublon.
+# Adapter le chemin après "<" vers un PDF local.
+POST {{baseUrl}}/technician/reports
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BoundaryReport
+
+--BoundaryReport
+Content-Disposition: form-data; name="farm_id"
+
+{{farmId}}
+--BoundaryReport
+Content-Disposition: form-data; name="client_id"
+
+{{clientId}}
+--BoundaryReport
+Content-Disposition: form-data; name="title"
+
+Rapport de visite mensuel - Septembre 2026
+--BoundaryReport
+Content-Disposition: form-data; name="type"
+
+monthly
+--BoundaryReport
+Content-Disposition: form-data; name="notes"
+
+Culture en bon état, signalement de pucerons sur la parcelle B.
+--BoundaryReport
+Content-Disposition: form-data; name="client_uuid"
+
+rep-local-20260908-0020
+--BoundaryReport
+Content-Disposition: form-data; name="file"; filename="rapport-septembre.pdf"
+Content-Type: application/pdf
+
+< ./rapport-septembre.pdf
+--BoundaryReport--
+
+### 3.6.3 Lien de téléchargement du rapport
+GET {{baseUrl}}/technician/reports/{{reportId}}/download
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### ── 3.7 Photos ──────────────────────────────────────────────────────────────
+
+### 3.7.1 Liste des photos (filtres optionnels : farm_id, client_id)
+GET {{baseUrl}}/technician/photos?farm_id={{farmId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.7.2 Téléverser des photos (multipart — JAMAIS via l'outbox)
+# photos[] : 1 à 20 images (jpeg, jpg, png, gif, webp) ≤ 10 Mo chacune.
+# latitude/longitude en degrés décimaux. client_uuid : ré-envoi sans doublon.
+# Adapter les chemins après "<" vers des images locales.
+POST {{baseUrl}}/technician/photos
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BoundaryPhotos
+
+--BoundaryPhotos
+Content-Disposition: form-data; name="farm_id"
+
+{{farmId}}
+--BoundaryPhotos
+Content-Disposition: form-data; name="client_id"
+
+{{clientId}}
+--BoundaryPhotos
+Content-Disposition: form-data; name="caption"
+
+Parcelle B — stade végétatif
+--BoundaryPhotos
+Content-Disposition: form-data; name="latitude"
+
+6.1319
+--BoundaryPhotos
+Content-Disposition: form-data; name="longitude"
+
+1.2228
+--BoundaryPhotos
+Content-Disposition: form-data; name="taken_at"
+
+2026-09-08T11:00:00Z
+--BoundaryPhotos
+Content-Disposition: form-data; name="client_uuid"
+
+pho-local-20260908-0030
+--BoundaryPhotos
+Content-Disposition: form-data; name="photos[]"; filename="photo-parcelle-b.jpg"
+Content-Type: image/jpeg
+
+< ./photo-parcelle-b.jpg
+--BoundaryPhotos--
+
+### ── 3.8 Profil ──────────────────────────────────────────────────────────────
+
+### 3.8.1 Consulter le profil (utilisateur + fiche technicien)
+GET {{baseUrl}}/technician/profile
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.8.2 Mettre à jour le profil (multipart ; avatar : image ≤ 2 Mo, optionnel)
+# Champs : name, phone, phone_secondary, location_base, avatar
+PUT {{baseUrl}}/technician/profile
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BoundaryProfile
+
+--BoundaryProfile
+Content-Disposition: form-data; name="name"
+
+Koffi Agbeko
+--BoundaryProfile
+Content-Disposition: form-data; name="phone"
+
++22890000001
+--BoundaryProfile
+Content-Disposition: form-data; name="phone_secondary"
+
++22890000002
+--BoundaryProfile
+Content-Disposition: form-data; name="location_base"
+
+Lomé
+--BoundaryProfile--
+
+### ============================================================================
+#  NOTES
+#  ---------------------------------------------------------------------------
+#  • Enveloppe : { "success", "message", "data", "errors"? } + "debug" si APP_DEBUG.
+#  • Tous les endpoints sauf /auth/login exigent : Authorization: Bearer <token>.
+#  • /technician/* exige le rôle technicien (middleware api.technician → 403 sinon).
+#  • client_uuid (≤ 64 car.) rend toute écriture idempotente (offline-safe) :
+#    un renvoi ne duplique jamais la ressource côté serveur.
+#  • Rapports/photos : multipart uniquement (fichiers exclus de l'outbox).
+#  • Adaptez : @host, @email/@password, les IDs d'exemple et les chemins après "<".
+# ============================================================================

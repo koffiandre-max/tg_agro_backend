@@ -64,7 +64,7 @@
                     @forelse($entries as $entry)
                         <tr class="hover:bg-gray-50/60" wire:key="entry-{{ $entry->id }}">
                             <td class="px-4 py-3 text-gray-700">{{ $entry->farm?->name ?? '-' }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $entry->client?->user?->name ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $entry->client?->code ?? '-' }}</td>
                             <td class="px-4 py-3">
                                 <span class="text-gray-700">{{ $entry->crop_stage ?? '-' }}</span>
                                 @if($entry->crop_stage_progress)

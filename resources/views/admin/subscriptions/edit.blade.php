@@ -54,25 +54,35 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label for="type" class="block text-sm font-medium text-gray-700 mb-1.5">Type</label>
-                        <select id="type" name="type"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
-                            <option value="">Sélectionner</option>
-                            <option value="basic" {{ old('type', $subscription->type) === 'basic' ? 'selected' : '' }}>Basic</option>
-                            <option value="standard" {{ old('type', $subscription->type) === 'standard' ? 'selected' : '' }}>Standard</option>
-                            <option value="premium" {{ old('type', $subscription->type) === 'premium' ? 'selected' : '' }}>Premium</option>
-                        </select>
+                        <x-select 
+                            name="type" 
+                            label="Type" 
+                            :options="[
+                                ['value' => 'basic', 'label' => 'Basic'],
+                                ['value' => 'standard', 'label' => 'Standard'],
+                                ['value' => 'premium', 'label' => 'Premium'],
+                            ]"
+                            placeholder="Sélectionner"
+                            :value="old('type', $subscription->type)"
+                            error="type"
+                        />
                         @error('type') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-1.5">Statut</label>
-                        <select id="status" name="status"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
-                            <option value="">Sélectionner</option>
-                            <option value="active" {{ old('status', $subscription->status) === 'active' ? 'selected' : '' }}>Actif</option>
-                            <option value="expired" {{ old('status', $subscription->status) === 'expired' ? 'selected' : '' }}>Expiré</option>
-                            <option value="cancelled" {{ old('status', $subscription->status) === 'cancelled' ? 'selected' : '' }}>Annulé</option>
-                        </select>
+                        <x-select 
+                            name="status" 
+                            label="Statut" 
+                            :options="[
+                                ['value' => 'active', 'label' => 'Actif'],
+                                ['value' => 'expired', 'label' => 'Expiré'],
+                                ['value' => 'cancelled', 'label' => 'Annulé'],
+                            ]"
+                            placeholder="Sélectionner"
+                            :value="old('status', $subscription->status)"
+                            error="status"
+                        />
                         @error('status') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
@@ -127,6 +137,41 @@
                                placeholder="Ex: TX-123456">
                         @error('payment_reference') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
+
+                    <div>
+                        <label for="payment_code" class="block text-sm font-medium text-gray-700 mb-1.5">Code de paiement</label>
+                        <input type="text" id="payment_code" name="payment_code"
+                               value="{{ old('payment_code', $subscription->payment_code) }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
+                               placeholder="Ex: OM123456, MV789...">
+                        @error('payment_code') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label for="payment_provider" class="block text-sm font-medium text-gray-700 mb-1.5">Opérateur de paiement</label>
+                        <input type="text" id="payment_provider" name="payment_provider"
+                               value="{{ old('payment_provider', $subscription->payment_provider) }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
+                               placeholder="Ex: Orange Money, Moov Money, Visa...">
+                        @error('payment_provider') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label for="payment_phone" class="block text-sm font-medium text-gray-700 mb-1.5">Téléphone de paiement</label>
+                        <input type="text" id="payment_phone" name="payment_phone"
+                               value="{{ old('payment_phone', $subscription->payment_phone) }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
+                               placeholder="Ex: +225 07 00 00 00 00">
+                        @error('payment_phone') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label for="next_payment_date" class="block text-sm font-medium text-gray-700 mb-1.5">Date du prochain paiement</label>
+                        <input type="date" id="next_payment_date" name="next_payment_date"
+                               value="{{ old('next_payment_date', $subscription->next_payment_date?->format('Y-m-d')) }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
+                        @error('next_payment_date') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-3 pt-1">
@@ -134,6 +179,13 @@
                            {{ old('auto_renew', $subscription->auto_renew) ? 'checked' : '' }}
                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
                     <label for="auto_renew" class="text-sm text-gray-700">Renouvellement automatique</label>
+                </div>
+
+                <div class="flex items-center gap-3 pt-1">
+                    <input type="checkbox" id="auto_payment" name="auto_payment" value="1"
+                           {{ old('auto_payment', $subscription->auto_payment) ? 'checked' : '' }}
+                           class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                    <label for="auto_payment" class="text-sm text-gray-700">Paiement automatique activé</label>
                 </div>
             </div>
 

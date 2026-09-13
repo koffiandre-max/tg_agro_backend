@@ -25,7 +25,7 @@
                         <div class="flex w-1/3 items-center justify-center"
                              :style="`background-color: ${settings.sidebar_color || '#1f2937'}; color: ${settings.text_color || '#ffffff'}`">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 6v12a2.25 2.25 0 012.25 2.25zM14 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM4 16a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 016.75 20.25H4.5A2.25 2.25 0 012.25 18v-2.25z"/>
                             </svg>
                         </div>
                         <div class="flex flex-1 flex-col">
@@ -76,14 +76,23 @@
                             :class="activeTab === 'security' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                             class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200">
                         <svg class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
                         Sécurité
+                    </button>
+                    <button @click="activeTab = 'payments'"
+                            :class="activeTab === 'payments' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 12h19.5m-16.5 5.25h6m-6 2.25h3.75m-3.75 0h6m-9 4.5h15a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z"/>
+                        </svg>
+                        Paiements
                     </button>
                 </nav>
             </div>
 
             <div class="p-6 lg:p-8">
+                {{-- Form: System Settings --}}
                 <form method="POST" action="{{ route('admin.settings.system.update') }}">
                     @csrf
                     
@@ -376,8 +385,8 @@
                         </div>
                     </div>
 
-                    {{-- Actions --}}
-                    <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+                    {{-- Actions du formulaire système --}}
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200" x-show="activeTab !== 'payments'">
                         <a href="{{ route('admin.settings') }}" 
                            class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                             Retour aux KPIs
@@ -385,6 +394,68 @@
                         <button type="submit" 
                                 class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
                             Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+
+                {{-- Form: Payment Settings --}}
+                <form method="POST" action="{{ route('admin.settings.payments.update') }}" x-show="activeTab === 'payments'" style="display: none;">
+                    @csrf
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Paramètres de paiement par défaut</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Opérateur de paiement par défaut</label>
+                                    <input type="text" 
+                                           name="payment_default_provider"
+                                           value="{{ $settings['payment_default_provider'] ?? '' }}"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                           placeholder="Ex: Orange Money, Moov Money, Visa...">
+                                    <p class="mt-2 text-xs text-gray-500">Utilisé comme valeur par défaut dans les formulaires d'abonnement.</p>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone de paiement par défaut</label>
+                                    <input type="text" 
+                                           name="payment_default_phone"
+                                           value="{{ $settings['payment_default_phone'] ?? '' }}"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                           placeholder="Ex: +225 07 00 00 00 00">
+                                    <p class="mt-2 text-xs text-gray-500">Numéro utilisé par défaut pour les paiements automatiques.</p>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Préfixe de code de paiement</label>
+                                    <input type="text" 
+                                           name="payment_default_code_prefix"
+                                           value="{{ $settings['payment_default_code_prefix'] ?? '' }}"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                           placeholder="Ex: OM, MV, TX...">
+                                    <p class="mt-2 text-xs text-gray-500">Préfixe ajouté automatiquement aux codes de paiement.</p>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Rappel avant échéance (jours)</label>
+                                    <input type="number" 
+                                           name="payment_reminder_days_before"
+                                           value="{{ $settings['payment_reminder_days_before'] ?? 7 }}"
+                                           class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                           placeholder="7">
+                                    <p class="mt-2 text-xs text-gray-500">Nombre de jours avant la date de paiement pour envoyer un rappel.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+                        <a href="{{ route('admin.settings') }}" 
+                           class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Retour aux KPIs
+                        </a>
+                        <button type="submit" 
+                                class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                            Enregistrer les paramètres de paiement
                         </button>
                     </div>
                 </form>
