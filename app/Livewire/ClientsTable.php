@@ -201,6 +201,44 @@ class ClientsTable extends Component
         $this->dispatch('client-deleted');
     }
 
+    public function resendVerificationEmail($clientId): void
+    {
+        try {
+            $client = Client::with('user')->findOrFail($clientId);
+            $user = $client->user;
+
+            if (!$user || $user->is_verified) {
+                session()->flash('error', 'Ce compte a déjà été vérifié.');
+                return;
+            }
+
+            $token = bin2hex(random_bytes(32));
+            $user->update(['verification_token' => $token]);
+
+            $verificationUrl = route('verification.verify', ['token' => $token]);
+
+            if ($this->mailer && $user->email) {
+                $this->mailer->sendView(
+                    $user->email,
+                    'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+                    'emails.verify-account',
+                    [
+                        'name' => $user->name,
+                        'verificationUrl' => $verificationUrl,
+                    ]
+                );
+            }
+
+            session()->flash('success', 'Un nouvel email de vérification a été envoyé à ' . $user->email);
+        } catch (\Throwable $e) {
+            logger()->error('Échec renvoi email vérification', [
+                'client_id' => $clientId,
+                'error' => $e->getMessage(),
+            ]);
+            session()->flash('error', 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.');
+        }
+    }
+
     public function render()
     {
         $query = Client::query()
