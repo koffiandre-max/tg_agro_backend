@@ -137,4 +137,35 @@ class ClientController extends Controller
         // TODO: Implémenter la logique de suppression
         return redirect()->route('admin.clients.index');
     }
+
+    public function resendVerificationEmail(Request $request, Client $client)
+    {
+        $user = $client->user;
+
+        if (!$user || $user->is_verified) {
+            return back()->with('error', 'Ce compte a déjà été vérifié.');
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $user->update(['verification_token' => $token]);
+
+        $verificationUrl = route('verification.verify', ['token' => $token]);
+
+        try {
+            $emailService = app(\App\Services\SendmailService::class);
+            $emailService->sendView(
+                $user->email,
+                'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+                'emails.verify-account',
+                [
+                    'name' => $user->name,
+                    'verificationUrl' => $verificationUrl,
+                ]
+            );
+
+            return back()->with('success', 'Un nouvel email de vérification a été envoyé à ' . $user->email);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.');
+        }
+    }
 }

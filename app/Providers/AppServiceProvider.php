@@ -45,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', NavigationComposer::class);
 
+        require_once app_path('helpers.php');
+
         // ── Event → Listener mappings ──────────────────────────
         // Les e-mails sont toujours envoyés par les contrôleurs appelants
         // (SendmailService, comportement synchrone préservé).

@@ -56,6 +56,18 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->user->is_active ?? true ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
                         {{ ($client->user->is_active ?? true) ? 'Actif' : 'Inactif' }}
                     </span>
+                    @if(is_admin() && !($client->user->is_active ?? true) && !($client->user->is_verified ?? true))
+                        <form method="POST" action="{{ route('admin.clients.resendVerificationEmail', $client) }}" class="inline">
+                            @csrf
+                            @method('POST')
+                            <button type="submit" class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-100">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                Renvoyer l'email de confirmation
+                            </button>
+                        </form>
+                    @endif
                 </div>
                 @if($client->code)
                     <p class="mt-2 text-xs text-gray-500">Code: <span class="font-mono font-semibold text-gray-700">{{ $client->code }}</span></p>

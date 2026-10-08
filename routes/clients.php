@@ -11,3 +11,4 @@ Route::get('/clients/{client}/farms', [ClientController::class, 'farms'])->name(
 Route::get('/clients/{client}', [ClientController::class, 'show'])->name('admin.clients.show');
 Route::put('/clients/{client}', [ClientController::class, 'update'])->name('admin.clients.update');
 Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('admin.clients.destroy');
+Route::post('/clients/{client}/resend-verification-email', [ClientController::class, 'resendVerificationEmail'])->name('admin.clients.resendVerificationEmail');
