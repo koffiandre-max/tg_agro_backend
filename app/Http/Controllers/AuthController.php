@@ -148,6 +148,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'requires_verification' => true,
+                'redirect' => route('login'),
                 'message' => 'Inscription réussie ! Veuillez vérifier votre adresse email pour activer votre compte. Vous allez recevoir un lien de confirmation.',
             ]);
         } catch (Exception $e) {

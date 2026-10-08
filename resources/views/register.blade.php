@@ -285,6 +285,11 @@
                     if (response.ok && data.success) {
                         if (data.requires_verification) {
                             this.success = data.message || 'Inscription réussie. Veuillez vérifier votre email.';
+                            if (data.redirect) {
+                                setTimeout(() => {
+                                    window.location.href = data.redirect;
+                                }, 800);
+                            }
                             return;
                         }
 
