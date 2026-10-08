@@ -56,7 +56,7 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->user->is_active ?? true ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
                         {{ ($client->user->is_active ?? true) ? 'Actif' : 'Inactif' }}
                     </span>
-                    @if(is_admin() && !($client->user->is_active ?? true) && !($client->user->is_verified ?? true)) 
+                    @if(auth()->check() && auth()->user()->role === 'admin' && !($client->user->is_active ?? true) && !($client->user->is_verified ?? true)) 
                         <form method="POST" action="{{ route('admin.clients.resendVerificationEmail', $client) }}" class="inline">
                             @csrf   
                             @method('POST')
@@ -110,7 +110,7 @@
        
 
         {{-- Métriques --}}
-        @if(is_admin())
+        @if(auth()->check() && auth()->user()->role === 'admin')
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <x-ui.card class="flex items-center gap-4">
