@@ -94,6 +94,7 @@
 
                 {{-- Informations clés --}}
                 <div class="mt-6 pt-6 border-t border-slate-100 space-y-4 text-sm text-slate-600">
+                    @if(is_admin())
                     <div class="flex items-center justify-between">
                         <span class="inline-flex items-center text-slate-500">
                             <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -103,7 +104,7 @@
                         </span>
                         <span class="font-semibold text-slate-800">{{ $farm->user->name ?? '—' }}</span>
                     </div>
-
+                    @endif
                     <div class="flex items-center justify-between">
                         <span class="inline-flex items-center text-slate-500">
                             <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -211,6 +212,7 @@
                         <dt class="font-medium text-slate-500">Type de culture</dt>
                         <dd class="sm:col-span-2 text-slate-900 font-semibold capitalize">{{ $farm->culture_type ?? '—' }}</dd>
                     </div>
+                    @if(is_admin())
                     <div class="grid grid-cols-1 sm:grid-cols-3 py-3.5 gap-1">
                         <dt class="font-medium text-slate-500">Propriétaire référent</dt>
                         <dd class="sm:col-span-2 text-slate-900 font-semibold flex items-center gap-2">
@@ -220,6 +222,7 @@
                             {{ $farm->user->name ?? '—' }}
                         </dd>
                     </div>
+                    @endif
                     <div class="grid grid-cols-1 sm:grid-cols-3 py-3.5 gap-1">
                         <dt class="font-medium text-slate-500">Récolte prévisionnelle</dt>
                         <dd class="sm:col-span-2 text-slate-900 font-semibold">

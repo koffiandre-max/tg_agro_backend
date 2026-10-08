@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'technician' => \App\Http\Middleware\TechnicianMiddleware::class,
             'client' => \App\Http\Middleware\ClientMiddleware::class,
             'admin_or_technician' => \App\Http\Middleware\AdminOrTechnicianMiddleware::class,
+            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'feature' => \App\Http\Middleware\CheckFeatureMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureUserIsVerified::class,
             // API mobile

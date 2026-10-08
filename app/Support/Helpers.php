@@ -20,3 +20,19 @@ class Helpers
         throw new \RuntimeException('Impossible de générer un code client unique après ' . $maxAttempts . ' tentatives.');
     }
 }
+
+
+function is_technician(): bool
+{
+    return auth()->user()->role === 'technician';
+}
+
+function is_admin(): bool
+{
+    return auth()->user()->role === 'admin';
+}
+
+function is_client(): bool
+{
+    return auth()->user()->role === 'client';
+}

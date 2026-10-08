@@ -43,6 +43,10 @@ return [
             'namespace' => 'Modules\\SendEmail\\',
             'enabled'   => env('SUITE_MODULE_SEND_EMAIL', true),
         ],
+        'Invoice' => [
+            'namespace' => 'Modules\\Invoice\\',
+            'enabled'   => env('SUITE_MODULE_INVOICE', true),
+        ],
     ],
 
     /*

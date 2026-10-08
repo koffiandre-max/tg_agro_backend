@@ -19,6 +19,12 @@
     $selectedTechnicien = $techniciens->firstWhere('id', old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')));
     $selectedTypeTechnicien = $selectedTechnicien?->type_technicien?->value ?? ($selectedTechnicien?->type_technicien ?? '');
     $isAdmin = $selectedTechnicien?->role === 'admin';
+    $currentUserRole = auth()->user()?->role;
+
+    $technicienMeta = $techniciens->map(fn($t) => [
+        'type_technicien' => $t->type_technicien?->value ?? $t->type_technicien ?? '',
+        'role' => $t->role,
+    ])->toArray();
 @endphp
 
 <div class="min-h-screen bg-gray-100" x-data="rapportWizard()">
@@ -72,7 +78,7 @@
             
             @csrf
 
-            {{-- Erreurs globales --}}
+            {{-- Étape 1 : Informations générales --}}
             @if ($errors->any())
                 <div class="px-6 py-4 bg-red-50 border-b border-red-200">
                     <div class="flex">
@@ -105,23 +111,15 @@
                             <label for="technicien_id" class="block text-sm font-medium text-gray-700 mb-1.5">
                                 Technicien <span class="text-red-600">*</span>
                             </label>
-                            <select id="technicien_id" name="technicien_id" required
-                                    x-model="technicienId"
-                                    @change="updateTypeActiviteFromTechnicien()"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
-                                <option value="">Sélectionner un technicien</option>
-                                @foreach($techniciens as $t)
-                                    <option value="{{ $t->id }}" 
-                                            data-type-technicien="{{ $t->type_technicien?->value ?? $t->type_technicien ?? '' }}"
-                                            data-role="{{ $t->role }}"
-                                            {{ old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')) == $t->id ? 'selected' : '' }}>
-                                        {{ $t->name }}
-                                        @if($t->type_technicien)
-                                            ({{ $t->type_technicien instanceof \App\Enums\TypeTechnicien ? $t->type_technicien->label() : $t->type_technicien }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-select 
+                                name="technicien_id" 
+                                label="Technicien" 
+                                :options="$techniciens->map(fn($t) => ['value' => $t->id, 'label' => $t->name . ($t->type_technicien ? ' (' . ($t->type_technicien instanceof \App\Enums\TypeTechnicien ? $t->type_technicien->label() : $t->type_technicien) . ')' : '')])" 
+                                :value="old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? ''))"
+                                placeholder="Sélectionner un technicien" 
+                                error="technicien_id"
+                                x-ref="technicienSelect"
+                            />
                             @error('technicien_id') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
@@ -140,12 +138,24 @@
                             <x-select 
                                 name="client_id" 
                                 label="Client" 
-                                :options="$clients->map(fn($c) => ['value' => $c->id, 'label' => $c->user?->name ?? $c->nom ?? 'Client #' . $c->id])" 
+                                :options="$clients->map(fn($c) => ['value' => $c->id, 'label' => ($currentUserRole === 'technician' ? ($c->code ?? 'Client #' . $c->id) : ($c->user?->name ?? $c->nom ?? 'Client #' . $c->id))])" 
                                 :value="$rapport->client_id ?? ''"
                                 placeholder="Sélectionner un client" 
                                 error="client_id"
                             />
                             @error('client_id') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label for="farm_id" class="block text-sm font-medium text-gray-700 mb-1.5">Exploitation</label>
+                            <select id="farm_id" name="farm_id" x-ref="farmSelect"
+                                    x-bind:disabled="!availableFarmsLoaded"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
+                                <option value="">Sélectionner une exploitation</option>
+                                <template x-for="farm in availableFarms" :key="farm.id">
+                                    <option :value="farm.id" x-text="farm.name"></option>
+                                </template>
+                            </select>
+                            @error('farm_id') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div class="md:col-span-2">
                             <label for="localisation_parcelle" class="block text-sm font-medium text-gray-700 mb-1.5">
@@ -361,12 +371,14 @@
                         </div>
                         <div>
                             <label for="irrigation_en_place" class="block text-sm font-medium text-gray-700 mb-1.5">Irrigation en place</label>
-                            <select id="irrigation_en_place" name="irrigation_en_place"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
-                                <option value="">Sélectionner</option>
-                                <option value="1" {{ old('irrigation_en_place', $visiteCulture->irrigation_en_place ?? '') == '1' ? 'selected' : '' }}>Oui</option>
-                                <option value="0" {{ old('irrigation_en_place', $visiteCulture->irrigation_en_place ?? '') === '0' ? 'selected' : '' }}>Non</option>
-                            </select>
+                            <x-select
+                                name="irrigation_en_place"
+                                label="Irrigation en place"
+                                :options="[['value' => '1', 'label' => 'Oui'], ['value' => '0', 'label' => 'Non']]"
+                                :value="old('irrigation_en_place', $visiteCulture->irrigation_en_place ?? '')"
+                                placeholder="Sélectionner"
+                                error="irrigation_en_place"
+                            />
                             @error('irrigation_en_place') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
@@ -394,6 +406,20 @@
                             @error('intrants_utilises') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Entretien / intrants</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                @foreach(['Fertilisation', 'Pulvérisation', 'Traitement sol', 'Autre'] as $entretien)
+                                    <label class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 transition-colors">
+                                        <input type="checkbox" name="entretien_intrants[]" value="{{ $entretien }}"
+                                               {{ in_array($entretien, old('entretien_intrants', $visiteCulture->entretien_intrants ?? [])) ? 'checked' : '' }}
+                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                                        {{ $entretien }}
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('entretien_intrants') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
                             <label for="estimation_recolte_kg" class="block text-sm font-medium text-gray-700 mb-1.5">Estimation récolte (kg)</label>
                             <input type="number" step="0.01" min="0" id="estimation_recolte_kg" name="estimation_recolte_kg"
                                    value="{{ old('estimation_recolte_kg', $visiteCulture->estimation_recolte_kg ?? '') }}"
@@ -408,6 +434,20 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
                             @error('date_estimee_recolte') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Ravageurs / maladies observés</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @foreach(['Cochenilles', 'Champignons', 'Insectes foliaires', 'Acariens', 'Pourriture', 'Autre'] as $ravageur)
+                                <label class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 transition-colors">
+                                    <input type="checkbox" name="ravageurs_maladies[]" value="{{ $ravageur }}"
+                                           {{ in_array($ravageur, old('ravageurs_maladies', $visiteCulture->ravageurs_maladies ?? [])) ? 'checked' : '' }}
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                                    {{ $ravageur }}
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('ravageurs_maladies') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label for="observations_ravageurs" class="block text-sm font-medium text-gray-700 mb-1.5">Observations sur les ravageurs/maladies</label>
@@ -553,14 +593,42 @@
                                    placeholder="0.00">
                             @error('gain_poids_kg_mois') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
-                    </div>
-                    <div>
-                        <label for="observations_sanitaires" class="block text-sm font-medium text-gray-700 mb-1.5">Observations sanitaires</label>
-                        <textarea id="observations_sanitaires" name="observations_sanitaires" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y"
-                                  placeholder="Détails des observations sanitaires...">{{ old('observations_sanitaires', $visiteElevage->observations_sanitaires ?? '') }}</textarea>
-                        @error('observations_sanitaires') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
-                    </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Signes cliniques observés</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                @foreach(['Fièvre', 'Toux', 'Diarrhée', 'Boiterie', 'Perte poids', 'Autre'] as $signe)
+                                    <label class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 transition-colors">
+                                        <input type="checkbox" name="signes_cliniques[]" value="{{ $signe }}"
+                                               {{ in_array($signe, old('signes_cliniques', $visiteElevage->signes_cliniques ?? [])) ? 'checked' : '' }}
+                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                                        {{ $signe }}
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('signes_cliniques') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Soins / traitements administrés</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                @foreach(['Vaccination', 'Déparasitage', 'Antibiotiques', 'Soins blessures', 'Autre'] as $soin)
+                                    <label class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700 transition-colors">
+                                        <input type="checkbox" name="soins_traitements[]" value="{{ $soin }}"
+                                               {{ in_array($soin, old('soins_traitements', $visiteElevage->soins_traitements ?? [])) ? 'checked' : '' }}
+                                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-600">
+                                        {{ $soin }}
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('soins_traitements') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label for="observations_sanitaires" class="block text-sm font-medium text-gray-700 mb-1.5">Observations sanitaires</label>
+                            <textarea id="observations_sanitaires" name="observations_sanitaires" rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 resize-y"
+                                      placeholder="Détails des observations sanitaires...">{{ old('observations_sanitaires', $visiteElevage->observations_sanitaires ?? '') }}</textarea>
+                            @error('observations_sanitaires') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
                 </div>
             </div>
 
@@ -766,6 +834,10 @@
             currentStep: 0,
             typeActivite: '{{ $typeActiviteValue }}',
             technicienId: '{{ old('technicien_id', $rapport->technicien_id ?? ($defaultTechnicienId ?? '')) }}',
+            technicienMeta: @json($technicienMeta),
+            availableFarms: [],
+            availableFarmsLoaded: false,
+            selectedFarmId: @json(old('farm_id', $rapport->farm_id ?? ($selectedFarmId ?? null))),
             canChooseActivite: true,
             photos: [],
             steps: [
@@ -776,26 +848,80 @@
                 { label: 'Résumé & Envoi', completed: false },
             ],
             init() {
-                // Déterminer si le technicien peut choisir l'activité
                 this.updateTypeActiviteFromTechnicien();
+                this.loadAvailableFarms();
+
+                const technicienSelect = this.$refs.technicienSelect;
+                if (technicienSelect) {
+                    technicienSelect.addEventListener('change', () => {
+                        this.updateTypeActiviteFromTechnicien();
+                        this.loadAvailableFarms();
+                    });
+                }
+
+                const clientInput = document.querySelector('input[name="client_id"]');
+                if (clientInput) {
+                    clientInput.addEventListener('change', () => {
+                        this.loadAvailableFarms();
+                    });
+                }
+            },
+            async loadAvailableFarms() {
+                const clientSelect = document.querySelector('input[name="client_id"]');
+                const technicienId = this.technicienId;
+
+                if (!clientSelect || !technicienId) {
+                    this.availableFarms = [];
+                    this.availableFarmsLoaded = false;
+                    return;
+                }
+
+                const clientId = clientSelect.value;
+                if (!clientId) {
+                    this.availableFarms = [];
+                    this.availableFarmsLoaded = true;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`{{ route('admin.rapports-visite.farms') }}?client_id=${clientId}&technicien_id=${technicienId}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load farms');
+                    }
+
+                    this.availableFarms = await response.json();
+                } catch (error) {
+                    console.error('Error loading farms:', error);
+                    this.availableFarms = [];
+                } finally {
+                    this.availableFarmsLoaded = true;
+                }
             },
             updateTypeActiviteFromTechnicien() {
-                const select = document.getElementById('technicien_id');
+                const select = this.$refs.technicienSelect;
                 if (!select) return;
-                
-                const selectedOption = select.options[select.selectedIndex];
-                if (!selectedOption) return;
-                
-                const typeTechnicien = selectedOption.dataset.typeTechnicien || '';
-                const role = selectedOption.dataset.role || '';
-                
-                // Admin peut tout faire
+
+                const hiddenInput = select.querySelector('input[type="hidden"]');
+                if (!hiddenInput) return;
+
+                const technicienId = hiddenInput.value;
+                const meta = this.technicienMeta[technicienId] || {};
+                const typeTechnicien = meta.type_technicien || '';
+                const role = meta.role || '';
+
+                this.technicienId = technicienId;
+
                 if (role === 'admin') {
                     this.canChooseActivite = true;
                     return;
                 }
-                
-                // Technicien spécialisé
+
                 if (typeTechnicien === 'culture') {
                     this.canChooseActivite = false;
                     this.typeActivite = 'culture';
@@ -805,7 +931,6 @@
                 } else if (typeTechnicien === 'les_deux') {
                     this.canChooseActivite = true;
                 } else {
-                    // Pas de type défini, on laisse choisir
                     this.canChooseActivite = true;
                 }
             },
@@ -853,6 +978,21 @@
                         }
                     });
                     input.files = dt.files;
+                }
+            },
+            watch: {
+                availableFarms(farms) {
+                    if (this.selectedFarmId && farms.length) {
+                        const exists = farms.some(f => f.id == this.selectedFarmId);
+                        if (exists) {
+                            this.$nextTick(() => {
+                                const select = this.$refs.farmSelect;
+                                if (select) {
+                                    select.value = this.selectedFarmId;
+                                }
+                            });
+                        }
+                    }
                 }
             }
         }

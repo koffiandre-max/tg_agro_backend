@@ -36,3 +36,5 @@ Route::get('/rapports-visite/{id}/print', [RapportVisiteController::class, 'prin
 Route::get('/rapports-visite/datatable', function () {
     return view('admin.rapports-visite.datatable');
 })->name('admin.rapports-visite.datatable');
+
+Route::get('/rapports-visite/farms', [RapportVisiteController::class, 'farmsByClientAndTechnician'])->name('admin.rapports-visite.farms');

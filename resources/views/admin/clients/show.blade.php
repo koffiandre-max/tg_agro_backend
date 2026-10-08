@@ -28,7 +28,7 @@
                 Retour au client
             </a>
             <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
-                Information sur <span class="text-indigo-600">@if(auth()->user()->type === 'admin') {{ $client->user->name ?? 'Client' }} @else {{ $client->user->code ?? '-' }} @endif</span>
+                Information sur <span class="text-indigo-600">@if(auth()->user()->type === 'admin') {{ $client->user->name ?? 'Client' }} @else {{ $client->code ?? '-' }} @endif</span>
             </h1>
             {{-- <p class="mt-1.5 text-sm text-slate-500 flex items-center gap-1.5">
                 <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -98,6 +98,8 @@
        
 
         {{-- Métriques --}}
+        @if(is_admin())
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <x-ui.card class="flex items-center gap-4">
                 <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0">
@@ -127,6 +129,8 @@
                 </div>
             </x-ui.card>
         </div>
+        @endif
+
 
         {{-- Fermes --}}
         <x-ui.card>

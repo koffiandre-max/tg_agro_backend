@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -56,6 +57,22 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class, 'utilisateur_id')
             ->where('lue', false)
             ->orderBy('date_creation', 'desc');
+    }
+
+    public function roleModel()
+    {
+        return Role::where('slug', $this->role)->first();
+    }
+
+    public function hasPermission(string $slug): bool
+    {
+        $role = $this->roleModel();
+
+        if (!$role) {
+            return false;
+        }
+
+        return $role->permissions()->where('slug', $slug)->exists();
     }
 
     protected function casts(): array

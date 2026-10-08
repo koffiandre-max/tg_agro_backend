@@ -9,8 +9,10 @@ use App\Enums\StatutRapport;
 use App\Enums\TypeActivite;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ClientFarm;
 use App\Models\Farm;
 use App\Models\RapportVisite;
+use App\Models\Technician;
 use App\Models\User;
 use App\Models\VisiteAutre;
 use App\Models\VisiteCulture;
@@ -36,7 +38,7 @@ class RapportVisiteController extends Controller
         return view('admin.rapports-visite.datatable');
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
 
@@ -74,6 +76,7 @@ class RapportVisiteController extends Controller
             'techniciens' => $techniciens,
             'clients' => $clients,
             'farms' => $farms,
+            'selectedFarmId' => $request->query('farm_id'),
             'defaultTechnicienId' => ($user && $user->role === 'technician') ? $user->id : null,
             'typeVisiteOptions' => $typeVisiteOptions,
             'conditionMeteoOptions' => $conditionMeteoOptions,
@@ -261,6 +264,7 @@ class RapportVisiteController extends Controller
             'techniciens' => $techniciens,
             'clients' => $clients,
             'farms' => $farms,
+            'selectedFarmId' => $rapport->farm_id,
             'typeActiviteOptions' => $typeActiviteOptions,
         ]);
     }
@@ -467,5 +471,23 @@ class RapportVisiteController extends Controller
         ])->findOrFail($id);
 
         return view('admin.rapports-visite.pdf', compact('rapport'));
+    }
+
+    public function farmsByClientAndTechnician(Request $request)
+    {
+        $request->validate([
+            'client_id' => ['required', 'exists:clients,id'],
+            'technicien_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $technician = Technician::where('user_id', $request->query('technicien_id'))->first();
+
+        $farms = Farm::whereHas('clients', function ($query) use ($request) {
+            $query->where('clients.id', $request->query('client_id'));
+        })->when($technician, function ($query) use ($technician) {
+            $query->where('assigned_technician_id', $technician->id);
+        })->get(['id', 'name']);
+
+        return response()->json($farms);
     }
 }

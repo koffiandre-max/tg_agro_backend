@@ -1,8 +1,0 @@
-STATUS: 200 (88994 octets)
-OK   : max-w-7xl
-MISS : x-select
-OK   : Ajouter des photos
-OK   : Obtenir ma position
-OK   : Enregistrer les photos
-OK  plus de select natif client_id
-OK  plus de select natif farm_id

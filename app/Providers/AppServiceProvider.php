@@ -15,14 +15,16 @@ use App\Models\Farm;
 use App\Models\Mission;
 use App\Models\Photo;
 use App\Models\Report;
+use App\Policies\FarmPolicy;
 use App\Observers\ChangelogObserver;
 use App\Services\SendmailService;
 use App\View\Composers\NavigationComposer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -68,5 +70,12 @@ class AppServiceProvider extends ServiceProvider
         Report::observe(ChangelogObserver::class);
         Photo::observe(ChangelogObserver::class);
         DataEntry::observe(ChangelogObserver::class);
+
+        Gate::policy(Farm::class, \App\Policies\FarmPolicy::class);
+        Gate::policy(Client::class, \App\Policies\ClientPolicy::class);
+        Gate::policy(Mission::class, \App\Policies\MissionPolicy::class);
+        Gate::policy(Photo::class, \App\Policies\PhotoPolicy::class);
+        Gate::policy(Report::class, \App\Policies\ReportPolicy::class);
+        Gate::policy(DataEntry::class, \App\Policies\DataEntryPolicy::class);
     }
 }

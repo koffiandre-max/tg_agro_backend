@@ -32,6 +32,10 @@
             </div>
         @endif
 
+        @php
+            $selectedFarmId = $selectedFarmId ?? null;
+        @endphp
+
         {{-- Form --}}
         <form action="{{ $formAction }}" method="POST" enctype="multipart/form-data" class="bg-white border border-gray-200 rounded-lg shadow-sm">
             @csrf
@@ -77,7 +81,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600">
                             <option value="">Sélectionner une exploitation</option>
                             @foreach($farms as $farm)
-                                <option value="{{ $farm->id }}" {{ old('farm_id') == $farm->id ? 'selected' : '' }}>{{ $farm->name }}</option>
+                                <option value="{{ $farm->id }}" {{ (old('farm_id') ?: $selectedFarmId) == $farm->id ? 'selected' : '' }}>{{ $farm->name }}</option>
                             @endforeach
                         </select>
                         @error('farm_id') <span class="text-red-600 text-xs mt-1">{{ $message }}</span> @enderror

@@ -166,4 +166,20 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect()->route('login');
     }
+
+    public function refresh(Request $request)
+    {
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'success' => true,
+            'csrf_token' => csrf_token(),
+            'user' => Auth::check() ? [
+                'id' => Auth::id(),
+                'name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+                'role' => Auth::user()->role,
+            ] : null,
+        ]);
+    }
 }

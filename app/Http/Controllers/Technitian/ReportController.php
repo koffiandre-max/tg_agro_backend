@@ -20,7 +20,7 @@ class ReportController extends Controller
         $this->middleware(TechnicianMiddleware::class);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
         $technicianId = $user->technician?->id;
@@ -29,8 +29,9 @@ class ReportController extends Controller
         $clients = $farmData['clients'];
 
         $formAction = route('admin.technitian.reports.store');
+        $selectedFarmId = $request->query('farm_id');
 
-        return view('technitian.reports.create', compact('farms', 'clients', 'formAction'));
+        return view('technitian.reports.create', compact('farms', 'clients', 'formAction', 'selectedFarmId'));
     }
 
     public function store(Request $request)

@@ -25,7 +25,17 @@ use Illuminate\Support\Facades\Auth;
 
 class FarmController extends Controller
 {
-    public function __construct(private SendmailService $mailer) {}
+    public function __construct(private SendmailService $mailer)
+    {
+        // authorizeResource pose automatiquement sur CHAQUE méthode REST :
+        // index→viewAny, create/store→create, show→view, edit/update→update,
+        // destroy→delete (+ pdf→view via mapping ci-dessous).
+        // Ces middlewares can:* tournent AVANT les middlewares de routes et
+        // utilisent le binding implicite {farm} → Farm.
+        $this->authorizeResource(Farm::class, 'farm', [
+            'pdf' => 'view',
+        ]);
+    }
 
     /**
      * Génère une référence de dossier unique au format DOS-YYYY-NNNN.
@@ -126,6 +136,8 @@ class FarmController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Farm::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id'],
@@ -213,6 +225,13 @@ class FarmController extends Controller
             'verificateur_signature' => ['nullable', 'string'],
         ]);
 
+        $user = auth()->user();
+
+        // farm.user_id référence users.id (relation Farm::user()), pas clients.id
+        if ($user && $user->role === 'client' && $user->client) {
+            $validated['user_id'] = $user->id;
+        }
+
         $validated['reference_dossier'] = $this->generateReferenceDossier();
 
         $farm = Farm::create($validated);
@@ -238,14 +257,18 @@ class FarmController extends Controller
 
     public function pdf(Farm $farm)
     {
+        $this->authorize('view', $farm);
+
         $farm->load('user', 'photos', 'reports', 'clients.user', 'assignedTechnician.user');
 
         return view('admin.farms.pdf', compact('farm'));
     }
 
-    public function edit($id)
+    // Type hint Farm OBLIGATOIRE : Laravel ne résout le binding implicite
+    // {farm} que si la signature le réclame. Sans type hint, le middleware
+    // can:update,farm (authorizeResource) reçoit une chaîne → 403 pour tous.
+    public function edit(Farm $farm)
     {
-        $farm = Farm::findOrFail($id);
         $farm->load('user');
 
         $typeSolOptions = collect(TypeSol::cases())->map(fn($case) => [
@@ -327,7 +350,8 @@ class FarmController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    // Type hint Farm : voir la remarque sur edit()
+    public function update(Request $request, Farm $farm)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -416,8 +440,6 @@ class FarmController extends Controller
             'verificateur_signature' => ['nullable', 'string'],
         ]);
 
-        $farm = Farm::findOrFail($id);
-
         if (empty($validated['reference_dossier'])) {
             $validated['reference_dossier'] = $this->generateReferenceDossier();
         }
@@ -433,12 +455,19 @@ class FarmController extends Controller
             );
         }
 
-        return redirect()->route('admin.farms.show', $farm)->with('success', 'Exploitation mise à jour avec succès.');
+        // Le client est renvoyé vers le portail — admin.farms.show est une
+        // route réservée admin/technicien (sinon 403 après la mise à jour).
+        $redirectRoute = auth()->user()?->role === 'client'
+            ? 'admin.portail.farms.show'
+            : 'admin.farms.show';
+
+        return redirect()->route($redirectRoute, $farm)
+            ->with('success', 'Exploitation mise à jour avec succès.');
     }
 
-    public function destroy($id)
+    // Type hint Farm : voir la remarque sur edit()
+    public function destroy(Farm $farm)
     {
-        $farm = Farm::findOrFail($id);
         $farm->delete();
 
         return redirect()->route('admin.farms.index')

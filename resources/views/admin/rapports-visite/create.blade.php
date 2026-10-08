@@ -10,6 +10,7 @@
             'techniciens' => $techniciens,
             'clients' => $clients,
             'farms' => $farms,
+            'selectedFarmId' => $selectedFarmId ?? null,
         ])
     </div>
 </div>

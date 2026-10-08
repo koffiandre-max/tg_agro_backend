@@ -35,6 +35,7 @@ Route::middleware(['guest', 'throttle:100,60'])->group(function () {
 // Authenticated routes — logout + dashboard + chat (role-agnostic)
 Route::middleware(['auth', 'verified', 'throttle:100,60'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/session/refresh', [AuthController::class, 'refresh'])->name('session.refresh');
 
     // Dashboard is role-agnostic — the controller redirects to the right dashboard
     require __DIR__ . '/dashboard.php';
@@ -52,7 +53,6 @@ Route::middleware(['auth', 'admin', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/admin.php';
 
     require __DIR__ . '/technicians.php';
-    require __DIR__ . '/farms.php';
     require __DIR__ . '/reports.php';
     require __DIR__ . '/photos.php';
     require __DIR__ . '/data.php';
@@ -61,6 +61,10 @@ Route::middleware(['auth', 'admin', 'throttle:100,60'])->group(function () {
     require __DIR__ . '/users.php';
     require __DIR__ . '/roles.php';
     require __DIR__ . '/permissions.php';
+});
+
+Route::middleware(['auth', 'throttle:100,60'])->group(function () {
+    require __DIR__ . '/farms.php';
 });
 
 // ─────────────────────────────────────────────
