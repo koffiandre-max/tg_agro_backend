@@ -80,7 +80,7 @@
                                                     Voir détails
                                                 </div>
                                             </a>
-                                        </div>
+                                        </div> 
 
                                         <div class="py-1">
                                             <a href="{{ route('admin.rapports-visite.create', ['farm_id' => $farm->id]) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

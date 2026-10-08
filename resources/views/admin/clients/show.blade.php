@@ -56,9 +56,9 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $client->user->is_active ?? true ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
                         {{ ($client->user->is_active ?? true) ? 'Actif' : 'Inactif' }}
                     </span>
-                    @if(is_admin() && !($client->user->is_active ?? true) && !($client->user->is_verified ?? true))
+                    @if(is_admin() && !($client->user->is_active ?? true) && !($client->user->is_verified ?? true)) 
                         <form method="POST" action="{{ route('admin.clients.resendVerificationEmail', $client) }}" class="inline">
-                            @csrf
+                            @csrf   
                             @method('POST')
                             <button type="submit" class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-100">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
