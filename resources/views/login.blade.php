@@ -6,13 +6,8 @@
 <div class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-10 sm:px-6" x-data="loginForm()" x-cloak style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%232D6A4F&quot; fill-opacity=&quot;0.04&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
     <div class="w-full max-w-sm">
         <div class="mb-8 text-center">
-            <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-2.5-6-6-6-10a6 6 0 0112 0c0 4-2 7.5-6 10z"/>
-                    <path stroke-linecap="round" d="M12 21V9"/>
-                </svg>
-            </span>
-            <h1 class="mt-4 text-lg font-semibold text-slate-900">{{ config('app.name', 'TG Agro') }}</h1>
+            <img src="{{ asset('img/Logo_Trans.png') }}" alt="Logo" class="h-24 w-24 mx-auto rounded-xl">
+            {{-- <h1 class="mt-4 text-lg font-semibold text-slate-900">{{ config('app.name', 'TG Agro') }}</h1> --}}
             <p class="mt-0.5 text-sm text-slate-500">Connectez-vous à votre espace</p>
         </div>
 

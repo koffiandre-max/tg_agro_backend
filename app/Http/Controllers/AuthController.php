@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Data\LoginData;
 use App\Data\RegisterData;
+use App\Jobs\SendEmailJob;
 use App\Models\Client;
+use App\Models\EmailAttempt;
 use App\Models\User;
 use App\Services\SendmailService;
 use App\Support\Helpers;
@@ -131,19 +133,16 @@ class AuthController extends Controller
 
             $verificationUrl = route('verification.verify', ['token' => $token]);
 
-            try {
-                $this->emailService->sendView(
-                    $user->email,
-                    'Vérification de votre compte ' . config('app.name', 'TG Agro'),
-                    'emails.verify-account',
-                    [
-                        'name' => $user->name,
-                        'verificationUrl' => $verificationUrl,
-                    ]
-                );
-            } catch (\Exception $e) {
-                \Log::error("Verification email failed: " . $e->getMessage());
-            }
+            $attempt = EmailAttempt::create([
+                'recipient_email' => $user->email,
+                'subject' => 'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+                'template' => 'emails.verify-account',
+                'template_data' => [
+                    'name' => $user->name,
+                    'verificationUrl' => $verificationUrl,
+                ],
+            ]);
+            SendEmailJob::dispatch($attempt);
 
             return response()->json([
                 'success' => true,

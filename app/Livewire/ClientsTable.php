@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Jobs\SendEmailJob;
 use App\Models\Client;
+use App\Models\EmailAttempt;
 use App\Models\Farm;
 use App\Models\Technician;
 use App\Models\User;
@@ -217,19 +219,18 @@ class ClientsTable extends Component
 
             $verificationUrl = route('verification.verify', ['token' => $token]);
 
-            if ($this->mailer && $user->email) {
-                $this->mailer->sendView(
-                    $user->email,
-                    'Vérification de votre compte ' . config('app.name', 'TG Agro'),
-                    'emails.verify-account',
-                    [
-                        'name' => $user->name,
-                        'verificationUrl' => $verificationUrl,
-                    ]
-                );
-            }
+            $attempt = EmailAttempt::create([
+                'recipient_email' => $user->email,
+                'subject' => 'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+                'template' => 'emails.verify-account',
+                'template_data' => [
+                    'name' => $user->name,
+                    'verificationUrl' => $verificationUrl,
+                ],
+            ]);
+            SendEmailJob::dispatch($attempt);
 
-            session()->flash('success', 'Un nouvel email de vérification a été envoyé à ' . $user->email);
+            session()->flash('success', 'Un nouvel email de vérification a été mis en file d\'attente pour ' . $user->email);
         } catch (\Throwable $e) {
             logger()->error('Échec renvoi email vérification', [
                 'client_id' => $clientId,

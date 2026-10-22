@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
 use App\Models\Client;
+use App\Models\EmailAttempt;
 use App\Models\User;
 use App\Support\Helpers;
 use Illuminate\Http\Request;
@@ -151,21 +153,17 @@ class ClientController extends Controller
 
         $verificationUrl = route('verification.verify', ['token' => $token]);
 
-        try {
-            $emailService = app(\App\Services\SendmailService::class);
-            $emailService->sendView(
-                $user->email,
-                'Vérification de votre compte ' . config('app.name', 'TG Agro'),
-                'emails.verify-account',
-                [
-                    'name' => $user->name,
-                    'verificationUrl' => $verificationUrl,
-                ]
-            );
+        $attempt = EmailAttempt::create([
+            'recipient_email' => $user->email,
+            'subject' => 'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+            'template' => 'emails.verify-account',
+            'template_data' => [
+                'name' => $user->name,
+                'verificationUrl' => $verificationUrl,
+            ],
+        ]);
+        SendEmailJob::dispatch($attempt);
 
-            return back()->with('success', 'Un nouvel email de vérification a été envoyé à ' . $user->email);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.');
-        }
+        return back()->with('success', 'Un nouvel email de vérification a été mis en file d\'attente pour ' . $user->email);
     }
 }

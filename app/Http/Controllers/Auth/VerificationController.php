@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailJob;
+use App\Models\EmailAttempt;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -63,30 +65,23 @@ class VerificationController extends Controller
         $token = bin2hex(random_bytes(32));
         $user->update(['verification_token' => $token]);
 
-        // Renvoyer l'email de vérification
+        // Renvoyer l'email de vérification via le système de relance
         $verificationUrl = route('verification.verify', ['token' => $token]);
 
-        try {
-            $emailService = app(\App\Services\SendmailService::class);
-            $emailService->sendView(
-                $user->email,
-                'Vérification de votre compte ' . config('app.name', 'TG Agro'),
-                'emails.verify-account',
-                [
-                    'name' => $user->name,
-                    'verificationUrl' => $verificationUrl,
-                ]
-            );
+        $attempt = EmailAttempt::create([
+            'recipient_email' => $user->email,
+            'subject' => 'Vérification de votre compte ' . config('app.name', 'TG Agro'),
+            'template' => 'emails.verify-account',
+            'template_data' => [
+                'name' => $user->name,
+                'verificationUrl' => $verificationUrl,
+            ],
+        ]);
+        SendEmailJob::dispatch($attempt);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Un nouvel email de vérification a été envoyé à votre adresse.',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer plus tard.',
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Un nouvel email de vérification a été envoyé à votre adresse.',
+        ]);
     }
 }

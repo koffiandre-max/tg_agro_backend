@@ -44,12 +44,8 @@ $textColor = 'text-white';
     {{-- Header / Logo --}}
     <div class="h-16 flex items-center px-4 bg-{{ $sidebarBg }} border-b border-white/5 shrink-0">
         <div class="flex items-center gap-3 overflow-hidden w-full">
-            {{-- Icône de Logo moderne & minimaliste --}}
-            <div class="h-9 w-9 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/10">
-                <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
-                </svg>
-            </div>
+            {{-- Logo --}}
+            <img src="{{ asset('img/Logo_Trans.png') }}" alt="Logo" class="h-9 w-9 shrink-0 rounded-xl">
             <span class="font-bold text-sm tracking-wider text-white transition-opacity duration-300 whitespace-nowrap"
                   :class="{ 'opacity-0 absolute pointer-events-none': sidebarCollapsed }">
                 TG’INVEST <span class="font-normal text-white/60">CONSULTING</span>
