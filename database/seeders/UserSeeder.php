@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'phone' => '+225 01 00 00 00 00',
                 'is_active' => true,
+                'is_verified' => true
             ]
         );
 
