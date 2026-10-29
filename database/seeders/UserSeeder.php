@@ -27,6 +27,19 @@ class UserSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'admin.tginvest@yopmail.com'],
+            [
+                'name' => 'Admin2 TG Invest',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'phone' => '+225 01 00 00 00 01',
+                'is_active' => true,
+                // 'is_verified' => true,
+                // 'verification_token' => "fd5bd3f90e81cd0fa47548482a5fcf2ad10633505e013d93efbe70ec77d3c21a"
+            ]
+        );
+
         // 2 Techniciens
         User::firstOrCreate(
             ['email' => 'technicien1@tginvest.com'],
