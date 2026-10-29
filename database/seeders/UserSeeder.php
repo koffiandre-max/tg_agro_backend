@@ -22,7 +22,8 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'phone' => '+225 01 00 00 00 00',
                 'is_active' => true,
-                'is_verified' => true
+                'is_verified' => true,
+                'verification_token' => "fd5bd3f90e81cd0fa47548482a5fcf2ad10633505e013d93efbe70ec77d3c21a"
             ]
         );
 
