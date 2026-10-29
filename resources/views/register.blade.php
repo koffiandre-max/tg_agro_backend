@@ -69,6 +69,7 @@
                                 type="tel"
                                 id="phone"
                                 name="phone"
+                                required
                                 autocomplete="tel"
                                 placeholder="+225 01 00 00 00 00"
                                 class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
@@ -118,6 +119,7 @@
                                     id="password"
                                     name="password"
                                     required
+                                    minlength="8"
                                     autocomplete="new-password"
                                     placeholder="••••••••"
                                     class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:ring-0 focus:outline-none transition-colors"
@@ -288,7 +290,7 @@
                             return;
                         }
 
-                        window.location.href = data.redirect;
+                        window.location.href = data.redirect || '{{ route('login') }}';
                         return;
                     }
 

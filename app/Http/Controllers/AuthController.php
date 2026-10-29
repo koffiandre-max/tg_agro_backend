@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -52,7 +53,7 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            if ($user->is_verified === false) {
+            if (! $user->is_verified) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -89,21 +90,22 @@ class AuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|min:8|confirmed',
-                'phone' => 'required|max:15',
-                'city_of_residence' => 'nullable|max:20',
-                'country_of_residence' =>  'nullable|max:20',
-                'country_of_origin' =>  'nullable|max:20',
+                'phone' => 'required|max:20',
+                'city_of_residence' => 'nullable|max:100',
+                'country_of_residence' => 'nullable|max:100',
+                'country_of_origin' => 'nullable|max:100',
+            ], [
+                'name.required' => 'Le nom complet est obligatoire.',
+                'email.required' => 'L\'email est obligatoire.',
+                'email.email' => 'L\'email n\'est pas valide.',
+                'email.unique' => 'Ce compte existe déjà.',
+                'password.required' => 'Le mot de passe est obligatoire.',
+                'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+                'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+                'phone.required' => 'Le téléphone est obligatoire.',
+                'phone.max' => 'Le téléphone ne doit pas dépasser 20 caractères.',
             ]);
             $registerData = RegisterData::from($validated);
-
-            $existingUser = User::where('email', $registerData->email)->first();
-
-            if ($existingUser) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Ce compte existe déjà.",
-                ]);
-            }
 
             $token = bin2hex(random_bytes(32));
 
@@ -150,6 +152,12 @@ class AuthController extends Controller
                 'redirect' => route('login'),
                 'message' => 'Inscription réussie ! Veuillez vérifier votre adresse email pour activer votre compte. Vous allez recevoir un lien de confirmation.',
             ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($e->errors())->flatten()->first() ?? 'Veuillez vérifier vos informations.',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (Exception $e) {
             \Log::error("File: " . $e->getFile() . " Line: " . $e->getLine() . " Error: " . $e->getMessage());
             return response()->json([
